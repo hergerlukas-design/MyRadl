@@ -24,6 +24,10 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: |
+          # Secret-Werte von versehentlichen CR/LF befreien, damit der
+          # Build-Arg-Wert sauber (und nicht leer/kaputt) im Image ankommt.
+          url="$(printf '%s' "$VITE_SUPABASE_URL" | tr -d '\r\n')"
+          key="$(printf '%s' "$VITE_SUPABASE_ANON_KEY" | tr -d '\r\n')"
           flyctl deploy --remote-only \
-            --build-arg VITE_SUPABASE_URL="$VITE_SUPABASE_URL" \
-            --build-arg VITE_SUPABASE_ANON_KEY="$VITE_SUPABASE_ANON_KEY"
+            --build-arg VITE_SUPABASE_URL="$url" \
+            --build-arg VITE_SUPABASE_ANON_KEY="$key"
