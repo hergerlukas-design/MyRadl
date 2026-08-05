@@ -10,7 +10,7 @@ import {
   Package,
   type LucideIcon,
 } from 'lucide-react'
-import type { PartCategory } from '@/types'
+import type { Part, PartCategory } from '@/types'
 
 export interface CategoryMeta {
   value: PartCategory
@@ -39,6 +39,39 @@ export function categoryMeta(value: PartCategory): CategoryMeta {
 
 export function categoryLabel(value: PartCategory): string {
   return categoryMeta(value).label
+}
+
+/** Kategorien, bei denen eine Einbauposition (vorne/hinten) sinnvoll ist. */
+export function categoryHasPosition(value: PartCategory): boolean {
+  return value === 'reifen' || value === 'laufraeder'
+}
+
+export interface PositionOption {
+  value: string
+  label: string
+}
+
+export const POSITION_OPTIONS: PositionOption[] = [
+  { value: 'vorne', label: 'Vorne' },
+  { value: 'hinten', label: 'Hinten' },
+]
+
+/** Anzeige-Label für eine gespeicherte Position, sonst null. */
+export function positionLabel(position: string | null | undefined): string | null {
+  return POSITION_OPTIONS.find((p) => p.value === position)?.label ?? null
+}
+
+/**
+ * Sprechender Titel eines Teils. Nutzt Hersteller + Modell; fällt bei
+ * „Sonstiges" auf die freie Bezeichnung und zuletzt auf den Kategorienamen zurück.
+ */
+export function partTitle(
+  part: Pick<Part, 'brand' | 'model' | 'custom_type' | 'category'>,
+): string {
+  const name = `${part.brand ?? ''} ${part.model ?? ''}`.trim()
+  if (name) return name
+  if (part.custom_type?.trim()) return part.custom_type.trim()
+  return categoryLabel(part.category)
 }
 
 /** Häufige Einstell-Vorschläge je Kategorie (nur UI-Hilfe, frei überschreibbar). */

@@ -4,7 +4,7 @@ import { format } from 'date-fns'
 import { ArrowLeftRight } from 'lucide-react'
 import Layout from '@/components/Layout'
 import Spinner from '@/components/ui/Spinner'
-import { categoryLabel } from '@/lib/categories'
+import { categoryLabel, partTitle } from '@/lib/categories'
 import { usePart, useCreatePart, useUpdatePart } from '@/hooks/useParts'
 import { useAddHistory } from '@/hooks/usePartMeta'
 
@@ -26,7 +26,7 @@ export default function ReplacePart() {
   useEffect(() => {
     if (old) {
       setBrand(old.brand)
-      setModel(old.model)
+      setModel(old.model ?? '')
       setVariant(old.variant ?? '')
     }
   }, [old])
@@ -44,18 +44,20 @@ export default function ReplacePart() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-    if (!brand.trim() || !model.trim()) {
-      setError('Hersteller und Modell sind Pflichtfelder.')
+    if (!brand.trim()) {
+      setError('Hersteller ist ein Pflichtfeld.')
       return
     }
     try {
-      // 1) Nachfolger anlegen (Kategorie übernehmen).
+      // 1) Nachfolger anlegen (Kategorie/Position/Bezeichnung übernehmen).
       const next = await createPart.mutateAsync({
         bike_id: old!.bike_id,
         category: old!.category,
         brand: brand.trim(),
-        model: model.trim(),
+        model: model.trim() || null,
         variant: variant.trim() || null,
+        position: old!.position,
+        custom_type: old!.custom_type,
         status: 'aktiv',
         install_date: date || null,
       })
@@ -66,14 +68,14 @@ export default function ReplacePart() {
         part_id: old!.id,
         event_type: 'ersetzt',
         event_date: date,
-        note: `Ersetzt durch ${brand.trim()} ${model.trim()}`,
+        note: `Ersetzt durch ${`${brand.trim()} ${model.trim()}`.trim()}`,
       })
       // … und neues Teil eingebaut.
       await addHistory.mutateAsync({
         part_id: next.id,
         event_type: 'eingebaut',
         event_date: date,
-        note: `Nachfolger von ${old!.brand} ${old!.model}`,
+        note: `Nachfolger von ${partTitle(old!)}`,
       })
       navigate(`/parts/${next.id}`, { replace: true })
     } catch (err) {
@@ -89,7 +91,7 @@ export default function ReplacePart() {
         <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4 flex items-start gap-3">
           <ArrowLeftRight size={18} className="text-orange-600 mt-0.5 flex-shrink-0" />
           <p className="text-sm text-orange-900">
-            Der bisherige Teil <span className="font-semibold">{old.brand} {old.model}</span> wird auf
+            Der bisherige Teil <span className="font-semibold">{partTitle(old)}</span> wird auf
             „ersetzt" gesetzt und erhält einen Verlaufseintrag. Der Nachfolger wird neu angelegt.
           </p>
         </div>
@@ -104,7 +106,7 @@ export default function ReplacePart() {
             <input value={brand} onChange={(e) => setBrand(e.target.value)} className="input" />
           </label>
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Modell *</span>
+            <span className="block text-sm font-medium text-gray-700 mb-1">Modell</span>
             <input value={model} onChange={(e) => setModel(e.target.value)} className="input" />
           </label>
         </div>
