@@ -5,6 +5,10 @@ RUN npm ci
 COPY . .
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
+# Als ENV setzen, damit Vite die Werte beim Build zuverlässig als
+# import.meta.env.VITE_* einbettet (ARG allein reicht dafür nicht überall).
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
 RUN npm run build
 
 FROM nginx:alpine
