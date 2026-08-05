@@ -15,10 +15,15 @@ jobs:
       - name: Setup Fly.io CLI
         uses: superfly/flyctl-actions/setup-flyctl@master
 
+      # Secrets werden als (gequotete) Env-Variablen übergeben, damit ein
+      # versehentlicher Zeilenumbruch im Secret-Wert das Kommando nicht
+      # zerteilt (sonst landet ein "--build-arg …" auf einer eigenen Zeile).
       - name: Deploy
-        run: >-
-          flyctl deploy --remote-only
-          --build-arg VITE_SUPABASE_URL=${{ secrets.VITE_SUPABASE_URL }}
-          --build-arg VITE_SUPABASE_ANON_KEY=${{ secrets.VITE_SUPABASE_ANON_KEY }}
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          flyctl deploy --remote-only \
+            --build-arg VITE_SUPABASE_URL="$VITE_SUPABASE_URL" \
+            --build-arg VITE_SUPABASE_ANON_KEY="$VITE_SUPABASE_ANON_KEY"
