@@ -11,6 +11,7 @@ export default function Login() {
   const [isSignup, setIsSignup] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
@@ -27,6 +28,11 @@ export default function Login() {
         await signInWithMagicLink(email.trim())
         setInfo('Magic-Link gesendet – prüfe dein Postfach.')
       } else if (isSignup) {
+        if (password !== confirmPassword) {
+          setError('Die Passwörter stimmen nicht überein.')
+          setBusy(false)
+          return
+        }
         const { needsConfirmation } = await signUpWithPassword(email.trim(), password)
         if (needsConfirmation) {
           setInfo('Fast fertig! Bestätige deine Email über den zugesendeten Link.')
@@ -81,6 +87,23 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 autoComplete={isSignup ? 'new-password' : 'current-password'}
+                required
+                minLength={6}
+                className="w-full px-4 py-3 rounded-xl text-white placeholder-green-200/60 border border-white/20 focus:outline-none focus:border-white/70"
+                style={{ backgroundColor: 'rgba(255,255,255,0.10)' }}
+              />
+            </div>
+          )}
+
+          {mode === 'password' && isSignup && (
+            <div>
+              <label className="block text-green-100 text-sm font-medium mb-1">Passwort bestätigen</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                autoComplete="new-password"
                 required
                 minLength={6}
                 className="w-full px-4 py-3 rounded-xl text-white placeholder-green-200/60 border border-white/20 focus:outline-none focus:border-white/70"
