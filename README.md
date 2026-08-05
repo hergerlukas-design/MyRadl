@@ -42,11 +42,22 @@ npm run dev            # http://localhost:5181
 
 ## Supabase einrichten
 
+Das Live-Projekt ist bereits angelegt:
+
+- **Projekt**: `myradl` (Region `eu-central-1`, Ref `zulhbsdlvaqwjjakqhck`)
+- **API-URL**: `https://zulhbsdlvaqwjjakqhck.supabase.co`
+- **Client-Key**: Publishable Key aus **Settings → API** (`sb_publishable_…`)
+
+Die Migrationen wurden bereits auf dieses Projekt angewendet (Tabellen, Enum,
+RLS-Policies, Storage-Bucket `photos`). Für einen frischen Aufbau:
+
 1. Projekt in Region `eu-central-1` anlegen.
-2. Migration `supabase/migrations/001_initial_schema.sql` ausführen
-   (SQL-Editor oder `supabase db push`). Sie legt Tabellen, Enum,
-   Row-Level-Security-Policies und den Storage-Bucket `photos` an.
-3. Auth → Email-Provider aktivieren (Passwort und/oder Magic-Link).
+2. Migrationen der Reihe nach ausführen (SQL-Editor oder `supabase db push`):
+   - `supabase/migrations/001_initial_schema.sql`
+   - `supabase/migrations/002_inline_rls_drop_security_definer.sql`
+3. Auth → Email-Provider aktivieren (Passwort und/oder Magic-Link). Standardmäßig
+   ist Email-Bestätigung aktiv; zum schnellen Testen ggf. unter
+   **Authentication → Sign In / Providers → Email** deaktivieren.
 
 Alle Tabellen sind per RLS auf den eingeloggten User beschränkt: `bikes.user_id`
 ist die Wurzel, die übrigen Tabellen leiten den Zugriff über `bike_id`/`part_id`
