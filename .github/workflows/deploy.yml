@@ -28,6 +28,14 @@ jobs:
           # Build-Arg-Wert sauber (und nicht leer/kaputt) im Image ankommt.
           url="$(printf '%s' "$VITE_SUPABASE_URL" | tr -d '\r\n')"
           key="$(printf '%s' "$VITE_SUPABASE_ANON_KEY" | tr -d '\r\n')"
+          # Sichere Diagnose: nur Länge/Schema loggen, niemals die Werte selbst.
+          echo "diag: VITE_SUPABASE_URL length=${#url}"
+          case "$url" in
+            https://*|http://*) echo "diag: url scheme=ok" ;;
+            "") echo "diag: url is EMPTY (Secret nicht/falsch gesetzt)" ;;
+            *) echo "diag: url MISSING http(s):// scheme" ;;
+          esac
+          echo "diag: VITE_SUPABASE_ANON_KEY length=${#key}"
           flyctl deploy --remote-only \
             --build-arg VITE_SUPABASE_URL="$url" \
             --build-arg VITE_SUPABASE_ANON_KEY="$key"
