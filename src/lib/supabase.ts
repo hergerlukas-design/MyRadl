@@ -1,7 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 
-const url = import.meta.env.VITE_SUPABASE_URL as string
-const key = import.meta.env.VITE_SUPABASE_ANON_KEY as string
+// .trim() als Sicherheitsnetz: falls der Wert (z.B. aus einem GitHub-Secret)
+// versehentlich mit Leerzeichen/Zeilenumbruch eingebettet wurde, würde eine
+// URL wie "https://…\n" den Client sonst mit einer ungültigen URL erzeugen.
+const url = (import.meta.env.VITE_SUPABASE_URL as string | undefined)?.trim() ?? ''
+const key = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)?.trim() ?? ''
 
 if (!url || !key) {
   // Surfaced early during development if the env is not wired up.
