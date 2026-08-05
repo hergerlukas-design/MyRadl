@@ -1,0 +1,4 @@
+# Supabase local/project config for MyRadl.
+# Die App nutzt Supabase Auth (Email/Passwort + Magic-Link). Alle Tabellen sind
+# per Row Level Security auf den eingeloggten User beschränkt.
+project_id = "myradl"
