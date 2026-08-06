@@ -5,6 +5,13 @@ on:
     branches:
       - master
 
+# Nur ein Deploy gleichzeitig: startet ein neuer master-Push, wird ein noch
+# laufender Deploy abgebrochen. Verhindert, dass zwei parallele `flyctl deploy`
+# um dieselbe Fly-Release konkurrieren (führte bisher zu abgebrochenen Runs).
+concurrency:
+  group: deploy-fly-io
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
