@@ -10,7 +10,7 @@ const items = [
 export default function BottomNav() {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 flex max-w-2xl mx-auto"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-[var(--color-surface)] border-t border-[var(--color-border-subtle)] flex max-w-2xl mx-auto"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {items.map(({ to, icon: Icon, label }) => (
@@ -19,7 +19,7 @@ export default function BottomNav() {
           to={to}
           className={({ isActive }) =>
             `flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-xs font-medium transition-colors ${
-              isActive ? 'text-primary' : 'text-gray-400 hover:text-gray-700'
+              isActive ? 'text-primary' : 'text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
             }`
           }
         >

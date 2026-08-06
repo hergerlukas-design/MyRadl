@@ -5,7 +5,7 @@ import Layout from '@/components/Layout'
 import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
 import ImageUpload from '@/components/ImageUpload'
-import { CATEGORIES, partTitle, partSubtitle } from '@/lib/categories'
+import { CATEGORIES, categoryColor, partTitle, partSubtitle } from '@/lib/categories'
 import { GEOMETRY_FIELDS, formatGeometryValue } from '@/lib/geometry'
 import { uploadBikePhoto, deletePhoto, photoUrl } from '@/lib/storage'
 import { useAuth } from '@/hooks/useAuth'
@@ -73,12 +73,12 @@ export default function BikeDetail() {
           label="Radfoto"
         />
 
-        {sub && <p className="text-gray-500 -mt-1">{sub}</p>}
+        {sub && <p className="text-[var(--color-text-muted)] -mt-1">{sub}</p>}
 
         <GeometrySection bikeId={bike.id} />
 
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-gray-900">Bauteile</h2>
+          <h2 className="text-base font-semibold text-[var(--color-text)]">Bauteile</h2>
           <button
             onClick={() => navigate(`/bikes/${bike.id}/parts/new`)}
             className="flex items-center gap-1 bg-primary text-white text-sm font-semibold pl-2.5 pr-3 py-1.5 rounded-full active:scale-95 transition-transform"
@@ -88,7 +88,7 @@ export default function BikeDetail() {
         </div>
 
         {!parts || parts.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-8">
+          <p className="text-sm text-[var(--color-text-muted)] text-center py-8">
             Noch keine Bauteile. Füge das erste Teil hinzu.
           </p>
         ) : (
@@ -97,11 +97,19 @@ export default function BikeDetail() {
               const group = parts.filter((p) => p.category === cat.value)
               if (group.length === 0) return null
               const Icon = cat.icon
+              const color = categoryColor(cat.value)
               return (
                 <section key={cat.value}>
-                  <div className="flex items-center gap-2 mb-2 text-gray-500">
-                    <Icon size={16} />
-                    <h3 className="text-xs font-semibold uppercase tracking-wide">{cat.label}</h3>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
+                      style={{ backgroundColor: color.bg, color: color.fg }}
+                    >
+                      <Icon size={13} />
+                    </span>
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
+                      {cat.label}
+                    </h3>
                   </div>
                   <ul className="space-y-2">
                     {group.map((part) => (
@@ -151,11 +159,13 @@ function PartRow({ part }: { part: Part }) {
   const navigate = useNavigate()
   const url = photoUrl(part.image_url)
   const replaced = part.status === 'ersetzt'
+  const color = categoryColor(part.category)
   return (
     <li>
       <button
         onClick={() => navigate(`/parts/${part.id}`)}
-        className={`w-full flex items-center gap-3 bg-white rounded-xl border border-gray-100 p-2.5 text-left active:scale-[0.99] transition-transform ${
+        style={{ borderLeft: `4px solid ${color.fg}` }}
+        className={`card w-full flex items-center gap-3 rounded-xl p-2.5 text-left active:scale-[0.99] transition-transform ${
           replaced ? 'opacity-60' : ''
         }`}
       >
@@ -163,17 +173,17 @@ function PartRow({ part }: { part: Part }) {
           <img src={url} alt="" className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
         )}
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-gray-900 truncate">
+          <p className="font-medium text-[var(--color-text)] truncate">
             {partTitle(part)}
           </p>
-          <p className="text-sm text-gray-500 truncate">
+          <p className="text-sm text-[var(--color-text-muted)] truncate">
             {partSubtitle(part) || '—'}
           </p>
         </div>
         {replaced && (
-          <span className="text-[11px] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">ersetzt</span>
+          <span className="text-[11px] font-semibold text-[var(--color-text-muted)] bg-[var(--color-border-subtle)] px-2 py-0.5 rounded-full">ersetzt</span>
         )}
-        <ChevronRight className="text-gray-300 flex-shrink-0" size={18} />
+        <ChevronRight className="text-[var(--color-text-muted)] opacity-50 flex-shrink-0" size={18} />
       </button>
     </li>
   )
@@ -201,21 +211,21 @@ function GeometrySection({ bikeId }: { bikeId: string }) {
     : ''
 
   return (
-    <section className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+    <section className="card rounded-2xl overflow-hidden">
       <div className="flex items-center">
         <button
           onClick={() => setOpen((o) => !o)}
           className="flex-1 flex items-center gap-2 px-4 py-3 min-w-0 text-left"
           aria-expanded={open}
         >
-          <Ruler size={16} className="text-gray-500 flex-shrink-0" />
-          <span className="text-base font-semibold text-gray-900 flex-shrink-0">Geometrie</span>
+          <Ruler size={16} className="text-[var(--color-text-muted)] flex-shrink-0" />
+          <span className="text-base font-semibold text-[var(--color-text)] flex-shrink-0">Geometrie</span>
           {!open && summary && (
-            <span className="text-sm text-gray-400 truncate">{summary}</span>
+            <span className="text-sm text-[var(--color-text-muted)] truncate">{summary}</span>
           )}
           <ChevronDown
             size={18}
-            className={`ml-auto flex-shrink-0 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}
+            className={`ml-auto flex-shrink-0 text-[var(--color-text-muted)] transition-transform ${open ? 'rotate-180' : ''}`}
           />
         </button>
         <button
@@ -228,29 +238,29 @@ function GeometrySection({ bikeId }: { bikeId: string }) {
       </div>
 
       {open && (
-        <div className="border-t border-gray-100">
+        <div className="border-t border-[var(--color-border-subtle)]">
           {isLoading ? (
             <div className="py-4 flex justify-center">
               <Spinner />
             </div>
           ) : !hasAny ? (
-            <p className="text-sm text-gray-400 px-4 py-3">
+            <p className="text-sm text-[var(--color-text-muted)] px-4 py-3">
               Noch keine Geometrie erfasst. Reach &amp; Stack sind die wichtigsten Werte für die Rahmengröße.
             </p>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-[var(--color-border-subtle)]">
               {geo!.frame_size && (
                 <div className="flex items-center justify-between px-4 py-2.5">
-                  <span className="text-sm font-semibold text-gray-900">Rahmengröße</span>
+                  <span className="text-sm font-semibold text-[var(--color-text)]">Rahmengröße</span>
                   <span className="text-sm font-bold text-primary">{geo!.frame_size}</span>
                 </div>
               )}
               {GEOMETRY_FIELDS.filter((f) => geo![f.key] != null).map((f) => (
                 <div key={f.key} className="flex items-center justify-between px-4 py-2.5">
-                  <span className={`text-sm ${f.primary ? 'font-semibold text-gray-900' : 'text-gray-500'}`}>
+                  <span className={`text-sm ${f.primary ? 'font-semibold text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`}>
                     {f.label}
                   </span>
-                  <span className={`text-sm ${f.primary ? 'font-bold text-primary' : 'font-medium text-gray-900'}`}>
+                  <span className={`text-sm ${f.primary ? 'font-bold text-primary' : 'font-medium text-[var(--color-text)]'}`}>
                     {formatGeometryValue(geo![f.key], f.unit)}
                   </span>
                 </div>

@@ -18,9 +18,9 @@ export default function Layout({ children, title, back = false, action, hideNav 
   const navigate = useNavigate()
 
   return (
-    <div className="min-h-dvh bg-slate-50 flex flex-col max-w-2xl mx-auto">
+    <div className="min-h-dvh bg-[var(--color-bg)] flex flex-col max-w-2xl mx-auto">
       {(title || back || action) && (
-        <header className="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-3">
+        <header className="sticky top-0 z-30 bg-[var(--color-surface)] border-b border-[var(--color-border-subtle)] px-4 py-3">
           <div className="flex items-center gap-2">
             {back && (
               <button
@@ -31,7 +31,7 @@ export default function Layout({ children, title, back = false, action, hideNav 
                 <ChevronLeft size={24} />
               </button>
             )}
-            <h1 className="flex-1 min-w-0 text-lg font-semibold text-gray-900 truncate">{title}</h1>
+            <h1 className="flex-1 min-w-0 text-lg font-semibold text-[var(--color-text)] truncate">{title}</h1>
             {action}
           </div>
         </header>

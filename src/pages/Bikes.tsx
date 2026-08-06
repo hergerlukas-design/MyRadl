@@ -52,20 +52,20 @@ function BikeCard({ bike }: { bike: Bike }) {
     <li>
       <button
         onClick={() => navigate(`/bikes/${bike.id}`)}
-        className="w-full flex items-center gap-3 bg-white rounded-2xl shadow-sm border border-gray-100 p-3 text-left active:scale-[0.99] transition-transform"
+        className="card w-full flex items-center gap-3 rounded-2xl p-3 text-left active:scale-[0.99] transition-transform"
       >
-        <div className="w-20 h-16 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0 flex items-center justify-center">
+        <div className="w-20 h-16 rounded-xl overflow-hidden bg-[var(--color-border-subtle)] flex-shrink-0 flex items-center justify-center">
           {url ? (
             <img src={url} alt={bike.name} className="w-full h-full object-cover" />
           ) : (
-            <BikeIcon className="text-slate-300" size={28} />
+            <BikeIcon className="text-[var(--color-text-muted)] opacity-50" size={28} />
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-semibold text-gray-900 truncate">{bike.name}</p>
-          {sub && <p className="text-sm text-gray-500 truncate">{sub}</p>}
+          <p className="font-semibold text-[var(--color-text)] truncate">{bike.name}</p>
+          {sub && <p className="text-sm text-[var(--color-text-muted)] truncate">{sub}</p>}
         </div>
-        <ChevronRight className="text-gray-300 flex-shrink-0" size={20} />
+        <ChevronRight className="text-[var(--color-text-muted)] opacity-50 flex-shrink-0" size={20} />
       </button>
     </li>
   )
@@ -74,11 +74,11 @@ function BikeCard({ bike }: { bike: Bike }) {
 function EmptyState({ onAdd }: { onAdd: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center text-center px-8 py-24">
-      <div className="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center mb-4">
+      <div className="w-16 h-16 rounded-2xl bg-[var(--color-cat-fork-bg)] flex items-center justify-center mb-4">
         <BikeIcon className="text-primary" size={30} />
       </div>
-      <h2 className="text-lg font-semibold text-gray-900">Noch kein Rad angelegt</h2>
-      <p className="text-sm text-gray-500 mt-1 mb-6">
+      <h2 className="text-lg font-semibold text-[var(--color-text)]">Noch kein Rad angelegt</h2>
+      <p className="text-sm text-[var(--color-text-muted)] mt-1 mb-6">
         Lege dein erstes Mountainbike an, um Bauteile und Einstellungen zu verwalten.
       </p>
       <button

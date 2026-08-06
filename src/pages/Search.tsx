@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Search as SearchIcon, ChevronRight } from 'lucide-react'
 import Layout from '@/components/Layout'
 import Spinner from '@/components/ui/Spinner'
-import { CATEGORIES, categoryLabel, partTitle, partSubtitle } from '@/lib/categories'
+import { CATEGORIES, categoryColor, categoryLabel, partTitle, partSubtitle } from '@/lib/categories'
 import { photoUrl } from '@/lib/storage'
 import { useBikes } from '@/hooks/useBikes'
 import { useAllParts } from '@/hooks/useParts'
@@ -66,7 +66,7 @@ export default function Search() {
           </select>
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-gray-600">
+        <label className="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
           <input type="checkbox" checked={onlyActive} onChange={(e) => setOnlyActive(e.target.checked)} className="accent-primary w-4 h-4" />
           Nur aktive Teile
         </label>
@@ -77,33 +77,38 @@ export default function Search() {
           <Spinner />
         </div>
       ) : results.length === 0 ? (
-        <p className="text-sm text-gray-400 text-center py-12">Keine Teile gefunden.</p>
+        <p className="text-sm text-[var(--color-text-muted)] text-center py-12">Keine Teile gefunden.</p>
       ) : (
         <ul className="px-4 pb-4 space-y-2">
           {results.map((p) => {
             const url = photoUrl(p.image_url)
+            const color = categoryColor(p.category)
             return (
               <li key={p.id}>
                 <button
                   onClick={() => navigate(`/parts/${p.id}`)}
-                  className={`w-full flex items-center gap-3 bg-white rounded-xl border border-gray-100 p-2.5 text-left active:scale-[0.99] transition-transform ${
+                  style={{ borderLeft: `4px solid ${color.fg}` }}
+                  className={`card w-full flex items-center gap-3 rounded-xl p-2.5 text-left active:scale-[0.99] transition-transform ${
                     p.status === 'ersetzt' ? 'opacity-60' : ''
                   }`}
                 >
-                  <div className="w-11 h-11 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
+                  <div
+                    className="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0"
+                    style={{ backgroundColor: color.bg }}
+                  >
                     {url && <img src={url} alt="" className="w-full h-full object-cover" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-gray-900 truncate">
+                    <p className="font-medium text-[var(--color-text)] truncate">
                       {partTitle(p)}
                     </p>
-                    <p className="text-xs text-gray-500 truncate">
+                    <p className="text-xs text-[var(--color-text-muted)] truncate">
                       {categoryLabel(p.category)}
                       {p.bike ? ` · ${p.bike.name}` : ''}
                       {partSubtitle(p) ? ` · ${partSubtitle(p)}` : ''}
                     </p>
                   </div>
-                  <ChevronRight className="text-gray-300 flex-shrink-0" size={18} />
+                  <ChevronRight className="text-[var(--color-text-muted)] opacity-50 flex-shrink-0" size={18} />
                 </button>
               </li>
             )
