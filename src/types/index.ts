@@ -5,9 +5,13 @@ export type PartCategory =
   | 'bremsen'
   | 'laufraeder'
   | 'reifen'
-  | 'cockpit'
+  | 'vorbau'
+  | 'lenker'
+  | 'griffe'
   | 'sattel'
   | 'sonstiges'
+  // Legacy-Wert (nicht mehr zur Auswahl): früher „Cockpit".
+  | 'cockpit'
 
 export type PartStatus = 'aktiv' | 'ersetzt'
 
@@ -29,8 +33,12 @@ export interface Part {
   bike_id: string
   category: PartCategory
   brand: string
-  model: string
+  model: string | null
   variant: string | null
+  /** Einbauposition bei Reifen/Laufrädern: 'vorne' | 'hinten' | null. */
+  position: string | null
+  /** Freie Bezeichnung bei Kategorie „Sonstiges". */
+  custom_type: string | null
   status: PartStatus
   install_date: string | null
   image_url: string | null
