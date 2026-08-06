@@ -1,16 +1,18 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Plus, Pencil, Trash2, ChevronRight } from 'lucide-react'
+import { Plus, Pencil, Trash2, ChevronRight, Ruler } from 'lucide-react'
 import Layout from '@/components/Layout'
 import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
 import ImageUpload from '@/components/ImageUpload'
 import { CATEGORIES, partTitle, partSubtitle } from '@/lib/categories'
+import { GEOMETRY_FIELDS, formatGeometryValue } from '@/lib/geometry'
 import { uploadBikePhoto, deletePhoto, photoUrl } from '@/lib/storage'
 import { useAuth } from '@/hooks/useAuth'
 import { useBike, useUpdateBike, useDeleteBike } from '@/hooks/useBikes'
+import { useBikeGeometry, useUpsertBikeGeometry } from '@/hooks/useBikeGeometry'
 import { useParts } from '@/hooks/useParts'
-import type { Bike, Part } from '@/types'
+import type { Bike, BikeGeometry, GeometryField, Part } from '@/types'
 
 export default function BikeDetail() {
   const { bikeId = '' } = useParams()
@@ -72,6 +74,8 @@ export default function BikeDetail() {
         />
 
         {sub && <p className="text-gray-500 -mt-1">{sub}</p>}
+
+        <GeometrySection bikeId={bike.id} />
 
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-gray-900">Bauteile</h2>
@@ -172,6 +176,166 @@ function PartRow({ part }: { part: Part }) {
         <ChevronRight className="text-gray-300 flex-shrink-0" size={18} />
       </button>
     </li>
+  )
+}
+
+// ── Geometrie ─────────────────────────────────────────────────────────────────
+function GeometrySection({ bikeId }: { bikeId: string }) {
+  const { data: geo, isLoading } = useBikeGeometry(bikeId)
+  const [editing, setEditing] = useState(false)
+
+  const hasAny =
+    geo != null &&
+    (!!geo.frame_size || GEOMETRY_FIELDS.some((f) => geo[f.key] != null))
+
+  return (
+    <section>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <Ruler size={16} className="text-gray-500" />
+          <h2 className="text-base font-semibold text-gray-900">Geometrie</h2>
+        </div>
+        <button
+          onClick={() => setEditing(true)}
+          className="flex items-center gap-1 text-primary text-sm font-semibold"
+          aria-label="Geometrie bearbeiten"
+        >
+          <Pencil size={15} /> {hasAny ? 'Bearbeiten' : 'Erfassen'}
+        </button>
+      </div>
+
+      {isLoading ? (
+        <div className="py-4 flex justify-center">
+          <Spinner />
+        </div>
+      ) : !hasAny ? (
+        <p className="text-sm text-gray-400 py-2">
+          Noch keine Geometrie erfasst. Reach &amp; Stack sind die wichtigsten Werte für die Rahmengröße.
+        </p>
+      ) : (
+        <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
+          {geo!.frame_size && (
+            <div className="flex items-center justify-between px-4 py-2.5">
+              <span className="text-sm font-semibold text-gray-900">Rahmengröße</span>
+              <span className="text-sm font-bold text-primary">{geo!.frame_size}</span>
+            </div>
+          )}
+          {GEOMETRY_FIELDS.filter((f) => geo![f.key] != null).map((f) => (
+            <div key={f.key} className="flex items-center justify-between px-4 py-2.5">
+              <span className={`text-sm ${f.primary ? 'font-semibold text-gray-900' : 'text-gray-500'}`}>
+                {f.label}
+              </span>
+              <span className={`text-sm ${f.primary ? 'font-bold text-primary' : 'font-medium text-gray-900'}`}>
+                {formatGeometryValue(geo![f.key], f.unit)}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {editing && <GeometryModal bikeId={bikeId} geo={geo ?? null} onClose={() => setEditing(false)} />}
+    </section>
+  )
+}
+
+function GeometryModal({
+  bikeId,
+  geo,
+  onClose,
+}: {
+  bikeId: string
+  geo: BikeGeometry | null
+  onClose: () => void
+}) {
+  const upsert = useUpsertBikeGeometry()
+  const [frameSize, setFrameSize] = useState(geo?.frame_size ?? '')
+  const [values, setValues] = useState<Record<GeometryField, string>>(() => {
+    const init = {} as Record<GeometryField, string>
+    for (const f of GEOMETRY_FIELDS) {
+      const v = geo?.[f.key]
+      init[f.key] = v == null ? '' : String(v)
+    }
+    return init
+  })
+  const [error, setError] = useState<string | null>(null)
+
+  const set = (key: GeometryField, value: string) =>
+    setValues((v) => ({ ...v, [key]: value }))
+
+  async function save() {
+    setError(null)
+    const patch: Partial<BikeGeometry> & { bike_id: string } = {
+      bike_id: bikeId,
+      frame_size: frameSize.trim() || null,
+    }
+    for (const f of GEOMETRY_FIELDS) {
+      const raw = values[f.key].trim().replace(',', '.')
+      if (raw === '') {
+        patch[f.key] = null
+        continue
+      }
+      const num = Number(raw)
+      if (Number.isNaN(num)) {
+        setError(`„${f.label}" ist keine gültige Zahl.`)
+        return
+      }
+      patch[f.key] = num
+    }
+    try {
+      await upsert.mutateAsync(patch)
+      onClose()
+    } catch (err) {
+      setError((err as Error)?.message ?? 'Speichern fehlgeschlagen')
+    }
+  }
+
+  return (
+    <Modal
+      title="Geometrie"
+      onClose={onClose}
+      footer={
+        <button
+          onClick={save}
+          disabled={upsert.isPending}
+          className="w-full py-3 rounded-xl bg-primary text-white font-semibold disabled:opacity-60"
+        >
+          {upsert.isPending ? 'Speichern…' : 'Speichern'}
+        </button>
+      }
+    >
+      <p className="text-sm text-gray-500 -mt-1">
+        Alle Angaben optional. Reach &amp; Stack sind herstellerübergreifend am besten vergleichbar.
+      </p>
+      <label className="block">
+        <span className="block text-sm font-medium text-gray-700 mb-1">Rahmengröße</span>
+        <input
+          value={frameSize}
+          onChange={(e) => setFrameSize(e.target.value)}
+          placeholder="z.B. M oder 44 cm"
+          className="input"
+        />
+      </label>
+      {GEOMETRY_FIELDS.map((f) => (
+        <label key={f.key} className="block">
+          <span className="flex items-baseline justify-between mb-1">
+            <span className={`text-sm font-medium ${f.primary ? 'text-primary' : 'text-gray-700'}`}>
+              {f.label}
+              {f.primary && <span className="ml-1 text-[11px] font-semibold uppercase">wichtig</span>}
+            </span>
+            <span className="text-xs text-gray-400">{f.unit}</span>
+          </span>
+          <input
+            value={values[f.key]}
+            onChange={(e) => set(f.key, e.target.value)}
+            inputMode="decimal"
+            placeholder={`z.B. ${f.unit === '°' ? '64,5' : '450'}`}
+            className="input"
+          />
+          <span className="block text-xs text-gray-400 mt-1">{f.hint}</span>
+        </label>
+      ))}
+      {error && <p className="text-sm text-red-600">{error}</p>}
+    </Modal>
   )
 }
 
