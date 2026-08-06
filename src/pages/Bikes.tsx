@@ -1,41 +1,58 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Bike as BikeIcon, ChevronRight } from 'lucide-react'
 import Layout from '@/components/Layout'
+import Watermark from '@/components/Watermark'
 import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
 import { photoUrl } from '@/lib/storage'
 import { useBikes, useCreateBike } from '@/hooks/useBikes'
+import { useAllParts } from '@/hooks/useParts'
 import type { Bike } from '@/types'
 
 export default function Bikes() {
   const { data: bikes, isLoading } = useBikes()
+  const { data: parts } = useAllParts()
   const [adding, setAdding] = useState(false)
 
+  const activeCount = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const p of parts ?? []) {
+      if (p.status !== 'aktiv') continue
+      map.set(p.bike_id, (map.get(p.bike_id) ?? 0) + 1)
+    }
+    return map
+  }, [parts])
+
+  const count = bikes?.length ?? 0
+
   return (
-    <Layout
-      title="Meine Räder"
-      action={
-        <button
-          onClick={() => setAdding(true)}
-          className="flex items-center gap-1 bg-primary text-white text-sm font-semibold pl-2.5 pr-3 py-1.5 rounded-full active:scale-95 transition-transform"
-        >
-          <Plus size={18} /> Rad
-        </button>
-      }
-    >
+    <Layout>
+      <header className="relative overflow-hidden px-6 pt-4 pb-5 flex-none">
+        <Watermark variant="top" />
+        <div className="relative flex flex-col gap-1">
+          <span className="eyebrow">GARAGE · {count} {count === 1 ? 'RAD' : 'RÄDER'}</span>
+          <h1 className="font-display font-black text-[34px] leading-[1.05] tracking-[-0.02em] text-cream">
+            Deine Räder
+          </h1>
+        </div>
+      </header>
+
       {isLoading ? (
         <div className="flex justify-center py-20">
           <Spinner />
         </div>
-      ) : !bikes || bikes.length === 0 ? (
-        <EmptyState onAdd={() => setAdding(true)} />
       ) : (
-        <ul className="p-4 space-y-3">
-          {bikes.map((bike) => (
-            <BikeCard key={bike.id} bike={bike} />
+        <div className="flex-1 px-6 pb-6 flex flex-col gap-4">
+          {bikes?.map((bike) => (
+            <BikeCard key={bike.id} bike={bike} parts={activeCount.get(bike.id) ?? 0} />
           ))}
-        </ul>
+          <button
+            onClick={() => setAdding(true)}
+            className="rounded-[22px] border border-dashed border-hair-dashed py-5 text-center font-medium text-muted active:scale-[0.99] transition-transform"
+          >
+            + Rad hinzufügen
+          </button>
+        </div>
       )}
 
       {adding && <AddBikeModal onClose={() => setAdding(false)} />}
@@ -43,51 +60,47 @@ export default function Bikes() {
   )
 }
 
-function BikeCard({ bike }: { bike: Bike }) {
-  const navigate = useNavigate()
-  const url = photoUrl(bike.image_url)
-  const sub = [bike.brand, bike.model, bike.year].filter(Boolean).join(' · ')
-
+function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <li>
-      <button
-        onClick={() => navigate(`/bikes/${bike.id}`)}
-        className="card w-full flex items-center gap-3 rounded-2xl p-3 text-left active:scale-[0.99] transition-transform"
-      >
-        <div className="w-20 h-16 rounded-xl overflow-hidden bg-[var(--color-border-subtle)] flex-shrink-0 flex items-center justify-center">
-          {url ? (
-            <img src={url} alt={bike.name} className="w-full h-full object-cover" />
-          ) : (
-            <BikeIcon className="text-[var(--color-text-muted)] opacity-50" size={28} />
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-[var(--color-text)] truncate">{bike.name}</p>
-          {sub && <p className="text-sm text-[var(--color-text-muted)] truncate">{sub}</p>}
-        </div>
-        <ChevronRight className="text-[var(--color-text-muted)] opacity-50 flex-shrink-0" size={20} />
-      </button>
-    </li>
+    <div className="flex flex-col gap-1">
+      <span className="eyebrow">{label}</span>
+      <span className="text-[13px] font-medium text-cream-dim truncate">{value || '—'}</span>
+    </div>
   )
 }
 
-function EmptyState({ onAdd }: { onAdd: () => void }) {
+function BikeCard({ bike, parts }: { bike: Bike; parts: number }) {
+  const navigate = useNavigate()
+  const url = photoUrl(bike.image_url)
+
   return (
-    <div className="flex flex-col items-center justify-center text-center px-8 py-24">
-      <div className="w-16 h-16 rounded-2xl bg-[var(--color-cat-fork-bg)] flex items-center justify-center mb-4">
-        <BikeIcon className="text-primary" size={30} />
+    <button
+      onClick={() => navigate(`/bikes/${bike.id}`)}
+      className="text-left rounded-[22px] bg-surface border border-hair overflow-hidden active:scale-[0.99] transition-transform"
+    >
+      <div className="relative h-[150px] photo-ph flex items-end justify-between p-4">
+        {url && <img src={url} alt={bike.name} className="absolute inset-0 w-full h-full object-cover" />}
+        <span className="relative font-mono text-[10px] text-dim">{url ? '' : 'radfoto'}</span>
+        {bike.year && (
+          <span className="relative font-mono text-[10px] font-medium tracking-[0.14em] text-accent-ink bg-accent px-2 py-1 rounded-md">
+            {bike.year}
+          </span>
+        )}
       </div>
-      <h2 className="text-lg font-semibold text-[var(--color-text)]">Noch kein Rad angelegt</h2>
-      <p className="text-sm text-[var(--color-text-muted)] mt-1 mb-6">
-        Lege dein erstes Mountainbike an, um Bauteile und Einstellungen zu verwalten.
-      </p>
-      <button
-        onClick={onAdd}
-        className="flex items-center gap-1.5 bg-primary text-white font-semibold px-5 py-2.5 rounded-full active:scale-95 transition-transform"
-      >
-        <Plus size={18} /> Erstes Rad anlegen
-      </button>
-    </div>
+      <div className="p-4 flex flex-col gap-3">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="font-display font-extrabold text-2xl leading-none tracking-[-0.01em] text-cream truncate">
+            {bike.name}
+          </h2>
+          {bike.model && <span className="font-mono text-xs text-muted flex-none">{bike.model}</span>}
+        </div>
+        <div className="grid grid-cols-3 gap-4 pt-3 border-t border-hair">
+          <Stat label="HERSTELLER" value={bike.brand ?? ''} />
+          <Stat label="BAUTEILE" value={String(parts)} />
+          <Stat label="BAUJAHR" value={bike.year ? String(bike.year) : ''} />
+        </div>
+      </div>
+    </button>
   )
 }
 
@@ -126,7 +139,7 @@ function AddBikeModal({ onClose }: { onClose: () => void }) {
         <button
           onClick={handleSave}
           disabled={createBike.isPending}
-          className="w-full py-3 rounded-xl bg-primary text-white font-semibold active:scale-[0.98] transition-transform disabled:opacity-60"
+          className="w-full py-3.5 rounded-xl bg-accent text-accent-ink font-semibold active:scale-[0.98] transition-transform disabled:opacity-60"
         >
           {createBike.isPending ? 'Speichern…' : 'Speichern'}
         </button>
@@ -158,7 +171,7 @@ function AddBikeModal({ onClose }: { onClose: () => void }) {
           className="input"
         />
       </Field>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
     </Modal>
   )
 }
@@ -166,7 +179,7 @@ function AddBikeModal({ onClose }: { onClose: () => void }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="block text-sm font-medium text-[var(--color-text)] mb-1">{label}</span>
+      <span className="block text-sm font-medium text-cream-dim mb-1.5">{label}</span>
       {children}
     </label>
   )

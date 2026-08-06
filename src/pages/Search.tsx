@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Search as SearchIcon, ChevronRight } from 'lucide-react'
 import Layout from '@/components/Layout'
 import Spinner from '@/components/ui/Spinner'
 import { CATEGORIES, categoryColor, categoryLabel, partTitle, partSubtitle } from '@/lib/categories'
@@ -35,86 +34,113 @@ export default function Search() {
   }, [parts, q, category, bikeId, onlyActive])
 
   return (
-    <Layout title="Suche">
-      <div className="p-4 space-y-3">
-        <div className="relative">
-          <SearchIcon size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+    <Layout>
+      <div className="px-5 pt-4 pb-4 flex flex-col gap-3.5 flex-none">
+        <h1 className="font-display font-black text-[32px] leading-none tracking-[-0.02em] text-cream">Suche</h1>
+
+        <div className="flex items-center gap-2.5 bg-surface border border-hair-strong rounded-2xl px-4 py-3">
+          <span className="text-muted text-lg leading-none">⌕</span>
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Hersteller, Modell, Variante…"
-            className="input pl-10"
+            className="flex-1 bg-transparent border-0 outline-none text-cream placeholder:text-dim text-[15px]"
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <select value={category} onChange={(e) => setCategory(e.target.value as PartCategory | '')} className="input">
-            <option value="">Alle Kategorien</option>
-            {CATEGORIES.map((c) => (
-              <option key={c.value} value={c.value}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-          <select value={bikeId} onChange={(e) => setBikeId(e.target.value)} className="input">
-            <option value="">Alle Räder</option>
-            {bikes?.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-wrap gap-2">
+          <Chip active={onlyActive} onClick={() => setOnlyActive((v) => !v)}>Nur aktive Teile</Chip>
+          {bikes?.map((b) => (
+            <Chip key={b.id} active={bikeId === b.id} onClick={() => setBikeId((v) => (v === b.id ? '' : b.id))}>
+              {b.name}
+            </Chip>
+          ))}
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
-          <input type="checkbox" checked={onlyActive} onChange={(e) => setOnlyActive(e.target.checked)} className="accent-primary w-4 h-4" />
-          Nur aktive Teile
-        </label>
+        <div className="flex gap-2 overflow-x-auto scr -mx-5 px-5 pb-0.5">
+          <Chip active={category === ''} onClick={() => setCategory('')}>Alle</Chip>
+          {CATEGORIES.map((c) => (
+            <Chip
+              key={c.value}
+              active={category === c.value}
+              color={c.color}
+              onClick={() => setCategory((v) => (v === c.value ? '' : c.value))}
+            >
+              {c.label}
+            </Chip>
+          ))}
+        </div>
       </div>
 
       {isLoading ? (
         <div className="flex justify-center py-16">
           <Spinner />
         </div>
-      ) : results.length === 0 ? (
-        <p className="text-sm text-[var(--color-text-muted)] text-center py-12">Keine Teile gefunden.</p>
       ) : (
-        <ul className="px-4 pb-4 space-y-2">
-          {results.map((p) => {
-            const url = photoUrl(p.image_url)
-            const color = categoryColor(p.category)
-            return (
-              <li key={p.id}>
+        <div className="flex-1 px-5 pb-6 flex flex-col gap-2.5">
+          <span className="eyebrow px-0.5 py-1">{results.length} TEILE</span>
+          {results.length === 0 ? (
+            <p className="font-mono text-xs text-muted text-center py-8">Keine Teile gefunden.</p>
+          ) : (
+            results.map((p) => {
+              const url = photoUrl(p.image_url)
+              const color = categoryColor(p.category)
+              return (
                 <button
+                  key={p.id}
                   onClick={() => navigate(`/parts/${p.id}`)}
-                  style={{ borderLeft: `4px solid ${color.fg}` }}
-                  className={`card w-full flex items-center gap-3 rounded-xl p-2.5 text-left active:scale-[0.99] transition-transform ${
-                    p.status === 'ersetzt' ? 'opacity-60' : ''
+                  className={`text-left flex items-center gap-3.5 bg-surface border border-hair rounded-[18px] px-3.5 py-3 active:scale-[0.99] transition-transform ${
+                    p.status === 'ersetzt' ? 'opacity-55' : ''
                   }`}
                 >
-                  <div
-                    className="w-11 h-11 rounded-lg overflow-hidden flex-shrink-0"
-                    style={{ backgroundColor: color.bg }}
-                  >
+                  <div className="w-[46px] h-[46px] flex-none rounded-[13px] overflow-hidden photo-ph border border-hair-soft">
                     {url && <img src={url} alt="" className="w-full h-full object-cover" />}
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-[var(--color-text)] truncate">
+                  <div className="flex-1 min-w-0 flex flex-col gap-1">
+                    <span className="text-[15px] font-semibold text-cream truncate">
                       {partTitle(p)}
-                    </p>
-                    <p className="text-xs text-[var(--color-text-muted)] truncate">
+                    </span>
+                    <span className="font-mono text-[11.5px] text-muted truncate">
                       {categoryLabel(p.category)}
                       {p.bike ? ` · ${p.bike.name}` : ''}
                       {partSubtitle(p) ? ` · ${partSubtitle(p)}` : ''}
-                    </p>
+                    </span>
                   </div>
-                  <ChevronRight className="text-[var(--color-text-muted)] opacity-50 flex-shrink-0" size={18} />
+                  <span className="w-2 h-2 rounded-full flex-none" style={{ background: color }} />
                 </button>
-              </li>
-            )
-          })}
-        </ul>
+              )
+            })
+          )}
+        </div>
       )}
     </Layout>
+  )
+}
+
+function Chip({
+  children,
+  active,
+  color,
+  onClick,
+}: {
+  children: React.ReactNode
+  active: boolean
+  color?: string
+  onClick: () => void
+}) {
+  const accent = color ?? 'var(--color-accent)'
+  return (
+    <button
+      onClick={onClick}
+      className="flex-none flex items-center gap-1.5 px-3.5 py-2 rounded-full font-mono text-xs font-medium tracking-[0.04em] transition-colors whitespace-nowrap"
+      style={{
+        background: active ? accent : 'transparent',
+        color: active ? 'var(--color-accent-ink)' : 'var(--color-cream-dim)',
+        border: `1px solid ${active ? accent : 'var(--c-hair-strong)'}`,
+      }}
+    >
+      {color && !active && <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />}
+      {children}
+    </button>
   )
 }

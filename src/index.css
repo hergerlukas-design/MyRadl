@@ -1,93 +1,153 @@
 @import "tailwindcss";
 
+/*
+ * MyRadl — "outdoor" design system, themeable (dark / light).
+ * Colors are driven by semantic CSS variables (--c-*) that swap per theme.
+ * Dark is the base/fallback; light applies for light-preference systems
+ * (unless dark is forced) or when data-theme="light" is set explicitly.
+ */
 @theme {
-  /* Basis: Warm Off-White + Grün-Akzent */
-  --color-bg: #f7f4ef;            /* App-Hintergrund statt reinem Weiß */
-  --color-surface: #fffdf9;       /* Karten-Hintergrund (Bauteil-Cards, Photo-Placeholder) */
-  --color-border-subtle: #efe8da;
-  --color-text: #2b2a26;
-  --color-text-muted: #8a8066;
-  --color-accent: #4c7a56;        /* Hauptgrün: Buttons, aktive Icons, Statusleiste */
+  --color-ink: var(--c-ink);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-nav: var(--c-nav);
+  --color-accent: var(--c-accent);
+  --color-accent-ink: var(--c-accent-ink);
+  --color-cream: var(--c-cream);
+  --color-cream-dim: var(--c-cream-dim);
+  --color-muted: var(--c-muted);
+  --color-dim: var(--c-dim);
+  --color-danger: var(--c-danger);
+  --color-hair: var(--c-hair);
+  --color-hair-soft: var(--c-hair-soft);
+  --color-hair-strong: var(--c-hair-strong);
+  --color-hair-dashed: var(--c-hair-dashed);
 
-  /* primary bleibt als Alias auf das Hauptgrün, damit bestehende
-     bg-primary / text-primary / border-primary weiterhin greifen. */
-  --color-primary: #4c7a56;
-  --color-primary-dark: #3c6245;
-
-  /* Kategoriefarben für Bauteil-Gruppen */
-  --color-cat-fork-bg: #e4eee1;
-  --color-cat-fork-fg: #4c7a56;   /* Federgabel */
-  --color-cat-shock-bg: #e3eef2;
-  --color-cat-shock-fg: #2e6e82;  /* Dämpfer */
-  --color-cat-drive-bg: #f5e6d3;
-  --color-cat-drive-fg: #a5661b;  /* Antrieb */
-  --color-cat-brake-bg: #f3e1dd;
-  --color-cat-brake-fg: #a24b3a;  /* Bremsen */
-  --color-cat-wheel-bg: #e5e8ec;
-  --color-cat-wheel-fg: #556070;  /* Laufräder */
-  --color-cat-tire-bg: #e6e3dc;
-  --color-cat-tire-fg: #5a5347;   /* Reifen */
-  --color-cat-stem-bg: #ebe4ec;
-  --color-cat-stem-fg: #6e5a78;   /* Vorbau */
-  --color-cat-bar-bg: #ddebe7;
-  --color-cat-bar-fg: #3b7a6a;    /* Lenker */
-  --color-cat-grip-bg: #f1e7d6;
-  --color-cat-grip-fg: #8a6d3b;   /* Griffe */
-  --color-cat-saddle-bg: #ede4d8;
-  --color-cat-saddle-fg: #7a5e3a; /* Sattel */
-  --color-cat-misc-bg: #eae6de;
-  --color-cat-misc-fg: #8a8066;   /* Sonstiges */
-
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Chivo", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
 
-/*
- * Dark-Mode-Variante: dieselben Tokens werden für dunkle Systemeinstellung
- * überschrieben. Da alle Screens die Variablen referenzieren, kippt die App
- * automatisch – warmes, braunes Dark-Theme (angelehnt an #493B2A der Palette),
- * mit bewusst dunklen Kartenflächen auf noch dunklerem Grund.
- */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-bg: #1a140e;            /* sehr dunkles, warmes Braun */
-    --color-surface: #382c1e;       /* Karten: dunkler als #493B2A, klar bräunlich */
-    --color-border-subtle: #4a3b29;
-    --color-text: #f0e9df;
-    --color-text-muted: #b4a68d;
-    --color-accent: #74b485;        /* Grün, für braunen Grund aufgehellt */
-    --color-primary: #74b485;
-    --color-primary-dark: #5c9b70;
+/* ── DARK (base / fallback) ──────────────────────────────────────────────── */
+:root {
+  --c-ink: #12100e;
+  --c-surface: #1b1815;
+  --c-surface-2: #221f1a;
+  --c-nav: #17140f;
+  --c-accent: #a6d65a;
+  --c-accent-ink: #12100e;
+  --c-cream: #f2efe9;
+  --c-cream-dim: #d8d3c9;
+  --c-muted: #8e877b;
+  --c-dim: #6f6a60;
+  --c-danger: #d66a6a;
 
-    /* Kategoriefarben: dunkle Chip-Flächen, aufgehellte Icon-/Randfarben. */
-    --color-cat-fork-bg: #2f3f31;
-    --color-cat-fork-fg: #86c295;
-    --color-cat-shock-bg: #2a3c44;
-    --color-cat-shock-fg: #74bad2;
-    --color-cat-drive-bg: #4a3a22;
-    --color-cat-drive-fg: #dca85f;
-    --color-cat-brake-bg: #452a24;
-    --color-cat-brake-fg: #db8b7a;
-    --color-cat-wheel-bg: #313742;
-    --color-cat-wheel-fg: #9fabbd;
-    --color-cat-tire-bg: #3a3227;
-    --color-cat-tire-fg: #bcae96;
-    --color-cat-stem-bg: #37303c;
-    --color-cat-stem-fg: #bda2c7;
-    --color-cat-bar-bg: #263f39;
-    --color-cat-bar-fg: #7cc0af;
-    --color-cat-grip-bg: #3f321f;
-    --color-cat-grip-fg: #cba86c;
-    --color-cat-saddle-bg: #3a2f1f;
-    --color-cat-saddle-fg: #c6a06f;
-    --color-cat-misc-bg: #362c20;
-    --color-cat-misc-fg: #b4a68d;
-  }
+  --c-hair: rgba(255, 255, 255, 0.07);
+  --c-hair-soft: rgba(255, 255, 255, 0.06);
+  --c-hair-strong: rgba(255, 255, 255, 0.12);
+  --c-hair-dashed: rgba(255, 255, 255, 0.18);
+  --c-track: rgba(255, 255, 255, 0.12);
+  --c-navbar-off: rgba(255, 255, 255, 0.08);
 
-  /* Auf dunklem Grund trägt eine feine Kontur die Karten besser als ein Schatten. */
-  .card {
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--color-border-subtle);
+  --c-hatch-a: #211e19;
+  --c-hatch-b: #1b1815;
+  --wm-filter: invert(1);
+  --wm-opacity: 0.13;
+
+  --cat-federgabel: #a6d65a;
+  --cat-daempfer: #6fa8d6;
+  --cat-antrieb: #d6c25a;
+  --cat-bremsen: #d67a5a;
+  --cat-laufraeder: #8c8cd6;
+  --cat-reifen: #e0a94e;
+  --cat-vorbau: #5ad6b0;
+  --cat-lenker: #4fbfd6;
+  --cat-griffe: #6fd6a8;
+  --cat-sattel: #c58bd6;
+  --cat-sonstiges: #9a9489;
+
+  color-scheme: dark;
+}
+
+/* ── LIGHT ───────────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --c-ink: #f4f2ed;
+    --c-surface: #ffffff;
+    --c-surface-2: #f0ede6;
+    --c-nav: #ffffff;
+    --c-accent: #233b10;
+    --c-accent-ink: #f7f5f0;
+    --c-cream: #1a1815;
+    --c-cream-dim: #332f29;
+    --c-muted: #8c867c;
+    --c-dim: #9a948a;
+    --c-danger: #b0362f;
+
+    --c-hair: rgba(0, 0, 0, 0.09);
+    --c-hair-soft: rgba(0, 0, 0, 0.07);
+    --c-hair-strong: rgba(0, 0, 0, 0.14);
+    --c-hair-dashed: rgba(0, 0, 0, 0.18);
+    --c-track: rgba(0, 0, 0, 0.12);
+    --c-navbar-off: rgba(0, 0, 0, 0.08);
+
+    --c-hatch-a: #ebe8e1;
+    --c-hatch-b: #f4f2ed;
+    --wm-filter: none;
+    --wm-opacity: 0.16;
+
+    --cat-federgabel: #4c7a24;
+    --cat-daempfer: #2f6e9e;
+    --cat-antrieb: #8a7420;
+    --cat-bremsen: #a8542a;
+    --cat-laufraeder: #5757a8;
+    --cat-reifen: #8a6420;
+    --cat-vorbau: #1f7a66;
+    --cat-lenker: #1f6e7a;
+    --cat-griffe: #2f7a54;
+    --cat-sattel: #7a4fa8;
+    --cat-sonstiges: #6e685e;
+
+    color-scheme: light;
   }
+}
+
+:root[data-theme="light"] {
+  --c-ink: #f4f2ed;
+  --c-surface: #ffffff;
+  --c-surface-2: #f0ede6;
+  --c-nav: #ffffff;
+  --c-accent: #233b10;
+  --c-accent-ink: #f7f5f0;
+  --c-cream: #1a1815;
+  --c-cream-dim: #332f29;
+  --c-muted: #8c867c;
+  --c-dim: #9a948a;
+  --c-danger: #b0362f;
+
+  --c-hair: rgba(0, 0, 0, 0.09);
+  --c-hair-soft: rgba(0, 0, 0, 0.07);
+  --c-hair-strong: rgba(0, 0, 0, 0.14);
+  --c-hair-dashed: rgba(0, 0, 0, 0.18);
+  --c-track: rgba(0, 0, 0, 0.12);
+  --c-navbar-off: rgba(0, 0, 0, 0.08);
+
+  --c-hatch-a: #ebe8e1;
+  --c-hatch-b: #f4f2ed;
+  --wm-filter: none;
+  --wm-opacity: 0.16;
+
+  --cat-federgabel: #4c7a24;
+  --cat-daempfer: #2f6e9e;
+  --cat-antrieb: #8a7420;
+  --cat-bremsen: #a8542a;
+  --cat-laufraeder: #5757a8;
+  --cat-reifen: #8a6420;
+  --cat-cockpit: #1f7a66;
+  --cat-sattel: #7a4fa8;
+  --cat-sonstiges: #6e685e;
+
+  color-scheme: light;
 }
 
 * {
@@ -96,18 +156,13 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: var(--c-ink);
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-bg);
-  color: var(--color-text);
-}
-
-/* Weiche Karten-Optik statt harter Border. */
-.card {
-  background-color: var(--color-surface);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background-color: var(--c-ink);
+  color: var(--c-cream);
 }
 
 /* Prevent iOS from zooming when focusing inputs (font-size >= 16px). */
@@ -117,27 +172,59 @@ textarea {
   font-size: 16px;
 }
 
-/* Shared form control styling. */
+/* Hidden scrollbars for the vertically-scrolling screen bodies. */
+.scr::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.scr {
+  scrollbar-width: none;
+}
+
+/* Diagonal hatched placeholder used where a real photo is missing. */
+.photo-ph {
+  background-image: repeating-linear-gradient(
+    115deg,
+    var(--c-hatch-a) 0 10px,
+    var(--c-hatch-b) 10px 20px
+  );
+}
+
+/* Shared themed form control. */
 .input {
   width: 100%;
-  border-radius: 0.75rem;
-  border: 1px solid var(--color-border-subtle);
-  background-color: var(--color-surface);
-  padding: 0.625rem 0.875rem;
-  color: var(--color-text);
+  border-radius: 0.875rem;
+  border: 1px solid var(--c-hair-strong);
+  background-color: var(--c-surface);
+  padding: 0.8125rem 0.9375rem;
+  color: var(--c-cream);
   outline: none;
 }
 .input:focus {
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(76, 122, 86, 0.18);
+  border-color: color-mix(in srgb, var(--c-accent) 60%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-accent) 18%, transparent);
 }
 .input::placeholder {
-  color: var(--color-text-muted);
+  color: var(--c-dim);
 }
 select.input {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%238a8066' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%238e877b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.625rem center;
-  padding-right: 2.25rem;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
+}
+select.input option {
+  background-color: var(--c-surface);
+  color: var(--c-cream);
+}
+
+/* Mono eyebrow label — the recurring small tracked caps in the design. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--c-dim);
 }

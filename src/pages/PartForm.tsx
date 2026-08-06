@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Layout from '@/components/Layout'
+import PageHeader from '@/components/PageHeader'
 import Spinner from '@/components/ui/Spinner'
 import { CATEGORIES, categoryHasPosition, POSITION_OPTIONS } from '@/lib/categories'
 import { usePart, useCreatePart, useUpdatePart } from '@/hooks/useParts'
@@ -106,7 +107,10 @@ export default function PartForm() {
 
   if (isEdit && isLoading) {
     return (
-      <Layout title="Teil bearbeiten" back hideNav>
+      <Layout hideNav>
+        <div className="px-5 pt-4">
+          <PageHeader />
+        </div>
         <div className="flex justify-center py-20">
           <Spinner />
         </div>
@@ -117,10 +121,16 @@ export default function PartForm() {
   const busy = createPart.isPending || updatePart.isPending
 
   return (
-    <Layout title={isEdit ? 'Teil bearbeiten' : 'Neues Teil'} back hideNav>
-      <form onSubmit={handleSubmit} className="p-4 space-y-4">
+    <Layout hideNav>
+      <div className="px-5 pt-4 pb-2">
+        <PageHeader />
+        <h1 className="mt-3 font-display font-black text-[30px] leading-none tracking-[-0.02em] text-cream">
+          {isEdit ? 'Teil bearbeiten' : 'Neues Teil'}
+        </h1>
+      </div>
+      <form onSubmit={handleSubmit} className="px-5 py-4 flex flex-col gap-4">
         <label className="block">
-          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Kategorie</span>
+          <span className="block text-sm font-medium text-cream-dim mb-1.5">Kategorie</span>
           <select
             value={form.category}
             onChange={(e) => set('category', e.target.value as PartCategory)}
@@ -136,18 +146,18 @@ export default function PartForm() {
 
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
-            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Hersteller *</span>
+            <span className="block text-sm font-medium text-cream-dim mb-1.5">Hersteller *</span>
             <input value={form.brand} onChange={(e) => set('brand', e.target.value)} placeholder="z.B. Fox" className="input" />
           </label>
           <label className="block">
-            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Modell</span>
+            <span className="block text-sm font-medium text-cream-dim mb-1.5">Modell</span>
             <input value={form.model} onChange={(e) => set('model', e.target.value)} placeholder="z.B. 36 Factory" className="input" />
           </label>
         </div>
 
         {form.category === 'sonstiges' && (
           <label className="block">
-            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Bezeichnung</span>
+            <span className="block text-sm font-medium text-cream-dim mb-1.5">Bezeichnung</span>
             <input
               value={form.custom_type}
               onChange={(e) => set('custom_type', e.target.value)}
@@ -159,7 +169,7 @@ export default function PartForm() {
 
         {categoryHasPosition(form.category) && (
           <label className="block">
-            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Position</span>
+            <span className="block text-sm font-medium text-cream-dim mb-1.5">Position</span>
             <select value={form.position} onChange={(e) => set('position', e.target.value)} className="input">
               <option value="">– keine Angabe –</option>
               {POSITION_OPTIONS.map((p) => (
@@ -172,7 +182,7 @@ export default function PartForm() {
         )}
 
         <label className="block">
-          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Variante / Größe</span>
+          <span className="block text-sm font-medium text-cream-dim mb-1.5">Variante / Größe</span>
           <input
             value={form.variant}
             onChange={(e) => set('variant', e.target.value)}
@@ -182,13 +192,13 @@ export default function PartForm() {
         </label>
 
         <label className="block">
-          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Einbaudatum</span>
+          <span className="block text-sm font-medium text-cream-dim mb-1.5">Einbaudatum</span>
           <input type="date" value={form.install_date} onChange={(e) => set('install_date', e.target.value)} className="input" />
         </label>
 
         {isEdit && (
           <label className="block">
-            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Status</span>
+            <span className="block text-sm font-medium text-cream-dim mb-1.5">Status</span>
             <select value={form.status} onChange={(e) => set('status', e.target.value as PartStatus)} className="input">
               <option value="aktiv">aktiv</option>
               <option value="ersetzt">ersetzt</option>
@@ -197,7 +207,7 @@ export default function PartForm() {
         )}
 
         <label className="block">
-          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Notizen</span>
+          <span className="block text-sm font-medium text-cream-dim mb-1.5">Notizen</span>
           <textarea
             value={form.notes}
             onChange={(e) => set('notes', e.target.value)}
@@ -207,12 +217,12 @@ export default function PartForm() {
           />
         </label>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <button
           type="submit"
           disabled={busy}
-          className="w-full py-3 rounded-xl bg-primary text-white font-semibold active:scale-[0.98] transition-transform disabled:opacity-60"
+          className="w-full py-3.5 rounded-xl bg-accent text-accent-ink font-semibold active:scale-[0.98] transition-transform disabled:opacity-60"
         >
           {busy ? 'Speichern…' : 'Speichern'}
         </button>

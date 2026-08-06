@@ -1,18 +1,28 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Ruler } from 'lucide-react'
 import Layout from '@/components/Layout'
+import Watermark from '@/components/Watermark'
+import PageHeader, { squareBtn } from '@/components/PageHeader'
 import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
 import ImageUpload from '@/components/ImageUpload'
-import { CATEGORIES, categoryColor, partTitle, partSubtitle } from '@/lib/categories'
+import { CATEGORIES, categoryColor, categoryLabel, partTitle, partSubtitle } from '@/lib/categories'
 import { GEOMETRY_FIELDS, formatGeometryValue } from '@/lib/geometry'
-import { uploadBikePhoto, deletePhoto, photoUrl } from '@/lib/storage'
+import { uploadBikePhoto, deletePhoto } from '@/lib/storage'
 import { useAuth } from '@/hooks/useAuth'
 import { useBike, useUpdateBike, useDeleteBike } from '@/hooks/useBikes'
 import { useBikeGeometry, useUpsertBikeGeometry } from '@/hooks/useBikeGeometry'
 import { useParts } from '@/hooks/useParts'
 import type { Bike, BikeGeometry, GeometryField, Part } from '@/types'
+
+const CAT_ORDER = new Map(CATEGORIES.map((c, i) => [c.value, i]))
+
+/** Zahl fürs Header-Kachel-Format (deutsches Dezimalkomma, optionale Einheit). */
+function tileValue(value: number | null | undefined, unit = ''): string {
+  if (value === null || value === undefined) return '–'
+  return `${String(value).replace('.', ',')}${unit}`
+}
 
 export default function BikeDetail() {
   const { bikeId = '' } = useParams()
@@ -20,14 +30,24 @@ export default function BikeDetail() {
   const { user } = useAuth()
   const { data: bike, isLoading } = useBike(bikeId)
   const { data: parts } = useParts(bikeId)
+  const { data: geo } = useBikeGeometry(bikeId)
   const updateBike = useUpdateBike()
   const deleteBike = useDeleteBike()
   const [editing, setEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
+  const sorted = useMemo(
+    () =>
+      [...(parts ?? [])].sort(
+        (a, b) => (CAT_ORDER.get(a.category) ?? 99) - (CAT_ORDER.get(b.category) ?? 99),
+      ),
+    [parts],
+  )
+  const active = sorted.filter((p) => p.status === 'aktiv').length
+
   if (isLoading || !bike) {
     return (
-      <Layout title="Rad" back>
+      <Layout>
         <div className="flex justify-center py-20">
           <Spinner />
         </div>
@@ -52,19 +72,37 @@ export default function BikeDetail() {
     navigate('/bikes', { replace: true })
   }
 
-  const sub = [bike.brand, bike.model, bike.year].filter(Boolean).join(' · ')
+  const sub = [bike.brand, bike.year, bike.model].filter(Boolean).join(' · ')
+  const eyebrow = (bike.brand ?? 'Rad').toUpperCase()
 
   return (
-    <Layout
-      title={bike.name}
-      back
-      action={
-        <button onClick={() => setEditing(true)} className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)]" aria-label="Bearbeiten">
-          <Pencil size={18} />
-        </button>
-      }
-    >
-      <div className="p-4 space-y-5">
+    <Layout>
+      <header className="relative overflow-hidden border-b border-hair flex-none">
+        <Watermark variant="bottom" />
+        <div className="relative px-5 pt-4 pb-5">
+          <PageHeader
+            eyebrow={eyebrow}
+            onBack={() => navigate('/bikes')}
+            action={
+              <button onClick={() => setEditing(true)} className={squareBtn} aria-label="Bearbeiten">
+                <Pencil size={15} className="text-accent" />
+              </button>
+            }
+          />
+          <h1 className="mt-3.5 font-display font-black text-[42px] leading-[0.95] tracking-[-0.03em] text-cream">
+            {bike.name}
+          </h1>
+          {sub && <p className="mt-0.5 font-mono text-[13px] text-muted">{sub}</p>}
+          <div className="mt-4 grid grid-cols-4 gap-2.5">
+            <Tile label="REACH" value={tileValue(geo?.reach)} />
+            <Tile label="STACK" value={tileValue(geo?.stack)} />
+            <Tile label="LW" value={tileValue(geo?.head_angle, '°')} />
+            <Tile label="KETTE" value={tileValue(geo?.chainstay_length)} />
+          </div>
+        </div>
+      </header>
+
+      <div className="flex-1 px-5 py-5 flex flex-col gap-5">
         <ImageUpload
           value={bike.image_url}
           onUpload={handlePhoto}
@@ -73,58 +111,36 @@ export default function BikeDetail() {
           label="Radfoto"
         />
 
-        {sub && <p className="text-[var(--color-text-muted)] -mt-1">{sub}</p>}
-
         <GeometrySection bikeId={bike.id} />
 
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-[var(--color-text)]">Bauteile</h2>
+          <h2 className="text-[15px] font-extrabold tracking-[0.02em] text-cream">
+            Verbaute Teile
+            {sorted.length > 0 && <span className="text-muted font-mono text-xs ml-2">{active} aktiv</span>}
+          </h2>
           <button
             onClick={() => navigate(`/bikes/${bike.id}/parts/new`)}
-            className="flex items-center gap-1 bg-primary text-white text-sm font-semibold pl-2.5 pr-3 py-1.5 rounded-full active:scale-95 transition-transform"
+            className="flex items-center gap-1.5 bg-accent text-accent-ink text-[13px] font-semibold pl-3 pr-3.5 py-2 rounded-full active:scale-95 transition-transform"
           >
-            <Plus size={17} /> Teil
+            <Plus size={16} /> Teil
           </button>
         </div>
 
-        {!parts || parts.length === 0 ? (
-          <p className="text-sm text-[var(--color-text-muted)] text-center py-8">
+        {sorted.length === 0 ? (
+          <p className="font-mono text-xs text-muted text-center py-8">
             Noch keine Bauteile. Füge das erste Teil hinzu.
           </p>
         ) : (
-          <div className="space-y-5">
-            {CATEGORIES.map((cat) => {
-              const group = parts.filter((p) => p.category === cat.value)
-              if (group.length === 0) return null
-              const Icon = cat.icon
-              const color = categoryColor(cat.value)
-              return (
-                <section key={cat.value}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span
-                      className="w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: color.bg, color: color.fg }}
-                    >
-                      <Icon size={13} />
-                    </span>
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--color-text-muted)]">
-                      {cat.label}
-                    </h3>
-                  </div>
-                  <ul className="space-y-2">
-                    {group.map((part) => (
-                      <PartRow key={part.id} part={part} />
-                    ))}
-                  </ul>
-                </section>
-              )
-            })}
+          <div className="flex flex-col gap-2.5">
+            {sorted.map((part) => (
+              <PartRow key={part.id} part={part} />
+            ))}
           </div>
         )}
 
         <button
           onClick={() => setConfirmDelete(true)}
-          className="mt-4 w-full flex items-center justify-center gap-2 text-red-600 text-sm font-medium py-2"
+          className="mt-2 w-full flex items-center justify-center gap-2 text-danger text-sm font-medium py-2"
         >
           <Trash2 size={16} /> Rad löschen
         </button>
@@ -137,16 +153,16 @@ export default function BikeDetail() {
           onClose={() => setConfirmDelete(false)}
           footer={
             <div className="flex gap-3">
-              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-3 rounded-xl bg-[var(--color-border-subtle)] font-semibold">
+              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-3.5 rounded-xl bg-surface-2 text-cream font-semibold">
                 Abbrechen
               </button>
-              <button onClick={handleDelete} className="flex-1 py-3 rounded-xl bg-red-600 text-white font-semibold">
+              <button onClick={handleDelete} className="flex-1 py-3.5 rounded-xl bg-danger text-ink font-semibold">
                 Löschen
               </button>
             </div>
           }
         >
-          <p className="text-sm text-[var(--color-text-muted)]">
+          <p className="text-sm text-cream-dim">
             „{bike.name}" und alle zugehörigen Bauteile, Einstellungen und Verläufe werden dauerhaft gelöscht.
           </p>
         </Modal>
@@ -155,37 +171,43 @@ export default function BikeDetail() {
   )
 }
 
+function Tile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-surface border border-hair rounded-[14px] px-3 py-2.5 flex flex-col gap-1">
+      <span className="eyebrow">{label}</span>
+      <span className="font-display font-semibold text-[17px] text-cream leading-none">{value}</span>
+    </div>
+  )
+}
+
 function PartRow({ part }: { part: Part }) {
   const navigate = useNavigate()
-  const url = photoUrl(part.image_url)
-  const replaced = part.status === 'ersetzt'
   const color = categoryColor(part.category)
+  const isReplaced = part.status === 'ersetzt'
+  const sub = partSubtitle(part)
   return (
-    <li>
-      <button
-        onClick={() => navigate(`/parts/${part.id}`)}
-        style={{ borderLeft: `4px solid ${color.fg}` }}
-        className={`card w-full flex items-center gap-3 rounded-xl p-2.5 text-left active:scale-[0.99] transition-transform ${
-          replaced ? 'opacity-60' : ''
-        }`}
-      >
-        {url && (
-          <img src={url} alt="" className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
-        )}
-        <div className="flex-1 min-w-0">
-          <p className="font-medium text-[var(--color-text)] truncate">
-            {partTitle(part)}
-          </p>
-          <p className="text-sm text-[var(--color-text-muted)] truncate">
-            {partSubtitle(part) || '—'}
-          </p>
-        </div>
-        {replaced && (
-          <span className="text-[11px] font-semibold text-[var(--color-text-muted)] bg-[var(--color-border-subtle)] px-2 py-0.5 rounded-full">ersetzt</span>
-        )}
-        <ChevronRight className="text-[var(--color-text-muted)] opacity-50 flex-shrink-0" size={18} />
-      </button>
-    </li>
+    <button
+      onClick={() => navigate(`/parts/${part.id}`)}
+      className={`text-left flex items-stretch gap-3.5 bg-surface border border-hair rounded-[18px] px-4 py-3.5 active:scale-[0.99] transition-transform ${
+        isReplaced ? 'opacity-55' : ''
+      }`}
+    >
+      <span className="w-[3px] rounded-full flex-none" style={{ background: color }} />
+      <div className="flex-1 min-w-0 flex flex-col gap-1">
+        <span className="font-mono text-[9px] font-medium tracking-[0.16em]" style={{ color }}>
+          {categoryLabel(part.category).toUpperCase()}
+        </span>
+        <span className="text-base font-semibold leading-tight text-cream truncate">
+          {partTitle(part)}
+        </span>
+        <span className="font-mono text-xs text-muted truncate">{sub || '—'}</span>
+      </div>
+      {isReplaced ? (
+        <span className="self-center font-mono text-[9px] font-medium tracking-[0.12em] text-muted">ERSETZT</span>
+      ) : (
+        <ChevronRight className="self-center text-dim flex-none" size={18} />
+      )}
+    </button>
   )
 }
 
@@ -196,10 +218,8 @@ function GeometrySection({ bikeId }: { bikeId: string }) {
   const [open, setOpen] = useState(false)
 
   const hasAny =
-    geo != null &&
-    (!!geo.frame_size || GEOMETRY_FIELDS.some((f) => geo[f.key] != null))
+    geo != null && (!!geo.frame_size || GEOMETRY_FIELDS.some((f) => geo[f.key] != null))
 
-  // Kompakte Zusammenfassung für den eingeklappten Zustand.
   const summary = geo
     ? [
         geo.frame_size ? `Gr. ${geo.frame_size}` : null,
@@ -211,56 +231,59 @@ function GeometrySection({ bikeId }: { bikeId: string }) {
     : ''
 
   return (
-    <section className="card rounded-2xl overflow-hidden">
+    <section className="bg-surface border border-hair rounded-[20px] overflow-hidden">
       <div className="flex items-center">
         <button
           onClick={() => setOpen((o) => !o)}
-          className="flex-1 flex items-center gap-2 px-4 py-3 min-w-0 text-left"
+          className="flex-1 flex items-center gap-2 px-4 py-3.5 min-w-0 text-left"
           aria-expanded={open}
         >
-          <Ruler size={16} className="text-[var(--color-text-muted)] flex-shrink-0" />
-          <span className="text-base font-semibold text-[var(--color-text)] flex-shrink-0">Geometrie</span>
+          <Ruler size={16} className="text-muted flex-shrink-0" />
+          <span className="text-[15px] font-extrabold text-cream flex-shrink-0">Geometrie</span>
           {!open && summary && (
-            <span className="text-sm text-[var(--color-text-muted)] truncate">{summary}</span>
+            <span className="font-mono text-xs text-muted truncate">{summary}</span>
           )}
           <ChevronDown
             size={18}
-            className={`ml-auto flex-shrink-0 text-[var(--color-text-muted)] transition-transform ${open ? 'rotate-180' : ''}`}
+            className={`ml-auto flex-shrink-0 text-muted transition-transform ${open ? 'rotate-180' : ''}`}
           />
         </button>
         <button
           onClick={() => setEditing(true)}
-          className="text-primary pl-2 pr-4 py-3 flex-shrink-0"
+          className="text-accent pl-2 pr-4 py-3.5 flex-shrink-0"
           aria-label={hasAny ? 'Geometrie bearbeiten' : 'Geometrie erfassen'}
         >
-          <Pencil size={18} />
+          <Pencil size={16} />
         </button>
       </div>
 
       {open && (
-        <div className="border-t border-[var(--color-border-subtle)]">
+        <div className="border-t border-hair-soft">
           {isLoading ? (
             <div className="py-4 flex justify-center">
               <Spinner />
             </div>
           ) : !hasAny ? (
-            <p className="text-sm text-[var(--color-text-muted)] px-4 py-3">
+            <p className="text-sm text-muted px-4 py-3">
               Noch keine Geometrie erfasst. Reach &amp; Stack sind die wichtigsten Werte für die Rahmengröße.
             </p>
           ) : (
-            <div className="divide-y divide-[var(--color-border-subtle)]">
+            <div className="px-4">
               {geo!.frame_size && (
-                <div className="flex items-center justify-between px-4 py-2.5">
-                  <span className="text-sm font-semibold text-[var(--color-text)]">Rahmengröße</span>
-                  <span className="text-sm font-bold text-primary">{geo!.frame_size}</span>
+                <div className="flex items-center justify-between py-3 border-b border-hair-soft">
+                  <span className="eyebrow">RAHMENGRÖSSE</span>
+                  <span className="text-sm font-bold text-accent">{geo!.frame_size}</span>
                 </div>
               )}
-              {GEOMETRY_FIELDS.filter((f) => geo![f.key] != null).map((f) => (
-                <div key={f.key} className="flex items-center justify-between px-4 py-2.5">
-                  <span className={`text-sm ${f.primary ? 'font-semibold text-[var(--color-text)]' : 'text-[var(--color-text-muted)]'}`}>
+              {GEOMETRY_FIELDS.filter((f) => geo![f.key] != null).map((f, i, arr) => (
+                <div
+                  key={f.key}
+                  className={`flex items-center justify-between py-3 ${i < arr.length - 1 ? 'border-b border-hair-soft' : ''}`}
+                >
+                  <span className={`text-sm ${f.primary ? 'font-semibold text-cream' : 'text-muted'}`}>
                     {f.label}
                   </span>
-                  <span className={`text-sm ${f.primary ? 'font-bold text-primary' : 'font-medium text-[var(--color-text)]'}`}>
+                  <span className={`text-sm ${f.primary ? 'font-bold text-accent' : 'font-medium text-cream-dim'}`}>
                     {formatGeometryValue(geo![f.key], f.unit)}
                   </span>
                 </div>
@@ -296,8 +319,7 @@ function GeometryModal({
   })
   const [error, setError] = useState<string | null>(null)
 
-  const set = (key: GeometryField, value: string) =>
-    setValues((v) => ({ ...v, [key]: value }))
+  const set = (key: GeometryField, value: string) => setValues((v) => ({ ...v, [key]: value }))
 
   async function save() {
     setError(null)
@@ -334,17 +356,17 @@ function GeometryModal({
         <button
           onClick={save}
           disabled={upsert.isPending}
-          className="w-full py-3 rounded-xl bg-primary text-white font-semibold disabled:opacity-60"
+          className="w-full py-3.5 rounded-xl bg-accent text-accent-ink font-semibold disabled:opacity-60"
         >
           {upsert.isPending ? 'Speichern…' : 'Speichern'}
         </button>
       }
     >
-      <p className="text-sm text-[var(--color-text-muted)] -mt-1">
+      <p className="text-sm text-muted -mt-1">
         Alle Angaben optional. Reach &amp; Stack sind herstellerübergreifend am besten vergleichbar.
       </p>
       <label className="block">
-        <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Rahmengröße</span>
+        <span className="block text-sm font-medium text-cream-dim mb-1.5">Rahmengröße</span>
         <input
           value={frameSize}
           onChange={(e) => setFrameSize(e.target.value)}
@@ -354,12 +376,12 @@ function GeometryModal({
       </label>
       {GEOMETRY_FIELDS.map((f) => (
         <label key={f.key} className="block">
-          <span className="flex items-baseline justify-between mb-1">
-            <span className={`text-sm font-medium ${f.primary ? 'text-primary' : 'text-[var(--color-text)]'}`}>
+          <span className="flex items-baseline justify-between mb-1.5">
+            <span className={`text-sm font-medium ${f.primary ? 'text-accent' : 'text-cream-dim'}`}>
               {f.label}
-              {f.primary && <span className="ml-1 text-[11px] font-semibold uppercase">wichtig</span>}
+              {f.primary && <span className="ml-1.5 font-mono text-[9px] font-semibold tracking-[0.12em]">WICHTIG</span>}
             </span>
-            <span className="text-xs text-[var(--color-text-muted)]">{f.unit}</span>
+            <span className="font-mono text-xs text-muted">{f.unit}</span>
           </span>
           <input
             value={values[f.key]}
@@ -368,10 +390,10 @@ function GeometryModal({
             placeholder={`z.B. ${f.unit === '°' ? '64,5' : '450'}`}
             className="input"
           />
-          <span className="block text-xs text-[var(--color-text-muted)] mt-1">{f.hint}</span>
+          <span className="block text-xs text-muted mt-1.5 leading-relaxed">{f.hint}</span>
         </label>
       ))}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
     </Modal>
   )
 }
@@ -413,28 +435,28 @@ function EditBikeModal({ bike, onClose }: { bike: Bike; onClose: () => void }) {
         <button
           onClick={handleSave}
           disabled={updateBike.isPending}
-          className="w-full py-3 rounded-xl bg-primary text-white font-semibold disabled:opacity-60"
+          className="w-full py-3.5 rounded-xl bg-accent text-accent-ink font-semibold disabled:opacity-60"
         >
           Speichern
         </button>
       }
     >
       <label className="block">
-        <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Name *</span>
+        <span className="block text-sm font-medium text-cream-dim mb-1.5">Name *</span>
         <input value={name} onChange={(e) => setName(e.target.value)} className="input" />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Marke</span>
+          <span className="block text-sm font-medium text-cream-dim mb-1.5">Marke</span>
           <input value={brand} onChange={(e) => setBrand(e.target.value)} className="input" />
         </label>
         <label className="block">
-          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Modell</span>
+          <span className="block text-sm font-medium text-cream-dim mb-1.5">Modell</span>
           <input value={model} onChange={(e) => setModel(e.target.value)} className="input" />
         </label>
       </div>
       <label className="block">
-        <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Baujahr</span>
+        <span className="block text-sm font-medium text-cream-dim mb-1.5">Baujahr</span>
         <input
           value={year}
           onChange={(e) => setYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
@@ -442,7 +464,7 @@ function EditBikeModal({ bike, onClose }: { bike: Bike; onClose: () => void }) {
           className="input"
         />
       </label>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
     </Modal>
   )
 }

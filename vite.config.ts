@@ -15,17 +15,15 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      // 'prompt': neuer Service-Worker wartet, bis der Nutzer im Banner bzw.
-      // über den Aktualisieren-Button bestätigt (statt still zu aktualisieren).
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       injectRegister: false,
       includeAssets: ['favicon.png', 'apple-touch-icon.png', 'logo.png'],
       manifest: {
         name: 'MyRadl – MTB Manager',
         short_name: 'MyRadl',
         description: 'Verwalte deine Mountainbikes, Bauteile und Einstellungen.',
-        theme_color: '#4c7a56',
-        background_color: '#f7f4ef',
+        theme_color: '#12100E',
+        background_color: '#12100E',
         display: 'standalone',
         orientation: 'portrait',
         id: '/',
@@ -37,8 +35,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
-        // Kein skipWaiting/clientsClaim: der neue Worker wartet auf die
-        // Nutzerbestätigung (Prompt-Flow), applyUpdate() löst ihn dann aus.
+        skipWaiting: true,
+        clientsClaim: true,
         cleanupOutdatedCaches: true,
         navigateFallback: '/index.html',
         // Never precache Supabase API/storage responses — they are user-specific

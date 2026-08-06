@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { Mail, Loader2 } from 'lucide-react'
+import Watermark from '@/components/Watermark'
 import { useAuth } from '@/hooks/useAuth'
 
 type Mode = 'password' | 'magic'
@@ -48,24 +49,23 @@ export default function Login() {
   }
 
   return (
-    <div
-      className="min-h-dvh flex flex-col items-center justify-center px-6"
-      style={{ background: 'linear-gradient(135deg, #3c6245 0%, #4c7a56 100%)' }}
-    >
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <img
-            src="/logo.png"
-            alt="MyRadl"
-            className="w-20 h-20 rounded-2xl mx-auto mb-4 shadow-lg object-cover"
-          />
-          <h1 className="text-2xl font-bold text-white">MyRadl</h1>
-          <p className="text-green-200 text-sm mt-1">Deine Bikes, Teile &amp; Einstellungen.</p>
+    <div className="relative min-h-dvh bg-ink text-cream flex flex-col justify-center px-6 max-w-md mx-auto overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden">
+        <Watermark variant="top" />
+      </div>
+
+      <div className="relative w-full">
+        <div className="mb-9">
+          <span className="eyebrow">GARAGE · MOUNTAINBIKE</span>
+          <h1 className="font-display font-black text-[52px] leading-[0.95] tracking-[-0.03em] text-cream mt-1">
+            MyRadl
+          </h1>
+          <p className="text-muted text-sm mt-2">Deine Bikes, Teile &amp; Einstellungen.</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
           <div>
-            <label className="block text-green-100 text-sm font-medium mb-1">Email</label>
+            <label className="block text-cream-dim text-sm font-medium mb-1.5">Email</label>
             <input
               type="email"
               value={email}
@@ -73,14 +73,13 @@ export default function Login() {
               placeholder="du@example.com"
               autoComplete="email"
               required
-              className="w-full px-4 py-3 rounded-xl text-white placeholder-green-200/60 border border-white/20 focus:outline-none focus:border-white/70"
-              style={{ backgroundColor: 'rgba(255,255,255,0.10)' }}
+              className="input"
             />
           </div>
 
           {mode === 'password' && (
             <div>
-              <label className="block text-green-100 text-sm font-medium mb-1">Passwort</label>
+              <label className="block text-cream-dim text-sm font-medium mb-1.5">Passwort</label>
               <input
                 type="password"
                 value={password}
@@ -89,15 +88,14 @@ export default function Login() {
                 autoComplete={isSignup ? 'new-password' : 'current-password'}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 rounded-xl text-white placeholder-green-200/60 border border-white/20 focus:outline-none focus:border-white/70"
-                style={{ backgroundColor: 'rgba(255,255,255,0.10)' }}
+                className="input"
               />
             </div>
           )}
 
           {mode === 'password' && isSignup && (
             <div>
-              <label className="block text-green-100 text-sm font-medium mb-1">Passwort bestätigen</label>
+              <label className="block text-cream-dim text-sm font-medium mb-1.5">Passwort bestätigen</label>
               <input
                 type="password"
                 value={confirmPassword}
@@ -106,19 +104,18 @@ export default function Login() {
                 autoComplete="new-password"
                 required
                 minLength={6}
-                className="w-full px-4 py-3 rounded-xl text-white placeholder-green-200/60 border border-white/20 focus:outline-none focus:border-white/70"
-                style={{ backgroundColor: 'rgba(255,255,255,0.10)' }}
+                className="input"
               />
             </div>
           )}
 
           {error && (
-            <div className="bg-red-500/20 border border-red-400/40 rounded-xl px-4 py-3 text-red-100 text-sm text-center">
+            <div className="bg-danger/10 border border-danger/40 rounded-xl px-4 py-3 text-danger text-sm text-center">
               {error}
             </div>
           )}
           {info && (
-            <div className="bg-white/15 border border-white/30 rounded-xl px-4 py-3 text-green-50 text-sm text-center">
+            <div className="bg-accent/10 border border-accent/30 rounded-xl px-4 py-3 text-accent text-sm text-center">
               {info}
             </div>
           )}
@@ -126,14 +123,14 @@ export default function Login() {
           <button
             type="submit"
             disabled={busy}
-            className="w-full py-3 rounded-xl font-bold text-base bg-white text-primary transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+            className="w-full py-3.5 rounded-xl font-semibold text-base bg-accent text-accent-ink transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {busy && <Loader2 className="animate-spin" size={18} />}
             {mode === 'magic' ? 'Magic-Link senden' : isSignup ? 'Registrieren' : 'Anmelden'}
           </button>
         </form>
 
-        <div className="mt-6 space-y-3 text-center text-sm">
+        <div className="mt-6 flex flex-col gap-3 text-center text-sm">
           {mode === 'password' ? (
             <>
               <button
@@ -142,22 +139,20 @@ export default function Login() {
                   setError(null)
                   setInfo(null)
                 }}
-                className="text-green-100 underline underline-offset-2"
+                className="text-cream-dim underline underline-offset-2"
               >
                 {isSignup ? 'Ich habe schon ein Konto' : 'Neu hier? Konto erstellen'}
               </button>
-              <div>
-                <button
-                  onClick={() => {
-                    setMode('magic')
-                    setError(null)
-                    setInfo(null)
-                  }}
-                  className="inline-flex items-center gap-1.5 text-green-200/90"
-                >
-                  <Mail size={15} /> Stattdessen per Magic-Link
-                </button>
-              </div>
+              <button
+                onClick={() => {
+                  setMode('magic')
+                  setError(null)
+                  setInfo(null)
+                }}
+                className="inline-flex items-center justify-center gap-1.5 text-muted"
+              >
+                <Mail size={15} /> Stattdessen per Magic-Link
+              </button>
             </>
           ) : (
             <button
@@ -166,7 +161,7 @@ export default function Login() {
                 setError(null)
                 setInfo(null)
               }}
-              className="text-green-100 underline underline-offset-2"
+              className="text-cream-dim underline underline-offset-2"
             >
               Mit Passwort anmelden
             </button>

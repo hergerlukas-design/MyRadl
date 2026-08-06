@@ -18,52 +18,27 @@ export interface CategoryMeta {
   value: PartCategory
   label: string
   icon: LucideIcon
-}
-
-/** Farbpaar einer Kategorie: Chip-Hintergrund + Vorder-/Randfarbe. */
-export interface CategoryColor {
-  bg: string
-  fg: string
-}
-
-/**
- * Zentrale Kategoriefarben. Werte referenzieren die Tokens aus index.css
- * (@theme), damit sich das Farbschema an einer Stelle steuern lässt und neue
- * Kategorien einfach ergänzt werden können.
- */
-export const CATEGORY_COLORS: Record<PartCategory, CategoryColor> = {
-  federgabel: { bg: 'var(--color-cat-fork-bg)', fg: 'var(--color-cat-fork-fg)' },
-  daempfer: { bg: 'var(--color-cat-shock-bg)', fg: 'var(--color-cat-shock-fg)' },
-  antrieb: { bg: 'var(--color-cat-drive-bg)', fg: 'var(--color-cat-drive-fg)' },
-  bremsen: { bg: 'var(--color-cat-brake-bg)', fg: 'var(--color-cat-brake-fg)' },
-  laufraeder: { bg: 'var(--color-cat-wheel-bg)', fg: 'var(--color-cat-wheel-fg)' },
-  reifen: { bg: 'var(--color-cat-tire-bg)', fg: 'var(--color-cat-tire-fg)' },
-  vorbau: { bg: 'var(--color-cat-stem-bg)', fg: 'var(--color-cat-stem-fg)' },
-  lenker: { bg: 'var(--color-cat-bar-bg)', fg: 'var(--color-cat-bar-fg)' },
-  griffe: { bg: 'var(--color-cat-grip-bg)', fg: 'var(--color-cat-grip-fg)' },
-  sattel: { bg: 'var(--color-cat-saddle-bg)', fg: 'var(--color-cat-saddle-fg)' },
-  sonstiges: { bg: 'var(--color-cat-misc-bg)', fg: 'var(--color-cat-misc-fg)' },
-  // Legacy „Cockpit" erbt die neutrale Sonstiges-Farbe.
-  cockpit: { bg: 'var(--color-cat-misc-bg)', fg: 'var(--color-cat-misc-fg)' },
-}
-
-export function categoryColor(value: PartCategory): CategoryColor {
-  return CATEGORY_COLORS[value] ?? CATEGORY_COLORS.sonstiges
+  /**
+   * Fester Farbcode der Kategorie als CSS-Variable — wechselt zwischen Dark-
+   * und Light-Theme automatisch (siehe index.css) und bleibt in Liste, Detail
+   * und Suche identisch.
+   */
+  color: string
 }
 
 // Reihenfolge = Anzeigereihenfolge in der Bauteilliste.
 export const CATEGORIES: CategoryMeta[] = [
-  { value: 'federgabel', label: 'Federgabel', icon: MoveVertical },
-  { value: 'daempfer', label: 'Dämpfer', icon: Wind },
-  { value: 'antrieb', label: 'Antrieb', icon: Cog },
-  { value: 'bremsen', label: 'Bremsen', icon: Disc3 },
-  { value: 'laufraeder', label: 'Laufräder', icon: CircleDot },
-  { value: 'reifen', label: 'Reifen', icon: Circle },
-  { value: 'vorbau', label: 'Vorbau', icon: Move },
-  { value: 'lenker', label: 'Lenker', icon: MoveHorizontal },
-  { value: 'griffe', label: 'Griffe', icon: Grip },
-  { value: 'sattel', label: 'Sattel', icon: Armchair },
-  { value: 'sonstiges', label: 'Sonstiges', icon: Package },
+  { value: 'federgabel', label: 'Federgabel', icon: MoveVertical, color: 'var(--cat-federgabel)' },
+  { value: 'daempfer', label: 'Dämpfer', icon: Wind, color: 'var(--cat-daempfer)' },
+  { value: 'antrieb', label: 'Antrieb', icon: Cog, color: 'var(--cat-antrieb)' },
+  { value: 'bremsen', label: 'Bremsen', icon: Disc3, color: 'var(--cat-bremsen)' },
+  { value: 'laufraeder', label: 'Laufräder', icon: CircleDot, color: 'var(--cat-laufraeder)' },
+  { value: 'reifen', label: 'Reifen', icon: Circle, color: 'var(--cat-reifen)' },
+  { value: 'vorbau', label: 'Vorbau', icon: Move, color: 'var(--cat-vorbau)' },
+  { value: 'lenker', label: 'Lenker', icon: MoveHorizontal, color: 'var(--cat-lenker)' },
+  { value: 'griffe', label: 'Griffe', icon: Grip, color: 'var(--cat-griffe)' },
+  { value: 'sattel', label: 'Sattel', icon: Armchair, color: 'var(--cat-sattel)' },
+  { value: 'sonstiges', label: 'Sonstiges', icon: Package, color: 'var(--cat-sonstiges)' },
 ]
 
 const BY_VALUE = new Map(CATEGORIES.map((c) => [c.value, c]))
@@ -74,6 +49,12 @@ export function categoryMeta(value: PartCategory): CategoryMeta {
 
 export function categoryLabel(value: PartCategory): string {
   return categoryMeta(value).label
+}
+
+/** Fester Farbcode (CSS-Variable, themebar). Legacy „Cockpit" → neutrale Farbe. */
+export function categoryColor(value: PartCategory): string {
+  if (value === 'cockpit') return 'var(--cat-sonstiges)'
+  return categoryMeta(value).color
 }
 
 /** Kategorien, bei denen eine Einbauposition (vorne/hinten) sinnvoll ist. */
