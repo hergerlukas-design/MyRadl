@@ -15,7 +15,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // 'prompt': neuer Service-Worker wartet, bis der Nutzer im Banner bzw.
+      // über den Aktualisieren-Button bestätigt (statt still zu aktualisieren).
+      registerType: 'prompt',
       injectRegister: false,
       includeAssets: ['favicon.png', 'apple-touch-icon.png', 'logo.png'],
       manifest: {
@@ -35,8 +37,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
-        skipWaiting: true,
-        clientsClaim: true,
+        // Kein skipWaiting/clientsClaim: der neue Worker wartet auf die
+        // Nutzerbestätigung (Prompt-Flow), applyUpdate() löst ihn dann aus.
         cleanupOutdatedCaches: true,
         navigateFallback: '/index.html',
         // Never precache Supabase API/storage responses — they are user-specific
