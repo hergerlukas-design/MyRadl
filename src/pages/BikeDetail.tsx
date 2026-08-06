@@ -103,13 +103,15 @@ export default function BikeDetail() {
       </header>
 
       <div className="flex-1 px-5 py-5 flex flex-col gap-5">
-        <ImageUpload
-          value={bike.image_url}
-          onUpload={handlePhoto}
-          onRemove={handlePhotoRemove}
-          aspect="video"
-          label="Radfoto"
-        />
+        {bike.image_url && (
+          <ImageUpload
+            value={bike.image_url}
+            onUpload={handlePhoto}
+            onRemove={handlePhotoRemove}
+            aspect="video"
+            label="Radfoto"
+          />
+        )}
 
         <GeometrySection bikeId={bike.id} />
 
@@ -136,6 +138,16 @@ export default function BikeDetail() {
               <PartRow key={part.id} part={part} />
             ))}
           </div>
+        )}
+
+        {!bike.image_url && (
+          <ImageUpload
+            value={bike.image_url}
+            onUpload={handlePhoto}
+            onRemove={handlePhotoRemove}
+            aspect="video"
+            label="Radfoto"
+          />
         )}
 
         <button

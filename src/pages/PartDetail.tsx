@@ -110,13 +110,15 @@ export default function PartDetail() {
       </header>
 
       <div className="flex-1 px-5 py-5 flex flex-col gap-4">
-        <ImageUpload
-          value={part.image_url}
-          onUpload={handlePhoto}
-          onRemove={handlePhotoRemove}
-          aspect="square"
-          label="Teilfoto"
-        />
+        {part.image_url && (
+          <ImageUpload
+            value={part.image_url}
+            onUpload={handlePhoto}
+            onRemove={handlePhotoRemove}
+            aspect="square"
+            label="Teilfoto"
+          />
+        )}
 
         <Stammdaten part={part} />
         <SettingsBlock partId={part.id} category={part.category} />
@@ -136,6 +138,16 @@ export default function PartDetail() {
           >
             <Repeat size={18} /> Teil ersetzen
           </button>
+        )}
+
+        {!part.image_url && (
+          <ImageUpload
+            value={part.image_url}
+            onUpload={handlePhoto}
+            onRemove={handlePhotoRemove}
+            aspect="square"
+            label="Teilfoto"
+          />
         )}
 
         <button
