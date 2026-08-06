@@ -40,8 +40,8 @@ export default function Modal({ title, onClose, children, footer }: ModalProps) 
         className="fixed left-0 right-0 z-50 flex items-end justify-center pointer-events-none"
         style={vp ? { top: vp.top, height: vp.height } : { top: 0, bottom: 0 }}
       >
-        <div className="pointer-events-auto bg-surface border-t border-white/10 rounded-t-3xl shadow-2xl w-full max-w-md max-h-full flex flex-col">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.07] flex-shrink-0">
+        <div className="pointer-events-auto bg-surface border-t border-hair-strong rounded-t-3xl shadow-2xl w-full max-w-md max-h-full flex flex-col">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-hair flex-shrink-0">
             <h2 className="text-base font-semibold text-cream">{title}</h2>
             <button onClick={onClose} className="text-muted hover:text-cream p-1" aria-label="Schließen">
               <X size={20} />
@@ -55,7 +55,7 @@ export default function Modal({ title, onClose, children, footer }: ModalProps) 
           </div>
           {footer && (
             <div
-              className="px-5 pb-4 pt-2 border-t border-white/[0.07] flex-shrink-0"
+              className="px-5 pb-4 pt-2 border-t border-hair flex-shrink-0"
               style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}
             >
               {footer}

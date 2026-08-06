@@ -38,7 +38,7 @@ export default function Search() {
       <div className="px-5 pt-4 pb-4 flex flex-col gap-3.5 flex-none">
         <h1 className="font-display font-black text-[32px] leading-none tracking-[-0.02em] text-cream">Suche</h1>
 
-        <div className="flex items-center gap-2.5 bg-surface border border-white/[0.09] rounded-2xl px-4 py-3">
+        <div className="flex items-center gap-2.5 bg-surface border border-hair-strong rounded-2xl px-4 py-3">
           <span className="text-muted text-lg leading-none">⌕</span>
           <input
             value={q}
@@ -89,11 +89,11 @@ export default function Search() {
                 <button
                   key={p.id}
                   onClick={() => navigate(`/parts/${p.id}`)}
-                  className={`text-left flex items-center gap-3.5 bg-surface border border-white/[0.07] rounded-[18px] px-3.5 py-3 active:scale-[0.99] transition-transform ${
+                  className={`text-left flex items-center gap-3.5 bg-surface border border-hair rounded-[18px] px-3.5 py-3 active:scale-[0.99] transition-transform ${
                     p.status === 'ersetzt' ? 'opacity-55' : ''
                   }`}
                 >
-                  <div className="w-[46px] h-[46px] flex-none rounded-[13px] overflow-hidden photo-ph border border-white/[0.06]">
+                  <div className="w-[46px] h-[46px] flex-none rounded-[13px] overflow-hidden photo-ph border border-hair-soft">
                     {url && <img src={url} alt="" className="w-full h-full object-cover" />}
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col gap-1">
@@ -135,8 +135,8 @@ function Chip({
       className="flex-none flex items-center gap-1.5 px-3.5 py-2 rounded-full font-mono text-xs font-medium tracking-[0.04em] transition-colors whitespace-nowrap"
       style={{
         background: active ? accent : 'transparent',
-        color: active ? '#12100e' : 'var(--color-cream-dim)',
-        border: `1px solid ${active ? accent : 'rgba(255,255,255,0.12)'}`,
+        color: active ? 'var(--color-accent-ink)' : 'var(--color-cream-dim)',
+        border: `1px solid ${active ? accent : 'var(--c-hair-strong)'}`,
       }}
     >
       {color && !active && <span className="w-1.5 h-1.5 rounded-full" style={{ background: color }} />}

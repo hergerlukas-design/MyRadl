@@ -11,7 +11,7 @@ interface PageHeaderProps {
 }
 
 const squareBtn =
-  'w-9 h-9 rounded-xl bg-surface border border-white/[0.08] flex items-center justify-center text-cream-dim active:scale-95 transition-transform'
+  'w-9 h-9 rounded-xl bg-surface border border-hair-strong flex items-center justify-center text-cream-dim active:scale-95 transition-transform'
 
 /** The back / eyebrow / action row used at the top of detail & form screens. */
 export default function PageHeader({ eyebrow, action, onBack }: PageHeaderProps) {

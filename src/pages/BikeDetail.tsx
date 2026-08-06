@@ -69,7 +69,7 @@ export default function BikeDetail() {
 
   return (
     <Layout>
-      <header className="relative overflow-hidden border-b border-white/[0.07] flex-none">
+      <header className="relative overflow-hidden border-b border-hair flex-none">
         <Watermark variant="bottom" />
         <div className="relative px-5 pt-4 pb-5">
           <PageHeader
@@ -160,7 +160,7 @@ export default function BikeDetail() {
 
 function Tile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-surface border border-white/[0.07] rounded-[14px] px-3 py-2.5 flex flex-col gap-1">
+    <div className="bg-surface border border-hair rounded-[14px] px-3 py-2.5 flex flex-col gap-1">
       <span className="eyebrow">{label}</span>
       <span className="font-display font-semibold text-[17px] text-cream leading-none">{value}</span>
     </div>
@@ -174,7 +174,7 @@ function PartRow({ part }: { part: Part }) {
   return (
     <button
       onClick={() => navigate(`/parts/${part.id}`)}
-      className={`text-left flex items-stretch gap-3.5 bg-surface border border-white/[0.07] rounded-[18px] px-4 py-3.5 active:scale-[0.99] transition-transform ${
+      className={`text-left flex items-stretch gap-3.5 bg-surface border border-hair rounded-[18px] px-4 py-3.5 active:scale-[0.99] transition-transform ${
         isReplaced ? 'opacity-55' : ''
       }`}
     >

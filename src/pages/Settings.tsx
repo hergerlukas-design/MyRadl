@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Check } from 'lucide-react'
+import { Check, Moon, Sun } from 'lucide-react'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/hooks/useAuth'
+import { useTheme, type Theme } from '@/hooks/useTheme'
 
 export default function Settings() {
   const { user, signOut, updatePassword } = useAuth()
@@ -47,7 +48,7 @@ export default function Settings() {
 
       <div className="flex-1 px-5 pb-6 flex flex-col gap-3.5">
         {/* Account */}
-        <div className="flex items-center gap-3.5 bg-surface border border-white/[0.07] rounded-[20px] p-4">
+        <div className="flex items-center gap-3.5 bg-surface border border-hair rounded-[20px] p-4">
           <div className="w-[46px] h-[46px] rounded-full bg-accent/15 border border-accent/35 flex items-center justify-center font-display font-semibold text-[15px] text-accent">
             {initials}
           </div>
@@ -57,8 +58,10 @@ export default function Settings() {
           </div>
         </div>
 
+        <ThemeCard />
+
         {/* Passwort */}
-        <div className="bg-surface border border-white/[0.07] rounded-[20px] p-[18px] flex flex-col gap-3">
+        <div className="bg-surface border border-hair rounded-[20px] p-[18px] flex flex-col gap-3">
           <span className="text-[15px] font-extrabold text-cream">Passwort festlegen</span>
           <span className="text-[13px] leading-relaxed text-muted">
             Lege ein Passwort fest oder ändere es, um dich künftig mit Email &amp; Passwort anzumelden.
@@ -99,7 +102,7 @@ export default function Settings() {
         </div>
 
         {/* App-Version */}
-        <div className="bg-surface border border-white/[0.07] rounded-[20px] p-[18px] flex flex-col gap-3">
+        <div className="bg-surface border border-hair rounded-[20px] p-[18px] flex flex-col gap-3">
           <div className="flex items-baseline justify-between">
             <span className="text-[15px] font-extrabold text-cream">App-Version</span>
             <span className="font-mono text-xs text-muted">{__APP_VERSION__}</span>
@@ -123,5 +126,37 @@ export default function Settings() {
         </button>
       </div>
     </Layout>
+  )
+}
+
+function ThemeCard() {
+  const { theme, setTheme } = useTheme()
+  const options: { value: Theme; label: string; icon: typeof Sun }[] = [
+    { value: 'dark', label: 'Dunkel', icon: Moon },
+    { value: 'light', label: 'Hell', icon: Sun },
+  ]
+  return (
+    <div className="bg-surface border border-hair rounded-[20px] p-[18px] flex flex-col gap-3">
+      <span className="text-[15px] font-extrabold text-cream">Erscheinungsbild</span>
+      <div className="grid grid-cols-2 gap-2.5">
+        {options.map(({ value, label, icon: Icon }) => {
+          const active = theme === value
+          return (
+            <button
+              key={value}
+              onClick={() => setTheme(value)}
+              className="flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-colors border"
+              style={{
+                background: active ? 'var(--color-accent)' : 'transparent',
+                color: active ? 'var(--color-accent-ink)' : 'var(--color-cream-dim)',
+                borderColor: active ? 'var(--color-accent)' : 'var(--c-hair-strong)',
+              }}
+            >
+              <Icon size={16} /> {label}
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }

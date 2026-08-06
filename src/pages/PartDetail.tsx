@@ -76,7 +76,7 @@ export default function PartDetail() {
 
   return (
     <Layout>
-      <header className="border-b border-white/[0.07] px-5 pt-4 pb-5 flex-none">
+      <header className="border-b border-hair px-5 pt-4 pb-5 flex-none">
         <PageHeader
           eyebrow={(bike?.name ?? '').toUpperCase()}
           onBack={() => navigate(`/bikes/${part.bike_id}`)}
@@ -113,7 +113,7 @@ export default function PartDetail() {
         <Stammdaten part={part} />
         <SettingsBlock partId={part.id} category={part.category} />
         {part.notes && (
-          <div className="bg-surface border border-white/[0.07] rounded-[20px] p-4 flex flex-col gap-2">
+          <div className="bg-surface border border-hair rounded-[20px] p-4 flex flex-col gap-2">
             <span className="eyebrow">SETUP-NOTIZ</span>
             <p className="text-sm leading-relaxed text-cream-dim whitespace-pre-wrap">{part.notes}</p>
           </div>
@@ -145,12 +145,12 @@ function Stammdaten({ part }: { part: Part }) {
     ...(part.install_date ? [['EINBAU', fmtDate(part.install_date)] as [string, string]] : []),
   ]
   return (
-    <div className="bg-surface border border-white/[0.07] rounded-[20px] px-4">
+    <div className="bg-surface border border-hair rounded-[20px] px-4">
       {rows.map(([label, value], i) => (
         <div
           key={label}
           className={`flex items-center justify-between py-3.5 ${
-            i < rows.length - 1 ? 'border-b border-white/[0.06]' : ''
+            i < rows.length - 1 ? 'border-b border-hair-soft' : ''
           }`}
         >
           <span className="eyebrow">{label}</span>
@@ -205,12 +205,12 @@ function SettingsBlock({ partId, category }: { partId: string; category: Part['c
       {!settings || settings.length === 0 ? (
         <p className="font-mono text-xs text-muted py-1">Noch keine Einstellungen erfasst.</p>
       ) : (
-        <div className="bg-surface border border-white/[0.07] rounded-[20px] px-4">
+        <div className="bg-surface border border-hair rounded-[20px] px-4">
           {settings.map((s, i) => (
             <div
               key={s.id}
               className={`flex items-center gap-3 py-3.5 ${
-                i < settings.length - 1 ? 'border-b border-white/[0.06]' : ''
+                i < settings.length - 1 ? 'border-b border-hair-soft' : ''
               }`}
             >
               <span className="flex-1 eyebrow">{s.key}</span>
@@ -326,12 +326,12 @@ function LinksBlock({ partId }: { partId: string }) {
       {!links || links.length === 0 ? (
         <p className="font-mono text-xs text-muted py-1">Noch keine Links. Füge Shop- oder Vergleichslinks hinzu.</p>
       ) : (
-        <div className="bg-surface border border-white/[0.07] rounded-[20px] px-4">
+        <div className="bg-surface border border-hair rounded-[20px] px-4">
           {links.map((l, i) => (
             <div
               key={l.id}
               className={`flex items-center gap-3 py-3.5 ${
-                i < links.length - 1 ? 'border-b border-white/[0.06]' : ''
+                i < links.length - 1 ? 'border-b border-hair-soft' : ''
               }`}
             >
               <a
@@ -376,9 +376,9 @@ function LinksBlock({ partId }: { partId: string }) {
 
 // ── Verlaufshistorie ──────────────────────────────────────────────────────────
 const EVENT_META: Record<HistoryEventType, { label: string; icon: typeof Wrench; color: string }> = {
-  eingebaut: { label: 'Eingebaut', icon: PackagePlus, color: '#A6D65A' },
-  gewartet: { label: 'Gewartet', icon: Wrench, color: '#6FA8D6' },
-  ersetzt: { label: 'Ersetzt', icon: ArrowLeftRight, color: '#D6A65A' },
+  eingebaut: { label: 'Eingebaut', icon: PackagePlus, color: 'var(--cat-federgabel)' },
+  gewartet: { label: 'Gewartet', icon: Wrench, color: 'var(--cat-daempfer)' },
+  ersetzt: { label: 'Ersetzt', icon: ArrowLeftRight, color: 'var(--cat-reifen)' },
 }
 
 function HistoryBlock({ partId }: { partId: string }) {
@@ -407,7 +407,7 @@ function HistoryBlock({ partId }: { partId: string }) {
             const meta = EVENT_META[h.event_type] ?? EVENT_META.gewartet
             const Icon = meta.icon
             return (
-              <div key={h.id} className="flex items-start gap-3 bg-surface border border-white/[0.07] rounded-[18px] px-4 py-3.5">
+              <div key={h.id} className="flex items-start gap-3 bg-surface border border-hair rounded-[18px] px-4 py-3.5">
                 <Icon size={18} className="mt-0.5 flex-shrink-0" style={{ color: meta.color }} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">

@@ -13,9 +13,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;600;800;900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <title>MyRadl – MTB Manager</title>
+    <script>
+      // Apply the saved (or system) theme before first paint to avoid a flash.
+      (function () {
+        try {
+          var t = localStorage.getItem('myradl-theme')
+          var dark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches
+          if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t)
+          var bg = dark ? '#12100E' : '#F4F2ED'
+          document.documentElement.style.backgroundColor = bg
+          var m = document.querySelector('meta[name="theme-color"]')
+          if (m) m.setAttribute('content', bg)
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
-    <div id="root" style="min-height: 100dvh; background-color: #12100e"></div>
+    <div id="root" style="min-height: 100dvh"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

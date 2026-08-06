@@ -14,7 +14,7 @@ export default function Watermark({ variant = 'top' }: { variant?: 'top' | 'bott
       alt=""
       aria-hidden
       className="pointer-events-none absolute select-none"
-      style={{ ...style, opacity: 0.12, filter: 'invert(1)' }}
+      style={{ ...style, opacity: 'var(--wm-opacity)', filter: 'var(--wm-filter)' }}
     />
   )
 }

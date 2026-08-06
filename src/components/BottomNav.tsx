@@ -9,7 +9,7 @@ const items = [
 export default function BottomNav() {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 flex items-stretch bg-nav border-t border-white/[0.07] max-w-md mx-auto px-3 pt-2.5"
+      className="fixed bottom-0 left-0 right-0 z-40 flex items-stretch bg-nav border-t border-hair max-w-md mx-auto px-3 pt-2.5"
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
     >
       {items.map(({ to, label }) => (
@@ -22,7 +22,7 @@ export default function BottomNav() {
             <>
               <span
                 className="h-1 w-[34px] rounded-full transition-colors"
-                style={{ background: isActive ? 'var(--color-accent)' : 'rgba(255,255,255,0.08)' }}
+                style={{ background: isActive ? 'var(--color-accent)' : 'var(--c-navbar-off)' }}
               />
               <span
                 className="font-mono text-[11px] font-semibold tracking-[0.12em] transition-colors"

@@ -63,7 +63,7 @@ export default function ImageUpload({
         onChange={handleFile}
       />
       <div
-        className={`relative ${ratio} w-full rounded-2xl overflow-hidden border border-white/[0.07] photo-ph flex items-center justify-center`}
+        className={`relative ${ratio} w-full rounded-2xl overflow-hidden border border-hair photo-ph flex items-center justify-center`}
       >
         {url ? (
           <img src={url} alt={label} className="w-full h-full object-cover" />
@@ -89,7 +89,7 @@ export default function ImageUpload({
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="bg-ink/80 text-cream rounded-full p-2 border border-white/10"
+              className="bg-ink/80 text-cream rounded-full p-2 border border-hair-strong"
               aria-label="Foto ändern"
             >
               <Camera size={16} />
@@ -98,7 +98,7 @@ export default function ImageUpload({
               <button
                 type="button"
                 onClick={handleRemove}
-                className="bg-ink/80 rounded-full p-2 border border-white/10 text-danger"
+                className="bg-ink/80 rounded-full p-2 border border-hair-strong text-danger"
                 aria-label="Foto entfernen"
               >
                 <X size={16} />

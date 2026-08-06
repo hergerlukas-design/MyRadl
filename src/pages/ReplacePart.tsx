@@ -96,8 +96,8 @@ export default function ReplacePart() {
         </h1>
       </div>
       <form onSubmit={handleSubmit} className="px-5 py-4 flex flex-col gap-4">
-        <div className="bg-surface border border-white/[0.07] rounded-[18px] p-4 flex items-start gap-3">
-          <ArrowLeftRight size={18} className="mt-0.5 flex-shrink-0" style={{ color: '#D6A65A' }} />
+        <div className="bg-surface border border-hair rounded-[18px] p-4 flex items-start gap-3">
+          <ArrowLeftRight size={18} className="mt-0.5 flex-shrink-0" style={{ color: 'var(--cat-reifen)' }} />
           <p className="text-sm text-cream-dim">
             Der bisherige Teil <span className="font-semibold text-cream">{old.brand} {old.model}</span> wird auf
             „ersetzt" gesetzt und erhält einen Verlaufseintrag. Der Nachfolger wird neu angelegt.

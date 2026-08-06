@@ -1,26 +1,149 @@
 @import "tailwindcss";
 
 /*
- * MyRadl — dark "outdoor" design system.
- * Warm near-black base, lime accent, Chivo signage / IBM Plex Sans UI /
- * IBM Plex Mono for values & labels.
+ * MyRadl — "outdoor" design system, themeable (dark / light).
+ * Colors are driven by semantic CSS variables (--c-*) that swap per theme.
+ * Dark is the base/fallback; light applies for light-preference systems
+ * (unless dark is forced) or when data-theme="light" is set explicitly.
  */
 @theme {
-  --color-ink: #12100e;        /* app background */
-  --color-surface: #1b1815;    /* cards */
-  --color-surface-2: #221f1a;  /* card hover / raised */
-  --color-nav: #17140f;        /* bottom nav */
-  --color-accent: #a6d65a;     /* lime accent */
-  --color-accent-ink: #12100e; /* text on accent */
-  --color-cream: #f2efe9;      /* primary text */
-  --color-cream-dim: #d8d3c9;  /* secondary text */
-  --color-muted: #8e877b;      /* tertiary text */
-  --color-dim: #6f6a60;        /* faint labels */
-  --color-danger: #d66a6a;
+  --color-ink: var(--c-ink);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-nav: var(--c-nav);
+  --color-accent: var(--c-accent);
+  --color-accent-ink: var(--c-accent-ink);
+  --color-cream: var(--c-cream);
+  --color-cream-dim: var(--c-cream-dim);
+  --color-muted: var(--c-muted);
+  --color-dim: var(--c-dim);
+  --color-danger: var(--c-danger);
+  --color-hair: var(--c-hair);
+  --color-hair-soft: var(--c-hair-soft);
+  --color-hair-strong: var(--c-hair-strong);
+  --color-hair-dashed: var(--c-hair-dashed);
 
   --font-display: "Chivo", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+
+/* ── DARK (base / fallback) ──────────────────────────────────────────────── */
+:root {
+  --c-ink: #12100e;
+  --c-surface: #1b1815;
+  --c-surface-2: #221f1a;
+  --c-nav: #17140f;
+  --c-accent: #a6d65a;
+  --c-accent-ink: #12100e;
+  --c-cream: #f2efe9;
+  --c-cream-dim: #d8d3c9;
+  --c-muted: #8e877b;
+  --c-dim: #6f6a60;
+  --c-danger: #d66a6a;
+
+  --c-hair: rgba(255, 255, 255, 0.07);
+  --c-hair-soft: rgba(255, 255, 255, 0.06);
+  --c-hair-strong: rgba(255, 255, 255, 0.12);
+  --c-hair-dashed: rgba(255, 255, 255, 0.18);
+  --c-track: rgba(255, 255, 255, 0.12);
+  --c-navbar-off: rgba(255, 255, 255, 0.08);
+
+  --c-hatch-a: #211e19;
+  --c-hatch-b: #1b1815;
+  --wm-filter: invert(1);
+  --wm-opacity: 0.13;
+
+  --cat-federgabel: #a6d65a;
+  --cat-daempfer: #6fa8d6;
+  --cat-antrieb: #d6c25a;
+  --cat-bremsen: #d67a5a;
+  --cat-laufraeder: #8c8cd6;
+  --cat-reifen: #e0a94e;
+  --cat-cockpit: #5ad6b0;
+  --cat-sattel: #c58bd6;
+  --cat-sonstiges: #9a9489;
+
+  color-scheme: dark;
+}
+
+/* ── LIGHT ───────────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --c-ink: #f4f2ed;
+    --c-surface: #ffffff;
+    --c-surface-2: #f0ede6;
+    --c-nav: #ffffff;
+    --c-accent: #233b10;
+    --c-accent-ink: #f7f5f0;
+    --c-cream: #1a1815;
+    --c-cream-dim: #332f29;
+    --c-muted: #8c867c;
+    --c-dim: #9a948a;
+    --c-danger: #b0362f;
+
+    --c-hair: rgba(0, 0, 0, 0.09);
+    --c-hair-soft: rgba(0, 0, 0, 0.07);
+    --c-hair-strong: rgba(0, 0, 0, 0.14);
+    --c-hair-dashed: rgba(0, 0, 0, 0.18);
+    --c-track: rgba(0, 0, 0, 0.12);
+    --c-navbar-off: rgba(0, 0, 0, 0.08);
+
+    --c-hatch-a: #ebe8e1;
+    --c-hatch-b: #f4f2ed;
+    --wm-filter: none;
+    --wm-opacity: 0.16;
+
+    --cat-federgabel: #4c7a24;
+    --cat-daempfer: #2f6e9e;
+    --cat-antrieb: #8a7420;
+    --cat-bremsen: #a8542a;
+    --cat-laufraeder: #5757a8;
+    --cat-reifen: #8a6420;
+    --cat-cockpit: #1f7a66;
+    --cat-sattel: #7a4fa8;
+    --cat-sonstiges: #6e685e;
+
+    color-scheme: light;
+  }
+}
+
+:root[data-theme="light"] {
+  --c-ink: #f4f2ed;
+  --c-surface: #ffffff;
+  --c-surface-2: #f0ede6;
+  --c-nav: #ffffff;
+  --c-accent: #233b10;
+  --c-accent-ink: #f7f5f0;
+  --c-cream: #1a1815;
+  --c-cream-dim: #332f29;
+  --c-muted: #8c867c;
+  --c-dim: #9a948a;
+  --c-danger: #b0362f;
+
+  --c-hair: rgba(0, 0, 0, 0.09);
+  --c-hair-soft: rgba(0, 0, 0, 0.07);
+  --c-hair-strong: rgba(0, 0, 0, 0.14);
+  --c-hair-dashed: rgba(0, 0, 0, 0.18);
+  --c-track: rgba(0, 0, 0, 0.12);
+  --c-navbar-off: rgba(0, 0, 0, 0.08);
+
+  --c-hatch-a: #ebe8e1;
+  --c-hatch-b: #f4f2ed;
+  --wm-filter: none;
+  --wm-opacity: 0.16;
+
+  --cat-federgabel: #4c7a24;
+  --cat-daempfer: #2f6e9e;
+  --cat-antrieb: #8a7420;
+  --cat-bremsen: #a8542a;
+  --cat-laufraeder: #5757a8;
+  --cat-reifen: #8a6420;
+  --cat-cockpit: #1f7a66;
+  --cat-sattel: #7a4fa8;
+  --cat-sonstiges: #6e685e;
+
+  color-scheme: light;
 }
 
 * {
@@ -29,14 +152,13 @@
 
 html {
   scroll-behavior: smooth;
-  background-color: var(--color-ink);
-  color-scheme: dark;
+  background-color: var(--c-ink);
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-ink);
-  color: var(--color-cream);
+  background-color: var(--c-ink);
+  color: var(--c-cream);
 }
 
 /* Prevent iOS from zooming when focusing inputs (font-size >= 16px). */
@@ -57,25 +179,29 @@ textarea {
 
 /* Diagonal hatched placeholder used where a real photo is missing. */
 .photo-ph {
-  background-image: repeating-linear-gradient(115deg, #211e19 0 10px, #1b1815 10px 20px);
+  background-image: repeating-linear-gradient(
+    115deg,
+    var(--c-hatch-a) 0 10px,
+    var(--c-hatch-b) 10px 20px
+  );
 }
 
-/* Shared dark form control. */
+/* Shared themed form control. */
 .input {
   width: 100%;
   border-radius: 0.875rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background-color: var(--color-surface);
+  border: 1px solid var(--c-hair-strong);
+  background-color: var(--c-surface);
   padding: 0.8125rem 0.9375rem;
-  color: var(--color-cream);
+  color: var(--c-cream);
   outline: none;
 }
 .input:focus {
-  border-color: rgba(166, 214, 90, 0.6);
-  box-shadow: 0 0 0 3px rgba(166, 214, 90, 0.15);
+  border-color: color-mix(in srgb, var(--c-accent) 60%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-accent) 18%, transparent);
 }
 .input::placeholder {
-  color: var(--color-dim);
+  color: var(--c-dim);
 }
 select.input {
   appearance: none;
@@ -85,8 +211,8 @@ select.input {
   padding-right: 2.5rem;
 }
 select.input option {
-  background-color: var(--color-surface);
-  color: var(--color-cream);
+  background-color: var(--c-surface);
+  color: var(--c-cream);
 }
 
 /* Mono eyebrow label — the recurring small tracked caps in the design. */
@@ -96,5 +222,5 @@ select.input option {
   font-size: 9px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--color-dim);
+  color: var(--c-dim);
 }

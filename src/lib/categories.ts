@@ -21,17 +21,18 @@ export interface CategoryMeta {
 }
 
 // Reihenfolge = Anzeigereihenfolge in der Bauteilliste.
-// Farbcodes aus dem Design-System (Kategorie-Codes).
+// Farbcodes aus dem Design-System (Kategorie-Codes) — als CSS-Variablen, damit
+// sie zwischen Dark- und Light-Theme automatisch wechseln (siehe index.css).
 export const CATEGORIES: CategoryMeta[] = [
-  { value: 'federgabel', label: 'Federgabel', icon: MoveVertical, color: '#A6D65A' },
-  { value: 'daempfer', label: 'Dämpfer', icon: Wind, color: '#6FA8D6' },
-  { value: 'antrieb', label: 'Antrieb', icon: Cog, color: '#D6C25A' },
-  { value: 'bremsen', label: 'Bremsen', icon: Disc3, color: '#D67A5A' },
-  { value: 'laufraeder', label: 'Laufräder', icon: CircleDot, color: '#8C8CD6' },
-  { value: 'reifen', label: 'Reifen', icon: Circle, color: '#E0A94E' },
-  { value: 'cockpit', label: 'Cockpit', icon: Move, color: '#5AD6B0' },
-  { value: 'sattel', label: 'Sattel', icon: Armchair, color: '#C58BD6' },
-  { value: 'sonstiges', label: 'Sonstiges', icon: Package, color: '#9A9489' },
+  { value: 'federgabel', label: 'Federgabel', icon: MoveVertical, color: 'var(--cat-federgabel)' },
+  { value: 'daempfer', label: 'Dämpfer', icon: Wind, color: 'var(--cat-daempfer)' },
+  { value: 'antrieb', label: 'Antrieb', icon: Cog, color: 'var(--cat-antrieb)' },
+  { value: 'bremsen', label: 'Bremsen', icon: Disc3, color: 'var(--cat-bremsen)' },
+  { value: 'laufraeder', label: 'Laufräder', icon: CircleDot, color: 'var(--cat-laufraeder)' },
+  { value: 'reifen', label: 'Reifen', icon: Circle, color: 'var(--cat-reifen)' },
+  { value: 'cockpit', label: 'Cockpit', icon: Move, color: 'var(--cat-cockpit)' },
+  { value: 'sattel', label: 'Sattel', icon: Armchair, color: 'var(--cat-sattel)' },
+  { value: 'sonstiges', label: 'Sonstiges', icon: Package, color: 'var(--cat-sonstiges)' },
 ]
 
 const BY_VALUE = new Map(CATEGORIES.map((c) => [c.value, c]))

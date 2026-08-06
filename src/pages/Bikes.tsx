@@ -48,7 +48,7 @@ export default function Bikes() {
           ))}
           <button
             onClick={() => setAdding(true)}
-            className="rounded-[22px] border border-dashed border-white/20 py-5 text-center font-medium text-muted active:scale-[0.99] transition-transform"
+            className="rounded-[22px] border border-dashed border-hair-dashed py-5 text-center font-medium text-muted active:scale-[0.99] transition-transform"
           >
             + Rad hinzufügen
           </button>
@@ -76,7 +76,7 @@ function BikeCard({ bike, parts }: { bike: Bike; parts: number }) {
   return (
     <button
       onClick={() => navigate(`/bikes/${bike.id}`)}
-      className="text-left rounded-[22px] bg-surface border border-white/[0.07] overflow-hidden active:scale-[0.99] transition-transform"
+      className="text-left rounded-[22px] bg-surface border border-hair overflow-hidden active:scale-[0.99] transition-transform"
     >
       <div className="relative h-[150px] photo-ph flex items-end justify-between p-4">
         {url && <img src={url} alt={bike.name} className="absolute inset-0 w-full h-full object-cover" />}
@@ -94,7 +94,7 @@ function BikeCard({ bike, parts }: { bike: Bike; parts: number }) {
           </h2>
           {bike.model && <span className="font-mono text-xs text-muted flex-none">{bike.model}</span>}
         </div>
-        <div className="grid grid-cols-3 gap-4 pt-3 border-t border-white/[0.07]">
+        <div className="grid grid-cols-3 gap-4 pt-3 border-t border-hair">
           <Stat label="HERSTELLER" value={bike.brand ?? ''} />
           <Stat label="BAUTEILE" value={String(parts)} />
           <Stat label="BAUJAHR" value={bike.year ? String(bike.year) : ''} />
