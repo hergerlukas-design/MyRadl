@@ -5,9 +5,13 @@ export type PartCategory =
   | 'bremsen'
   | 'laufraeder'
   | 'reifen'
-  | 'cockpit'
+  | 'vorbau'
+  | 'lenker'
+  | 'griffe'
   | 'sattel'
   | 'sonstiges'
+  // Legacy-Wert (nicht mehr zur Auswahl): früher „Cockpit".
+  | 'cockpit'
 
 export type PartStatus = 'aktiv' | 'ersetzt'
 

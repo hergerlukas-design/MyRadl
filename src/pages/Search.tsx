@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Search as SearchIcon, ChevronRight } from 'lucide-react'
 import Layout from '@/components/Layout'
 import Spinner from '@/components/ui/Spinner'
-import { CATEGORIES, categoryLabel, partTitle, positionLabel } from '@/lib/categories'
+import { CATEGORIES, categoryLabel, partTitle, partSubtitle } from '@/lib/categories'
 import { photoUrl } from '@/lib/storage'
 import { useBikes } from '@/hooks/useBikes'
 import { useAllParts } from '@/hooks/useParts'
@@ -100,8 +100,7 @@ export default function Search() {
                     <p className="text-xs text-gray-500 truncate">
                       {categoryLabel(p.category)}
                       {p.bike ? ` · ${p.bike.name}` : ''}
-                      {positionLabel(p.position) ? ` · ${positionLabel(p.position)}` : ''}
-                      {p.variant ? ` · ${p.variant}` : ''}
+                      {partSubtitle(p) ? ` · ${partSubtitle(p)}` : ''}
                     </p>
                   </div>
                   <ChevronRight className="text-gray-300 flex-shrink-0" size={18} />

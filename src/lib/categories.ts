@@ -6,6 +6,8 @@ import {
   CircleDot,
   Circle,
   Move,
+  MoveHorizontal,
+  Grip,
   Armchair,
   Package,
   type LucideIcon,
@@ -26,7 +28,9 @@ export const CATEGORIES: CategoryMeta[] = [
   { value: 'bremsen', label: 'Bremsen', icon: Disc3 },
   { value: 'laufraeder', label: 'Laufräder', icon: CircleDot },
   { value: 'reifen', label: 'Reifen', icon: Circle },
-  { value: 'cockpit', label: 'Cockpit', icon: Move },
+  { value: 'vorbau', label: 'Vorbau', icon: Move },
+  { value: 'lenker', label: 'Lenker', icon: MoveHorizontal },
+  { value: 'griffe', label: 'Griffe', icon: Grip },
   { value: 'sattel', label: 'Sattel', icon: Armchair },
   { value: 'sonstiges', label: 'Sonstiges', icon: Package },
 ]
@@ -62,16 +66,32 @@ export function positionLabel(position: string | null | undefined): string | nul
 }
 
 /**
- * Sprechender Titel eines Teils. Nutzt Hersteller + Modell; fällt bei
- * „Sonstiges" auf die freie Bezeichnung und zuletzt auf den Kategorienamen zurück.
+ * Sprechender Titel eines Teils. Bei „Sonstiges" ist die freie Bezeichnung der
+ * primäre Titel; sonst Hersteller + Modell, zuletzt der Kategoriename.
  */
 export function partTitle(
   part: Pick<Part, 'brand' | 'model' | 'custom_type' | 'category'>,
 ): string {
+  if (part.category === 'sonstiges' && part.custom_type?.trim()) {
+    return part.custom_type.trim()
+  }
   const name = `${part.brand ?? ''} ${part.model ?? ''}`.trim()
   if (name) return name
   if (part.custom_type?.trim()) return part.custom_type.trim()
   return categoryLabel(part.category)
+}
+
+/**
+ * Zweitzeile für Listen/Übersicht. Bei „Sonstiges" Hersteller + Modell (die
+ * Bezeichnung steht bereits im Titel), sonst Position und Variante/Größe.
+ */
+export function partSubtitle(
+  part: Pick<Part, 'brand' | 'model' | 'custom_type' | 'category' | 'position' | 'variant'>,
+): string {
+  if (part.category === 'sonstiges') {
+    return `${part.brand ?? ''} ${part.model ?? ''}`.trim()
+  }
+  return [positionLabel(part.position), part.variant].filter(Boolean).join(' · ')
 }
 
 /** Häufige Einstell-Vorschläge je Kategorie (nur UI-Hilfe, frei überschreibbar). */
