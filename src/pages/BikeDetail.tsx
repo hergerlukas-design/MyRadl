@@ -5,7 +5,7 @@ import Layout from '@/components/Layout'
 import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
 import ImageUpload from '@/components/ImageUpload'
-import { CATEGORIES, partTitle, positionLabel } from '@/lib/categories'
+import { CATEGORIES, partTitle, partSubtitle } from '@/lib/categories'
 import { uploadBikePhoto, deletePhoto, photoUrl } from '@/lib/storage'
 import { useAuth } from '@/hooks/useAuth'
 import { useBike, useUpdateBike, useDeleteBike } from '@/hooks/useBikes'
@@ -163,7 +163,7 @@ function PartRow({ part }: { part: Part }) {
             {partTitle(part)}
           </p>
           <p className="text-sm text-gray-500 truncate">
-            {[positionLabel(part.position), part.variant].filter(Boolean).join(' · ') || '—'}
+            {partSubtitle(part) || '—'}
           </p>
         </div>
         {replaced && (
