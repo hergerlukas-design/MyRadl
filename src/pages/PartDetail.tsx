@@ -15,7 +15,7 @@ import Layout from '@/components/Layout'
 import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
 import ImageUpload from '@/components/ImageUpload'
-import { categoryLabel, partTitle, positionLabel, SETTING_SUGGESTIONS } from '@/lib/categories'
+import { categoryColor, categoryLabel, partTitle, positionLabel, SETTING_SUGGESTIONS } from '@/lib/categories'
 import { uploadPartPhoto, deletePhoto } from '@/lib/storage'
 import { useAuth } from '@/hooks/useAuth'
 import { usePart, useUpdatePart, useDeletePart } from '@/hooks/useParts'
@@ -162,8 +162,12 @@ function Stammdaten({ part }: { part: Part }) {
     ['Status', part.status],
     ...(part.install_date ? [['Einbaudatum', fmtDate(part.install_date)] as [string, string]] : []),
   ]
+  const color = categoryColor(part.category)
   return (
-    <section className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
+    <section
+      className="card rounded-2xl divide-y divide-[var(--color-border-subtle)]"
+      style={{ borderLeft: `4px solid ${color.fg}` }}
+    >
       {rows.map(([label, value]) => (
         <div key={label} className="flex items-center justify-between px-4 py-2.5">
           <span className="text-sm text-gray-500">{label}</span>
@@ -216,7 +220,7 @@ function SettingsBlock({ partId, category }: { partId: string; category: Part['c
       {!settings || settings.length === 0 ? (
         <p className="text-sm text-gray-400 py-2">Noch keine Einstellungen erfasst.</p>
       ) : (
-        <ul className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
+        <ul className="card rounded-2xl divide-y divide-[var(--color-border-subtle)]">
           {settings.map((s) => (
             <li key={s.id} className="flex items-center gap-3 px-4 py-2.5">
               <span className="flex-1 text-sm text-gray-700">{s.key}</span>
@@ -332,7 +336,7 @@ function LinksBlock({ partId }: { partId: string }) {
       {!links || links.length === 0 ? (
         <p className="text-sm text-gray-400 py-2">Noch keine Links. Füge Shop- oder Vergleichslinks hinzu.</p>
       ) : (
-        <ul className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
+        <ul className="card rounded-2xl divide-y divide-[var(--color-border-subtle)]">
           {links.map((l) => (
             <li key={l.id} className="flex items-center gap-3 px-4 py-2.5">
               <a
@@ -408,7 +412,7 @@ function HistoryBlock({ partId }: { partId: string }) {
             const meta = EVENT_META[h.event_type] ?? EVENT_META.gewartet
             const Icon = meta.icon
             return (
-              <li key={h.id} className="flex items-start gap-3 bg-white rounded-xl border border-gray-100 px-4 py-3">
+              <li key={h.id} className="card flex items-start gap-3 rounded-xl px-4 py-3">
                 <Icon size={18} className={`mt-0.5 flex-shrink-0 ${meta.color}`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">

@@ -50,7 +50,7 @@ export default function Login() {
   return (
     <div
       className="min-h-dvh flex flex-col items-center justify-center px-6"
-      style={{ background: 'linear-gradient(135deg, #493b2a 0%, #499167 100%)' }}
+      style={{ background: 'linear-gradient(135deg, #3c6245 0%, #4c7a56 100%)' }}
     >
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">

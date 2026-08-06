@@ -1,10 +1,43 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #499167;      /* green */
-  --color-primary-dark: #493b2a; /* dark brown */
-  --color-accent: #e6af2e;       /* golden yellow */
-  --color-muted: #9f838c;        /* mauve */
+  /* Basis: Warm Off-White + Grün-Akzent */
+  --color-bg: #f7f4ef;            /* App-Hintergrund statt reinem Weiß */
+  --color-surface: #fffdf9;       /* Karten-Hintergrund (Bauteil-Cards, Photo-Placeholder) */
+  --color-border-subtle: #efe8da;
+  --color-text: #2b2a26;
+  --color-text-muted: #8a8066;
+  --color-accent: #4c7a56;        /* Hauptgrün: Buttons, aktive Icons, Statusleiste */
+
+  /* primary bleibt als Alias auf das Hauptgrün, damit bestehende
+     bg-primary / text-primary / border-primary weiterhin greifen. */
+  --color-primary: #4c7a56;
+  --color-primary-dark: #3c6245;
+
+  /* Kategoriefarben für Bauteil-Gruppen */
+  --color-cat-fork-bg: #e4eee1;
+  --color-cat-fork-fg: #4c7a56;   /* Federgabel */
+  --color-cat-shock-bg: #e3eef2;
+  --color-cat-shock-fg: #2e6e82;  /* Dämpfer */
+  --color-cat-drive-bg: #f5e6d3;
+  --color-cat-drive-fg: #a5661b;  /* Antrieb */
+  --color-cat-brake-bg: #f3e1dd;
+  --color-cat-brake-fg: #a24b3a;  /* Bremsen */
+  --color-cat-wheel-bg: #e5e8ec;
+  --color-cat-wheel-fg: #556070;  /* Laufräder */
+  --color-cat-tire-bg: #e6e3dc;
+  --color-cat-tire-fg: #5a5347;   /* Reifen */
+  --color-cat-stem-bg: #ebe4ec;
+  --color-cat-stem-fg: #6e5a78;   /* Vorbau */
+  --color-cat-bar-bg: #ddebe7;
+  --color-cat-bar-fg: #3b7a6a;    /* Lenker */
+  --color-cat-grip-bg: #f1e7d6;
+  --color-cat-grip-fg: #8a6d3b;   /* Griffe */
+  --color-cat-saddle-bg: #ede4d8;
+  --color-cat-saddle-fg: #7a5e3a; /* Sattel */
+  --color-cat-misc-bg: #eae6de;
+  --color-cat-misc-fg: #8a8066;   /* Sonstiges */
+
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -18,8 +51,14 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background-color: #fbfffe;
-  color: #0f172a;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Weiche Karten-Optik statt harter Border. */
+.card {
+  background-color: var(--color-surface);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 /* Prevent iOS from zooming when focusing inputs (font-size >= 16px). */
@@ -33,22 +72,22 @@ textarea {
 .input {
   width: 100%;
   border-radius: 0.75rem;
-  border: 1px solid #d1d5db;
-  background-color: #fff;
+  border: 1px solid var(--color-border-subtle);
+  background-color: var(--color-surface);
   padding: 0.625rem 0.875rem;
-  color: #0f172a;
+  color: var(--color-text);
   outline: none;
 }
 .input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(73, 145, 103, 0.2);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(76, 122, 86, 0.18);
 }
 .input::placeholder {
-  color: #9ca3af;
+  color: var(--color-text-muted);
 }
 select.input {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%238a8066' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.625rem center;
   padding-right: 2.25rem;

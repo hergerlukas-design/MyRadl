@@ -40,10 +40,10 @@ export default function Modal({ title, onClose, children, footer }: ModalProps) 
         className="fixed left-0 right-0 z-50 flex items-end justify-center pointer-events-none"
         style={vp ? { top: vp.top, height: vp.height } : { top: 0, bottom: 0 }}
       >
-        <div className="pointer-events-auto bg-white rounded-t-3xl shadow-2xl w-full max-w-2xl max-h-full flex flex-col">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 flex-shrink-0">
-            <h2 className="text-base font-semibold text-gray-900">{title}</h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-700 p-1" aria-label="Schließen">
+        <div className="pointer-events-auto bg-[var(--color-surface)] rounded-t-3xl shadow-2xl w-full max-w-2xl max-h-full flex flex-col">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-border-subtle)] flex-shrink-0">
+            <h2 className="text-base font-semibold text-[var(--color-text)]">{title}</h2>
+            <button onClick={onClose} className="text-[var(--color-text-muted)] hover:text-[var(--color-text)] p-1" aria-label="Schließen">
               <X size={20} />
             </button>
           </div>
@@ -55,7 +55,7 @@ export default function Modal({ title, onClose, children, footer }: ModalProps) 
           </div>
           {footer && (
             <div
-              className="px-5 pb-4 pt-2 border-t border-gray-100 flex-shrink-0"
+              className="px-5 pb-4 pt-2 border-t border-[var(--color-border-subtle)] flex-shrink-0"
               style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 1rem)' }}
             >
               {footer}
