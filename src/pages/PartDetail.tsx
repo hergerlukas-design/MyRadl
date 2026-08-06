@@ -84,7 +84,7 @@ export default function PartDetail() {
       action={
         <button
           onClick={() => navigate(`/parts/${part.id}/edit`)}
-          className="p-1.5 text-gray-500 hover:text-gray-900"
+          className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           aria-label="Bearbeiten"
         >
           <Pencil size={18} />
@@ -128,7 +128,7 @@ export default function PartDetail() {
           onClose={() => setConfirmDelete(false)}
           footer={
             <div className="flex gap-3">
-              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-3 rounded-xl bg-gray-100 font-semibold">
+              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-3 rounded-xl bg-[var(--color-border-subtle)] font-semibold">
                 Abbrechen
               </button>
               <button
@@ -141,7 +141,7 @@ export default function PartDetail() {
             </div>
           }
         >
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-[var(--color-text-muted)]">
             „{partTitle(part)}" und alle zugehörigen Einstellungen, Links und Verläufe werden dauerhaft gelöscht.
           </p>
         </Modal>
@@ -170,16 +170,16 @@ function Stammdaten({ part }: { part: Part }) {
     >
       {rows.map(([label, value]) => (
         <div key={label} className="flex items-center justify-between px-4 py-2.5">
-          <span className="text-sm text-gray-500">{label}</span>
-          <span className={`text-sm font-medium ${label === 'Status' && value === 'ersetzt' ? 'text-gray-400' : 'text-gray-900'}`}>
+          <span className="text-sm text-[var(--color-text-muted)]">{label}</span>
+          <span className={`text-sm font-medium ${label === 'Status' && value === 'ersetzt' ? 'text-[var(--color-text-muted)]' : 'text-[var(--color-text)]'}`}>
             {value}
           </span>
         </div>
       ))}
       {part.notes && (
         <div className="px-4 py-3">
-          <p className="text-sm text-gray-500 mb-0.5">Notizen</p>
-          <p className="text-sm text-gray-800 whitespace-pre-wrap">{part.notes}</p>
+          <p className="text-sm text-[var(--color-text-muted)] mb-0.5">Notizen</p>
+          <p className="text-sm text-[var(--color-text)] whitespace-pre-wrap">{part.notes}</p>
         </div>
       )}
     </section>
@@ -199,7 +199,7 @@ function Section({
   return (
     <section>
       <div className="flex items-center justify-between mb-2">
-        <h2 className="text-base font-semibold text-gray-900">{title}</h2>
+        <h2 className="text-base font-semibold text-[var(--color-text)]">{title}</h2>
         <button onClick={onAdd} className="flex items-center gap-1 text-primary text-sm font-semibold" aria-label={`${title} hinzufügen`}>
           <Plus size={16} /> Hinzufügen
         </button>
@@ -218,19 +218,19 @@ function SettingsBlock({ partId, category }: { partId: string; category: Part['c
   return (
     <Section title="Einstellungen" onAdd={() => setEditing('new')}>
       {!settings || settings.length === 0 ? (
-        <p className="text-sm text-gray-400 py-2">Noch keine Einstellungen erfasst.</p>
+        <p className="text-sm text-[var(--color-text-muted)] py-2">Noch keine Einstellungen erfasst.</p>
       ) : (
         <ul className="card rounded-2xl divide-y divide-[var(--color-border-subtle)]">
           {settings.map((s) => (
             <li key={s.id} className="flex items-center gap-3 px-4 py-2.5">
-              <span className="flex-1 text-sm text-gray-700">{s.key}</span>
-              <button onClick={() => setEditing(s)} className="text-sm font-semibold text-gray-900">
+              <span className="flex-1 text-sm text-[var(--color-text)]">{s.key}</span>
+              <button onClick={() => setEditing(s)} className="text-sm font-semibold text-[var(--color-text)]">
                 {s.value}
                 {s.unit ? ` ${s.unit}` : ''}
               </button>
               <button
                 onClick={() => del.mutate({ id: s.id, partId })}
-                className="text-gray-300 hover:text-red-500"
+                className="text-[var(--color-text-muted)] hover:text-red-500"
                 aria-label="Löschen"
               >
                 <Trash2 size={15} />
@@ -291,7 +291,7 @@ function SettingModal({
       }
     >
       <label className="block">
-        <span className="block text-sm font-medium text-gray-700 mb-1">Bezeichnung</span>
+        <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Bezeichnung</span>
         <input value={key} onChange={(e) => setKey(e.target.value)} list="setting-suggestions" placeholder="z.B. Luftdruck" className="input" autoFocus />
         <datalist id="setting-suggestions">
           {suggestions.map((s) => (
@@ -301,11 +301,11 @@ function SettingModal({
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Wert</span>
+          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Wert</span>
           <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="z.B. 75" className="input" />
         </label>
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Einheit</span>
+          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Einheit</span>
           <input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="z.B. psi" className="input" />
         </label>
       </div>
@@ -334,7 +334,7 @@ function LinksBlock({ partId }: { partId: string }) {
   return (
     <Section title="Shop &amp; Preisvergleich" onAdd={() => setAdding(true)}>
       {!links || links.length === 0 ? (
-        <p className="text-sm text-gray-400 py-2">Noch keine Links. Füge Shop- oder Vergleichslinks hinzu.</p>
+        <p className="text-sm text-[var(--color-text-muted)] py-2">Noch keine Links. Füge Shop- oder Vergleichslinks hinzu.</p>
       ) : (
         <ul className="card rounded-2xl divide-y divide-[var(--color-border-subtle)]">
           {links.map((l) => (
@@ -348,7 +348,7 @@ function LinksBlock({ partId }: { partId: string }) {
                 <ExternalLink size={15} className="flex-shrink-0" />
                 <span className="truncate">{l.label}</span>
               </a>
-              <button onClick={() => del.mutate({ id: l.id, partId })} className="text-gray-300 hover:text-red-500" aria-label="Löschen">
+              <button onClick={() => del.mutate({ id: l.id, partId })} className="text-[var(--color-text-muted)] hover:text-red-500" aria-label="Löschen">
                 <Trash2 size={15} />
               </button>
             </li>
@@ -366,11 +366,11 @@ function LinksBlock({ partId }: { partId: string }) {
           }
         >
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Bezeichnung</span>
+            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Bezeichnung</span>
             <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="z.B. Bike-Components" className="input" autoFocus />
           </label>
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">URL</span>
+            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">URL</span>
             <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" inputMode="url" className="input" />
           </label>
         </Modal>
@@ -405,7 +405,7 @@ function HistoryBlock({ partId }: { partId: string }) {
   return (
     <Section title="Verlauf" onAdd={() => setAdding(true)}>
       {!history || history.length === 0 ? (
-        <p className="text-sm text-gray-400 py-2">Noch keine Einträge.</p>
+        <p className="text-sm text-[var(--color-text-muted)] py-2">Noch keine Einträge.</p>
       ) : (
         <ul className="space-y-2">
           {history.map((h) => {
@@ -416,12 +416,12 @@ function HistoryBlock({ partId }: { partId: string }) {
                 <Icon size={18} className={`mt-0.5 flex-shrink-0 ${meta.color}`} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-semibold text-gray-900">{meta.label}</span>
-                    <span className="text-xs text-gray-400">{fmtDate(h.event_date)}</span>
+                    <span className="text-sm font-semibold text-[var(--color-text)]">{meta.label}</span>
+                    <span className="text-xs text-[var(--color-text-muted)]">{fmtDate(h.event_date)}</span>
                   </div>
-                  {h.note && <p className="text-sm text-gray-600 mt-0.5 whitespace-pre-wrap">{h.note}</p>}
+                  {h.note && <p className="text-sm text-[var(--color-text-muted)] mt-0.5 whitespace-pre-wrap">{h.note}</p>}
                 </div>
-                <button onClick={() => del.mutate({ id: h.id, partId })} className="text-gray-300 hover:text-red-500 mt-0.5" aria-label="Löschen">
+                <button onClick={() => del.mutate({ id: h.id, partId })} className="text-[var(--color-text-muted)] hover:text-red-500 mt-0.5" aria-label="Löschen">
                   <Trash2 size={15} />
                 </button>
               </li>
@@ -440,7 +440,7 @@ function HistoryBlock({ partId }: { partId: string }) {
           }
         >
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Ereignis</span>
+            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Ereignis</span>
             <select value={type} onChange={(e) => setType(e.target.value as HistoryEventType)} className="input">
               <option value="eingebaut">Eingebaut</option>
               <option value="gewartet">Gewartet</option>
@@ -448,11 +448,11 @@ function HistoryBlock({ partId }: { partId: string }) {
             </select>
           </label>
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Datum</span>
+            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Datum</span>
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input" />
           </label>
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Notiz</span>
+            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Notiz</span>
             <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="optional" className="input resize-none" />
           </label>
         </Modal>

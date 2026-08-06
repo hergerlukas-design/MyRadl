@@ -166,7 +166,7 @@ function AddBikeModal({ onClose }: { onClose: () => void }) {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="block text-sm font-medium text-gray-700 mb-1">{label}</span>
+      <span className="block text-sm font-medium text-[var(--color-text)] mb-1">{label}</span>
       {children}
     </label>
   )

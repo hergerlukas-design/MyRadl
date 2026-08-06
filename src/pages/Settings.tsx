@@ -147,7 +147,7 @@ export default function Settings() {
           <LogOut size={18} /> Abmelden
         </button>
 
-        <p className="text-center text-xs text-gray-400">MyRadl v{__APP_VERSION__}</p>
+        <p className="text-center text-xs text-[var(--color-text-muted)]">MyRadl v{__APP_VERSION__}</p>
       </div>
     </Layout>
   )

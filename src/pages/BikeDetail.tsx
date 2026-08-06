@@ -59,7 +59,7 @@ export default function BikeDetail() {
       title={bike.name}
       back
       action={
-        <button onClick={() => setEditing(true)} className="p-1.5 text-gray-500 hover:text-gray-900" aria-label="Bearbeiten">
+        <button onClick={() => setEditing(true)} className="p-1.5 text-[var(--color-text-muted)] hover:text-[var(--color-text)]" aria-label="Bearbeiten">
           <Pencil size={18} />
         </button>
       }
@@ -137,7 +137,7 @@ export default function BikeDetail() {
           onClose={() => setConfirmDelete(false)}
           footer={
             <div className="flex gap-3">
-              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-3 rounded-xl bg-gray-100 font-semibold">
+              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-3 rounded-xl bg-[var(--color-border-subtle)] font-semibold">
                 Abbrechen
               </button>
               <button onClick={handleDelete} className="flex-1 py-3 rounded-xl bg-red-600 text-white font-semibold">
@@ -146,7 +146,7 @@ export default function BikeDetail() {
             </div>
           }
         >
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-[var(--color-text-muted)]">
             „{bike.name}" und alle zugehörigen Bauteile, Einstellungen und Verläufe werden dauerhaft gelöscht.
           </p>
         </Modal>
@@ -340,11 +340,11 @@ function GeometryModal({
         </button>
       }
     >
-      <p className="text-sm text-gray-500 -mt-1">
+      <p className="text-sm text-[var(--color-text-muted)] -mt-1">
         Alle Angaben optional. Reach &amp; Stack sind herstellerübergreifend am besten vergleichbar.
       </p>
       <label className="block">
-        <span className="block text-sm font-medium text-gray-700 mb-1">Rahmengröße</span>
+        <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Rahmengröße</span>
         <input
           value={frameSize}
           onChange={(e) => setFrameSize(e.target.value)}
@@ -355,11 +355,11 @@ function GeometryModal({
       {GEOMETRY_FIELDS.map((f) => (
         <label key={f.key} className="block">
           <span className="flex items-baseline justify-between mb-1">
-            <span className={`text-sm font-medium ${f.primary ? 'text-primary' : 'text-gray-700'}`}>
+            <span className={`text-sm font-medium ${f.primary ? 'text-primary' : 'text-[var(--color-text)]'}`}>
               {f.label}
               {f.primary && <span className="ml-1 text-[11px] font-semibold uppercase">wichtig</span>}
             </span>
-            <span className="text-xs text-gray-400">{f.unit}</span>
+            <span className="text-xs text-[var(--color-text-muted)]">{f.unit}</span>
           </span>
           <input
             value={values[f.key]}
@@ -368,7 +368,7 @@ function GeometryModal({
             placeholder={`z.B. ${f.unit === '°' ? '64,5' : '450'}`}
             className="input"
           />
-          <span className="block text-xs text-gray-400 mt-1">{f.hint}</span>
+          <span className="block text-xs text-[var(--color-text-muted)] mt-1">{f.hint}</span>
         </label>
       ))}
       {error && <p className="text-sm text-red-600">{error}</p>}
@@ -420,21 +420,21 @@ function EditBikeModal({ bike, onClose }: { bike: Bike; onClose: () => void }) {
       }
     >
       <label className="block">
-        <span className="block text-sm font-medium text-gray-700 mb-1">Name *</span>
+        <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Name *</span>
         <input value={name} onChange={(e) => setName(e.target.value)} className="input" />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Marke</span>
+          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Marke</span>
           <input value={brand} onChange={(e) => setBrand(e.target.value)} className="input" />
         </label>
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Modell</span>
+          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Modell</span>
           <input value={model} onChange={(e) => setModel(e.target.value)} className="input" />
         </label>
       </div>
       <label className="block">
-        <span className="block text-sm font-medium text-gray-700 mb-1">Baujahr</span>
+        <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Baujahr</span>
         <input
           value={year}
           onChange={(e) => setYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
