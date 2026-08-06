@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - master
+  # Manuelles Auslösen (z.B. um einen Deploy nachzuziehen, wenn ein Push den
+  # Workflow nicht getriggert hat).
+  workflow_dispatch:
 
 # Nur ein Deploy gleichzeitig: startet ein neuer master-Push, wird ein noch
 # laufender Deploy abgebrochen. Verhindert, dass zwei parallele `flyctl deploy`
