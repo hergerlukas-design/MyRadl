@@ -108,9 +108,91 @@ export function partSubtitle(
 
 /** Häufige Einstell-Vorschläge je Kategorie (nur UI-Hilfe, frei überschreibbar). */
 export const SETTING_SUGGESTIONS: Partial<Record<PartCategory, string[]>> = {
-  federgabel: ['Luftdruck', 'Sag', 'Zugstufe', 'Druckstufe', 'Tokens'],
-  daempfer: ['Luftdruck', 'Sag', 'Zugstufe', 'Druckstufe'],
-  reifen: ['Luftdruck vorne', 'Luftdruck hinten'],
+  federgabel: ['Luftdruck', 'Sag', 'Rebound', 'HSC', 'LSC', 'Tokens'],
+  daempfer: ['Luftdruck', 'Feder', 'Sag', 'Rebound', 'HSC', 'LSC'],
+  reifen: ['Luftdruck', 'Luftdruck vorne', 'Luftdruck hinten'],
   bremsen: ['Hebelweite', 'Druckpunkt'],
   antrieb: ['Kettenlänge', 'Übersetzung'],
+}
+
+// ── Schnellübersicht: „wichtige" Setup-Werte am Rad ───────────────────────────
+// Diese Keys erscheinen in der Einstellungen-Karte unter der Geometrie
+// (Federgabel, Dämpfer, Reifen). `primary` hebt die zentralen Werte hervor,
+// `unit` ist die Standardeinheit, die beim ersten Setzen vorbelegt wird.
+export interface ImportantSetting {
+  key: string
+  unit: string
+  primary?: boolean
+}
+
+// Reihenfolge der Kategorien in der Schnellübersicht.
+export const QUICK_SETTING_CATEGORIES: PartCategory[] = ['federgabel', 'daempfer', 'reifen']
+
+const FEDERGABEL_SETTINGS: ImportantSetting[] = [
+  { key: 'Luftdruck', unit: 'psi', primary: true },
+  { key: 'Sag', unit: '%', primary: true },
+  { key: 'Rebound', unit: 'Klicks' },
+  { key: 'HSC', unit: 'Klicks' },
+  { key: 'LSC', unit: 'Klicks' },
+  { key: 'Tokens', unit: '' },
+]
+
+// ── Dämpfer: Luft- oder Stahlfeder-Dämpfer ────────────────────────────────────
+// Der Typ wird als normale Einstellung am Teil gespeichert (Key = DAEMPFER_TYPE_KEY),
+// damit er mit der Teil-Detailseite synchron bleibt. Luftdämpfer → „Luftdruck",
+// Stahlfederdämpfer → „Feder" (Federrate). Der Rest ist identisch.
+export type ShockType = 'air' | 'coil'
+export const DAEMPFER_TYPE_KEY = 'Typ'
+
+const DAEMPFER_BASE: ImportantSetting[] = [
+  { key: 'Sag', unit: '%', primary: true },
+  { key: 'Rebound', unit: 'Klicks' },
+  { key: 'HSC', unit: 'Klicks' },
+  { key: 'LSC', unit: 'Klicks' },
+]
+
+/** Leitet den Dämpfer-Typ aus dem gespeicherten „Typ"-Wert ab (Default: Luft). */
+export function shockTypeFromValue(value: string | null | undefined): ShockType {
+  const v = (value ?? '').toLowerCase()
+  return v.includes('coil') || v.includes('feder') || v.includes('stahl') ? 'coil' : 'air'
+}
+
+export function shockTypeLabel(type: ShockType): string {
+  return type === 'coil' ? 'Coil' : 'Luft'
+}
+
+function daempferSettings(type: ShockType): ImportantSetting[] {
+  const head: ImportantSetting =
+    type === 'coil'
+      ? { key: 'Feder', unit: 'lbs', primary: true }
+      : { key: 'Luftdruck', unit: 'psi', primary: true }
+  return [head, ...DAEMPFER_BASE]
+}
+
+function reifenSettings(hasPosition: boolean): ImportantSetting[] {
+  // Positionierte Reifen (vorne/hinten) haben je einen Luftdruck; ein einzelner
+  // Reifen ohne Position deckt vorne und hinten separat ab.
+  return hasPosition
+    ? [{ key: 'Luftdruck', unit: 'bar', primary: true }]
+    : [
+        { key: 'Luftdruck vorne', unit: 'bar', primary: true },
+        { key: 'Luftdruck hinten', unit: 'bar', primary: true },
+      ]
+}
+
+/** Wichtige Einstellungen für ein konkretes Teil (Dämpfer typ-, Reifen positionsabhängig). */
+export function importantSettingsForPart(
+  part: Pick<Part, 'category' | 'position'>,
+  shockType: ShockType = 'air',
+): ImportantSetting[] {
+  switch (part.category) {
+    case 'federgabel':
+      return FEDERGABEL_SETTINGS
+    case 'daempfer':
+      return daempferSettings(shockType)
+    case 'reifen':
+      return reifenSettings(!!part.position)
+    default:
+      return []
+  }
 }

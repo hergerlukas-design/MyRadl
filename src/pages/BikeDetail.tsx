@@ -1,19 +1,35 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Ruler, GripVertical } from 'lucide-react'
+import { format } from 'date-fns'
+import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Ruler, SlidersHorizontal, GripVertical } from 'lucide-react'
 import Layout from '@/components/Layout'
 import Watermark from '@/components/Watermark'
 import PageHeader, { squareBtn } from '@/components/PageHeader'
 import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
 import ImageUpload from '@/components/ImageUpload'
-import { CATEGORIES, categoryColor, categoryLabel, partTitle, partSubtitle } from '@/lib/categories'
+import {
+  CATEGORIES,
+  categoryColor,
+  categoryLabel,
+  categoryMeta,
+  partTitle,
+  partSubtitle,
+  positionLabel,
+  importantSettingsForPart,
+  shockTypeFromValue,
+  shockTypeLabel,
+  DAEMPFER_TYPE_KEY,
+  QUICK_SETTING_CATEGORIES,
+  type ShockType,
+} from '@/lib/categories'
 import { GEOMETRY_FIELDS, formatGeometryValue } from '@/lib/geometry'
 import { uploadBikePhoto, deletePhoto } from '@/lib/storage'
 import { useAuth } from '@/hooks/useAuth'
 import { useBike, useUpdateBike, useDeleteBike } from '@/hooks/useBikes'
 import { useBikeGeometry, useUpsertBikeGeometry } from '@/hooks/useBikeGeometry'
 import { useParts, useReorderParts } from '@/hooks/useParts'
+import { useBikeSettings, useUpsertSetting, useAddHistory, type BikeSetting } from '@/hooks/usePartMeta'
 import type { Bike, BikeGeometry, GeometryField, Part } from '@/types'
 
 const CAT_ORDER = new Map(CATEGORIES.map((c, i) => [c.value, i]))
@@ -123,6 +139,8 @@ export default function BikeDetail() {
         )}
 
         <GeometrySection bikeId={bike.id} />
+
+        <BikeSettingsSection bikeId={bike.id} parts={parts ?? []} />
 
         <div className="flex items-center justify-between">
           <h2 className="text-[15px] font-extrabold tracking-[0.02em] text-cream">
@@ -519,6 +537,255 @@ function GeometryModal({
         </label>
       ))}
       {error && <p className="text-sm text-danger">{error}</p>}
+    </Modal>
+  )
+}
+
+// ── Einstellungen (Schnellübersicht) ─────────────────────────────────────────
+interface QuickEditTarget {
+  part: Part
+  key: string
+  unit: string
+  setting: BikeSetting | null
+}
+
+function BikeSettingsSection({ bikeId, parts }: { bikeId: string; parts: Part[] }) {
+  const { data: settings, isLoading } = useBikeSettings(bikeId)
+  const upsertType = useUpsertSetting()
+  const [open, setOpen] = useState(false)
+  const [editing, setEditing] = useState<QuickEditTarget | null>(null)
+
+  // Aktive Teile je relevanter Kategorie, in definierter Reihenfolge.
+  const groups = QUICK_SETTING_CATEGORIES.map((cat) => ({
+    cat,
+    parts: parts.filter((p) => p.category === cat && p.status === 'aktiv'),
+  })).filter((g) => g.parts.length > 0)
+
+  const valueFor = (partId: string, key: string): BikeSetting | null =>
+    settings?.find((s) => s.part_id === partId && s.key === key) ?? null
+
+  const shockTypeOf = (part: Part): ShockType =>
+    part.category === 'daempfer'
+      ? shockTypeFromValue(valueFor(part.id, DAEMPFER_TYPE_KEY)?.value)
+      : 'air'
+
+  // Kurzfassung für den eingeklappten Zustand: die wichtigsten Primärwerte.
+  const summary = groups
+    .flatMap(({ cat, parts: catParts }) =>
+      catParts.flatMap((part) => {
+        const first = importantSettingsForPart(part, shockTypeOf(part))[0]
+        if (!first) return []
+        const cur = valueFor(part.id, first.key)
+        if (!cur) return []
+        const short = cat === 'federgabel' ? 'Gabel' : categoryLabel(cat)
+        return [`${short} ${cur.value}${cur.unit ? ` ${cur.unit}` : ''}`]
+      }),
+    )
+    .slice(0, 3)
+    .join(' · ')
+
+  return (
+    <section className="bg-surface border border-hair rounded-[20px] overflow-hidden">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center gap-2 px-4 py-3.5 min-w-0 text-left"
+        aria-expanded={open}
+      >
+        <SlidersHorizontal size={16} className="text-muted flex-shrink-0" />
+        <span className="text-[15px] font-extrabold text-cream flex-shrink-0">Einstellungen</span>
+        {!open && summary && <span className="font-mono text-xs text-muted truncate">{summary}</span>}
+        <ChevronDown
+          size={18}
+          className={`ml-auto flex-shrink-0 text-muted transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {open && (
+        <div className="border-t border-hair-soft">
+          {isLoading ? (
+            <div className="py-4 flex justify-center">
+              <Spinner />
+            </div>
+          ) : groups.length === 0 ? (
+            <p className="text-sm text-muted px-4 py-3">
+              Noch keine Federgabel, kein Dämpfer oder Reifen angelegt. Lege diese Teile an, um dein Setup
+              hier im Blick zu haben.
+            </p>
+          ) : (
+            <div className="px-4">
+              {groups.flatMap(({ cat, parts: catParts }) =>
+                catParts.map((part) => {
+                  const meta = categoryMeta(cat)
+                  const Icon = meta.icon
+                  const color = categoryColor(cat)
+                  const isShock = cat === 'daempfer'
+                  const shockType = shockTypeOf(part)
+                  const keys = importantSettingsForPart(part, shockType)
+                  const eyebrow = [categoryLabel(cat), positionLabel(part.position)]
+                    .filter(Boolean)
+                    .join(' · ')
+                    .toUpperCase()
+                  return (
+                    <div key={part.id} className="py-3 border-b border-hair-soft last:border-0">
+                      <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <Icon size={13} className="flex-none" style={{ color }} />
+                          <span
+                            className="font-mono text-[9px] font-medium tracking-[0.16em] flex-none"
+                            style={{ color }}
+                          >
+                            {eyebrow}
+                          </span>
+                          <span className="text-[13px] font-semibold text-cream truncate">
+                            {partTitle(part)}
+                          </span>
+                        </div>
+                        {isShock && (
+                          <div className="inline-flex flex-none rounded-lg bg-surface-2 p-0.5">
+                            {(['air', 'coil'] as ShockType[]).map((t) => (
+                              <button
+                                key={t}
+                                onClick={() =>
+                                  upsertType.mutate({
+                                    part_id: part.id,
+                                    key: DAEMPFER_TYPE_KEY,
+                                    value: shockTypeLabel(t),
+                                  })
+                                }
+                                className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-colors ${
+                                  shockType === t ? 'bg-accent text-accent-ink' : 'text-muted'
+                                }`}
+                              >
+                                {shockTypeLabel(t)}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {keys.map((s) => {
+                        const cur = valueFor(part.id, s.key)
+                        return (
+                          <button
+                            key={s.key}
+                            onClick={() =>
+                              setEditing({ part, key: s.key, unit: cur?.unit ?? s.unit, setting: cur })
+                            }
+                            className="w-full flex items-center justify-between py-2 text-left active:opacity-70"
+                          >
+                            <span className={s.primary ? 'text-sm font-semibold text-cream' : 'text-sm text-muted'}>
+                              {s.key}
+                            </span>
+                            {cur ? (
+                              <span
+                                className={
+                                  s.primary
+                                    ? 'text-sm font-bold text-accent'
+                                    : 'text-sm font-medium text-cream-dim'
+                                }
+                              >
+                                {cur.value}
+                                {cur.unit ? ` ${cur.unit}` : ''}
+                              </span>
+                            ) : (
+                              <span className="font-mono text-xs text-dim">setzen</span>
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )
+                }),
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {editing && <QuickSettingModal target={editing} onClose={() => setEditing(null)} />}
+    </section>
+  )
+}
+
+function QuickSettingModal({ target, onClose }: { target: QuickEditTarget; onClose: () => void }) {
+  const upsert = useUpsertSetting()
+  const addHistory = useAddHistory()
+  const [value, setValue] = useState(target.setting?.value ?? '')
+  const [unit, setUnit] = useState(target.setting?.unit ?? target.unit)
+  const [log, setLog] = useState(false)
+  const prev = target.setting?.value ?? null
+
+  async function save() {
+    const v = value.trim()
+    if (!v) return
+    const u = unit.trim()
+    await upsert.mutateAsync({
+      id: target.setting?.id,
+      part_id: target.part.id,
+      key: target.key,
+      value: v,
+      unit: u || null,
+    })
+    if (log) {
+      const suffix = u ? ` ${u}` : ''
+      const note =
+        prev && prev !== v
+          ? `${target.key}: ${prev} → ${v}${suffix}`
+          : `${target.key}: ${v}${suffix}`
+      await addHistory.mutateAsync({
+        part_id: target.part.id,
+        event_type: 'gewartet',
+        event_date: format(new Date(), 'yyyy-MM-dd'),
+        note,
+      })
+    }
+    onClose()
+  }
+
+  const sub = [categoryLabel(target.part.category), positionLabel(target.part.position)]
+    .filter(Boolean)
+    .join(' · ')
+
+  return (
+    <Modal
+      title={`${sub} · ${target.key}`}
+      onClose={onClose}
+      footer={
+        <button
+          onClick={save}
+          disabled={upsert.isPending || addHistory.isPending}
+          className="w-full py-3.5 rounded-xl bg-accent text-accent-ink font-semibold disabled:opacity-60"
+        >
+          Speichern
+        </button>
+      }
+    >
+      <p className="font-mono text-xs text-muted -mt-1 truncate">{partTitle(target.part)}</p>
+      <div className="grid grid-cols-2 gap-3">
+        <label className="block">
+          <span className="block text-sm font-medium text-cream-dim mb-1.5">Wert</span>
+          <input
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="z.B. 75"
+            className="input"
+            autoFocus
+            inputMode="decimal"
+          />
+        </label>
+        <label className="block">
+          <span className="block text-sm font-medium text-cream-dim mb-1.5">Einheit</span>
+          <input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="z.B. psi" className="input" />
+        </label>
+      </div>
+      <label className="flex items-center gap-2.5 text-sm text-cream-dim">
+        <input
+          type="checkbox"
+          checked={log}
+          onChange={(e) => setLog(e.target.checked)}
+          className="w-4 h-4 rounded border-hair accent-accent"
+        />
+        Änderung im Verlauf des Teils festhalten
+      </label>
     </Modal>
   )
 }
