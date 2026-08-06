@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Ruler } from 'lucide-react'
+import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Ruler, GripVertical } from 'lucide-react'
 import Layout from '@/components/Layout'
 import Watermark from '@/components/Watermark'
 import PageHeader, { squareBtn } from '@/components/PageHeader'
@@ -13,7 +13,7 @@ import { uploadBikePhoto, deletePhoto } from '@/lib/storage'
 import { useAuth } from '@/hooks/useAuth'
 import { useBike, useUpdateBike, useDeleteBike } from '@/hooks/useBikes'
 import { useBikeGeometry, useUpsertBikeGeometry } from '@/hooks/useBikeGeometry'
-import { useParts } from '@/hooks/useParts'
+import { useParts, useReorderParts } from '@/hooks/useParts'
 import type { Bike, BikeGeometry, GeometryField, Part } from '@/types'
 
 const CAT_ORDER = new Map(CATEGORIES.map((c, i) => [c.value, i]))
@@ -36,13 +36,22 @@ export default function BikeDetail() {
   const [editing, setEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const sorted = useMemo(
-    () =>
-      [...(parts ?? [])].sort(
-        (a, b) => (CAT_ORDER.get(a.category) ?? 99) - (CAT_ORDER.get(b.category) ?? 99),
-      ),
-    [parts],
-  )
+  const sorted = useMemo(() => {
+    const arr = [...(parts ?? [])]
+    const anyCustom = arr.some((p) => p.sort_order != null)
+    if (anyCustom) {
+      // Vom Nutzer festgelegte Reihenfolge (Drag & Drop).
+      arr.sort(
+        (a, b) =>
+          (a.sort_order ?? Number.MAX_SAFE_INTEGER) - (b.sort_order ?? Number.MAX_SAFE_INTEGER) ||
+          (a.created_at < b.created_at ? -1 : 1),
+      )
+    } else {
+      // Standard: nach Kategorie gruppiert.
+      arr.sort((a, b) => (CAT_ORDER.get(a.category) ?? 99) - (CAT_ORDER.get(b.category) ?? 99))
+    }
+    return arr
+  }, [parts])
   const active = sorted.filter((p) => p.status === 'aktiv').length
 
   if (isLoading || !bike) {
@@ -133,11 +142,7 @@ export default function BikeDetail() {
             Noch keine Bauteile. Füge das erste Teil hinzu.
           </p>
         ) : (
-          <div className="flex flex-col gap-2.5">
-            {sorted.map((part) => (
-              <PartRow key={part.id} part={part} />
-            ))}
-          </div>
+          <PartsList bikeId={bike.id} parts={sorted} />
         )}
 
         {!bike.image_url && (
@@ -192,34 +197,142 @@ function Tile({ label, value }: { label: string; value: string }) {
   )
 }
 
-function PartRow({ part }: { part: Part }) {
+// ── Bauteilliste mit Drag & Drop ──────────────────────────────────────────────
+function PartsList({ bikeId, parts }: { bikeId: string; parts: Part[] }) {
+  const reorder = useReorderParts()
+  const [order, setOrder] = useState<string[]>(() => parts.map((p) => p.id))
+  const [dragId, setDragId] = useState<string | null>(null)
+  const rowRefs = useRef<Record<string, HTMLDivElement | null>>({})
+
+  const byId = useMemo(() => {
+    const m: Record<string, Part> = {}
+    for (const p of parts) m[p.id] = p
+    return m
+  }, [parts])
+
+  // Reihenfolge aus den Daten übernehmen, solange nicht gerade gezogen wird.
+  useEffect(() => {
+    if (!dragId) setOrder(parts.map((p) => p.id))
+  }, [parts, dragId])
+
+  function handleDown(e: React.PointerEvent, id: string) {
+    e.preventDefault()
+    e.stopPropagation()
+    ;(e.currentTarget as Element).setPointerCapture(e.pointerId)
+    setDragId(id)
+  }
+
+  function handleMove(e: React.PointerEvent) {
+    if (!dragId) return
+    const y = e.clientY
+    let target = order.length - 1
+    for (let i = 0; i < order.length; i++) {
+      const el = rowRefs.current[order[i]]
+      if (!el) continue
+      const r = el.getBoundingClientRect()
+      if (y < r.top + r.height / 2) {
+        target = i
+        break
+      }
+    }
+    const from = order.indexOf(dragId)
+    if (from === -1 || from === target) return
+    const next = [...order]
+    next.splice(from, 1)
+    next.splice(target, 0, dragId)
+    setOrder(next)
+  }
+
+  function handleUp(e: React.PointerEvent) {
+    if (!dragId) return
+    ;(e.currentTarget as Element).releasePointerCapture?.(e.pointerId)
+    setDragId(null)
+    const current = parts.map((p) => p.id)
+    if (order.length === current.length && order.some((id, i) => id !== current[i])) {
+      reorder.mutate({ bikeId, orderedIds: order })
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2.5">
+      {order
+        .map((id) => byId[id])
+        .filter(Boolean)
+        .map((part) => (
+          <PartRow
+            key={part.id}
+            part={part}
+            dragging={dragId === part.id}
+            setRef={(el) => {
+              rowRefs.current[part.id] = el
+            }}
+            onHandleDown={(e) => handleDown(e, part.id)}
+            onHandleMove={handleMove}
+            onHandleUp={handleUp}
+          />
+        ))}
+    </div>
+  )
+}
+
+function PartRow({
+  part,
+  dragging,
+  setRef,
+  onHandleDown,
+  onHandleMove,
+  onHandleUp,
+}: {
+  part: Part
+  dragging: boolean
+  setRef: (el: HTMLDivElement | null) => void
+  onHandleDown: (e: React.PointerEvent) => void
+  onHandleMove: (e: React.PointerEvent) => void
+  onHandleUp: (e: React.PointerEvent) => void
+}) {
   const navigate = useNavigate()
   const color = categoryColor(part.category)
   const isReplaced = part.status === 'ersetzt'
   const sub = partSubtitle(part)
   return (
-    <button
-      onClick={() => navigate(`/parts/${part.id}`)}
-      className={`text-left flex items-stretch gap-3.5 bg-surface border border-hair rounded-[18px] px-4 py-3.5 active:scale-[0.99] transition-transform ${
-        isReplaced ? 'opacity-55' : ''
-      }`}
+    <div
+      ref={setRef}
+      className={`flex items-stretch gap-1.5 bg-surface border rounded-[18px] pl-1.5 pr-4 py-3.5 ${
+        dragging ? 'border-accent/60 shadow-lg shadow-black/40 relative z-10' : 'border-hair'
+      } ${isReplaced ? 'opacity-55' : ''}`}
     >
-      <span className="w-[3px] rounded-full flex-none" style={{ background: color }} />
-      <div className="flex-1 min-w-0 flex flex-col gap-1">
-        <span className="font-mono text-[9px] font-medium tracking-[0.16em]" style={{ color }}>
-          {categoryLabel(part.category).toUpperCase()}
+      <button
+        onPointerDown={onHandleDown}
+        onPointerMove={onHandleMove}
+        onPointerUp={onHandleUp}
+        onPointerCancel={onHandleUp}
+        className="flex-none self-stretch flex items-center px-1 text-dim active:text-accent cursor-grab touch-none"
+        style={{ touchAction: 'none' }}
+        aria-label="Zum Sortieren ziehen"
+      >
+        <GripVertical size={18} />
+      </button>
+      <span className="w-[3px] rounded-full flex-none self-stretch" style={{ background: color }} />
+      <button
+        onClick={() => navigate(`/parts/${part.id}`)}
+        className="flex-1 min-w-0 flex items-center gap-3 text-left active:scale-[0.99] transition-transform"
+      >
+        <span className="flex-1 min-w-0 flex flex-col gap-1">
+          <span className="font-mono text-[9px] font-medium tracking-[0.16em]" style={{ color }}>
+            {categoryLabel(part.category).toUpperCase()}
+          </span>
+          <span className="block text-base font-semibold leading-tight text-cream truncate">
+            {partTitle(part)}
+          </span>
+          <span className="font-mono text-xs text-muted truncate">{sub || '—'}</span>
         </span>
-        <span className="text-base font-semibold leading-tight text-cream truncate">
-          {partTitle(part)}
-        </span>
-        <span className="font-mono text-xs text-muted truncate">{sub || '—'}</span>
-      </div>
-      {isReplaced ? (
-        <span className="self-center font-mono text-[9px] font-medium tracking-[0.12em] text-muted">ERSETZT</span>
-      ) : (
-        <ChevronRight className="self-center text-dim flex-none" size={18} />
-      )}
-    </button>
+        {isReplaced ? (
+          <span className="self-center font-mono text-[9px] font-medium tracking-[0.12em] text-muted">ERSETZT</span>
+        ) : (
+          <ChevronRight className="self-center text-dim flex-none" size={18} />
+        )}
+      </button>
+    </div>
   )
 }
 

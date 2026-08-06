@@ -98,3 +98,39 @@ export function useDeletePart() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['parts'] }),
   })
 }
+
+/**
+ * Persist a user-defined order for a bike's parts. Writes sort_order = index
+ * for each id in `orderedIds`. Optimistically updates the cached bike list so
+ * the new order sticks instantly.
+ */
+export function useReorderParts() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ orderedIds }: { bikeId: string; orderedIds: string[] }) => {
+      const results = await Promise.all(
+        orderedIds.map((id, index) =>
+          supabase.from('parts').update({ sort_order: index }).eq('id', id),
+        ),
+      )
+      const failed = results.find((r) => r.error)
+      if (failed?.error) throw failed.error
+    },
+    onMutate: async ({ bikeId, orderedIds }) => {
+      const key = ['parts', 'bike', bikeId]
+      await qc.cancelQueries({ queryKey: key })
+      const previous = qc.getQueryData<Part[]>(key)
+      qc.setQueryData<Part[]>(key, (old) =>
+        old?.map((p) => {
+          const idx = orderedIds.indexOf(p.id)
+          return idx === -1 ? p : { ...p, sort_order: idx }
+        }),
+      )
+      return { previous, bikeId }
+    },
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous) qc.setQueryData(['parts', 'bike', ctx.bikeId], ctx.previous)
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: ['parts'] }),
+  })
+}
