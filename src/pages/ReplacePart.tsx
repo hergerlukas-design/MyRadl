@@ -96,28 +96,28 @@ export default function ReplacePart() {
           </p>
         </div>
 
-        <div className="text-sm text-gray-500">
-          Kategorie: <span className="font-medium text-gray-800">{categoryLabel(old.category)}</span>
+        <div className="text-sm text-[var(--color-text-muted)]">
+          Kategorie: <span className="font-medium text-[var(--color-text)]">{categoryLabel(old.category)}</span>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Hersteller *</span>
+            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Hersteller *</span>
             <input value={brand} onChange={(e) => setBrand(e.target.value)} className="input" />
           </label>
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Modell</span>
+            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Modell</span>
             <input value={model} onChange={(e) => setModel(e.target.value)} className="input" />
           </label>
         </div>
 
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Variante / Größe</span>
+          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Variante / Größe</span>
           <input value={variant} onChange={(e) => setVariant(e.target.value)} placeholder="z.B. 180mm, 29 Zoll" className="input" />
         </label>
 
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Einbaudatum Nachfolger</span>
+          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Einbaudatum Nachfolger</span>
           <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input" />
         </label>
 

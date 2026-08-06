@@ -41,6 +41,55 @@
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
+/*
+ * Dark-Mode-Variante: dieselben Tokens werden für dunkle Systemeinstellung
+ * überschrieben. Da alle Screens die Variablen referenzieren, kippt die App
+ * automatisch – warmes, braunes Dark-Theme (angelehnt an #493B2A der Palette),
+ * mit bewusst dunklen Kartenflächen auf noch dunklerem Grund.
+ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #1a140e;            /* sehr dunkles, warmes Braun */
+    --color-surface: #382c1e;       /* Karten: dunkler als #493B2A, klar bräunlich */
+    --color-border-subtle: #4a3b29;
+    --color-text: #f0e9df;
+    --color-text-muted: #b4a68d;
+    --color-accent: #74b485;        /* Grün, für braunen Grund aufgehellt */
+    --color-primary: #74b485;
+    --color-primary-dark: #5c9b70;
+
+    /* Kategoriefarben: dunkle Chip-Flächen, aufgehellte Icon-/Randfarben. */
+    --color-cat-fork-bg: #2f3f31;
+    --color-cat-fork-fg: #86c295;
+    --color-cat-shock-bg: #2a3c44;
+    --color-cat-shock-fg: #74bad2;
+    --color-cat-drive-bg: #4a3a22;
+    --color-cat-drive-fg: #dca85f;
+    --color-cat-brake-bg: #452a24;
+    --color-cat-brake-fg: #db8b7a;
+    --color-cat-wheel-bg: #313742;
+    --color-cat-wheel-fg: #9fabbd;
+    --color-cat-tire-bg: #3a3227;
+    --color-cat-tire-fg: #bcae96;
+    --color-cat-stem-bg: #37303c;
+    --color-cat-stem-fg: #bda2c7;
+    --color-cat-bar-bg: #263f39;
+    --color-cat-bar-fg: #7cc0af;
+    --color-cat-grip-bg: #3f321f;
+    --color-cat-grip-fg: #cba86c;
+    --color-cat-saddle-bg: #3a2f1f;
+    --color-cat-saddle-fg: #c6a06f;
+    --color-cat-misc-bg: #362c20;
+    --color-cat-misc-fg: #b4a68d;
+  }
+
+  /* Auf dunklem Grund trägt eine feine Kontur die Karten besser als ein Schatten. */
+  .card {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--color-border-subtle);
+  }
+}
+
 * {
   -webkit-tap-highlight-color: transparent;
 }

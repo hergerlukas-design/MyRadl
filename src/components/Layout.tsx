@@ -25,7 +25,7 @@ export default function Layout({ children, title, back = false, action, hideNav 
             {back && (
               <button
                 onClick={() => navigate(-1)}
-                className="-ml-2 p-1 text-gray-500 hover:text-gray-900"
+                className="-ml-2 p-1 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                 aria-label="Zurück"
               >
                 <ChevronLeft size={24} />

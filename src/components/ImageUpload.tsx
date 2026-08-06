@@ -63,7 +63,7 @@ export default function ImageUpload({
         onChange={handleFile}
       />
       <div
-        className={`relative ${ratio} w-full rounded-2xl overflow-hidden border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center`}
+        className={`relative ${ratio} w-full rounded-2xl overflow-hidden border border-dashed border-[var(--color-border-subtle)] bg-[var(--color-surface)] flex items-center justify-center`}
       >
         {url ? (
           <img src={url} alt={label} className="w-full h-full object-cover" />
@@ -71,7 +71,7 @@ export default function ImageUpload({
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="flex flex-col items-center gap-1 text-gray-400"
+            className="flex flex-col items-center gap-1 text-[var(--color-text-muted)]"
           >
             <Camera size={28} />
             <span className="text-xs font-medium">{label} hinzufügen</span>

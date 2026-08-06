@@ -38,7 +38,7 @@ export default function Search() {
     <Layout title="Suche">
       <div className="p-4 space-y-3">
         <div className="relative">
-          <SearchIcon size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <SearchIcon size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}

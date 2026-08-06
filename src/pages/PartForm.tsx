@@ -120,7 +120,7 @@ export default function PartForm() {
     <Layout title={isEdit ? 'Teil bearbeiten' : 'Neues Teil'} back hideNav>
       <form onSubmit={handleSubmit} className="p-4 space-y-4">
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Kategorie</span>
+          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Kategorie</span>
           <select
             value={form.category}
             onChange={(e) => set('category', e.target.value as PartCategory)}
@@ -136,18 +136,18 @@ export default function PartForm() {
 
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Hersteller *</span>
+            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Hersteller *</span>
             <input value={form.brand} onChange={(e) => set('brand', e.target.value)} placeholder="z.B. Fox" className="input" />
           </label>
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Modell</span>
+            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Modell</span>
             <input value={form.model} onChange={(e) => set('model', e.target.value)} placeholder="z.B. 36 Factory" className="input" />
           </label>
         </div>
 
         {form.category === 'sonstiges' && (
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Bezeichnung</span>
+            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Bezeichnung</span>
             <input
               value={form.custom_type}
               onChange={(e) => set('custom_type', e.target.value)}
@@ -159,7 +159,7 @@ export default function PartForm() {
 
         {categoryHasPosition(form.category) && (
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Position</span>
+            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Position</span>
             <select value={form.position} onChange={(e) => set('position', e.target.value)} className="input">
               <option value="">– keine Angabe –</option>
               {POSITION_OPTIONS.map((p) => (
@@ -172,7 +172,7 @@ export default function PartForm() {
         )}
 
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Variante / Größe</span>
+          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Variante / Größe</span>
           <input
             value={form.variant}
             onChange={(e) => set('variant', e.target.value)}
@@ -182,13 +182,13 @@ export default function PartForm() {
         </label>
 
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Einbaudatum</span>
+          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Einbaudatum</span>
           <input type="date" value={form.install_date} onChange={(e) => set('install_date', e.target.value)} className="input" />
         </label>
 
         {isEdit && (
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Status</span>
+            <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Status</span>
             <select value={form.status} onChange={(e) => set('status', e.target.value as PartStatus)} className="input">
               <option value="aktiv">aktiv</option>
               <option value="ersetzt">ersetzt</option>
@@ -197,7 +197,7 @@ export default function PartForm() {
         )}
 
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Notizen</span>
+          <span className="block text-sm font-medium text-[var(--color-text)] mb-1">Notizen</span>
           <textarea
             value={form.notes}
             onChange={(e) => set('notes', e.target.value)}
