@@ -1,30 +1,37 @@
 import { NavLink } from 'react-router-dom'
-import { Bike, Search, Settings } from 'lucide-react'
 
 const items = [
-  { to: '/bikes', icon: Bike, label: 'Räder' },
-  { to: '/search', icon: Search, label: 'Suche' },
-  { to: '/settings', icon: Settings, label: 'Mehr' },
+  { to: '/bikes', label: 'RÄDER' },
+  { to: '/search', label: 'SUCHE' },
+  { to: '/settings', label: 'MEHR' },
 ]
 
 export default function BottomNav() {
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 flex max-w-2xl mx-auto"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      className="fixed bottom-0 left-0 right-0 z-40 flex items-stretch bg-nav border-t border-white/[0.07] max-w-md mx-auto px-3 pt-2.5"
+      style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}
     >
-      {items.map(({ to, icon: Icon, label }) => (
+      {items.map(({ to, label }) => (
         <NavLink
           key={to}
           to={to}
-          className={({ isActive }) =>
-            `flex-1 flex flex-col items-center justify-center py-2 gap-0.5 text-xs font-medium transition-colors ${
-              isActive ? 'text-primary' : 'text-gray-400 hover:text-gray-700'
-            }`
-          }
+          className="flex-1 flex flex-col items-center gap-1.5 py-2 group"
         >
-          <Icon size={22} />
-          <span className="truncate max-w-full px-1">{label}</span>
+          {({ isActive }) => (
+            <>
+              <span
+                className="h-1 w-[34px] rounded-full transition-colors"
+                style={{ background: isActive ? 'var(--color-accent)' : 'rgba(255,255,255,0.08)' }}
+              />
+              <span
+                className="font-mono text-[11px] font-semibold tracking-[0.12em] transition-colors"
+                style={{ color: isActive ? 'var(--color-accent)' : 'var(--color-dim)' }}
+              >
+                {label}
+              </span>
+            </>
+          )}
         </NavLink>
       ))}
     </nav>

@@ -16,19 +16,22 @@ export interface CategoryMeta {
   value: PartCategory
   label: string
   icon: LucideIcon
+  /** Fixed color code — stays identical across list, detail and search. */
+  color: string
 }
 
 // Reihenfolge = Anzeigereihenfolge in der Bauteilliste.
+// Farbcodes aus dem Design-System (Kategorie-Codes).
 export const CATEGORIES: CategoryMeta[] = [
-  { value: 'federgabel', label: 'Federgabel', icon: MoveVertical },
-  { value: 'daempfer', label: 'Dämpfer', icon: Wind },
-  { value: 'antrieb', label: 'Antrieb', icon: Cog },
-  { value: 'bremsen', label: 'Bremsen', icon: Disc3 },
-  { value: 'laufraeder', label: 'Laufräder', icon: CircleDot },
-  { value: 'reifen', label: 'Reifen', icon: Circle },
-  { value: 'cockpit', label: 'Cockpit', icon: Move },
-  { value: 'sattel', label: 'Sattel', icon: Armchair },
-  { value: 'sonstiges', label: 'Sonstiges', icon: Package },
+  { value: 'federgabel', label: 'Federgabel', icon: MoveVertical, color: '#A6D65A' },
+  { value: 'daempfer', label: 'Dämpfer', icon: Wind, color: '#6FA8D6' },
+  { value: 'antrieb', label: 'Antrieb', icon: Cog, color: '#D6C25A' },
+  { value: 'bremsen', label: 'Bremsen', icon: Disc3, color: '#D67A5A' },
+  { value: 'laufraeder', label: 'Laufräder', icon: CircleDot, color: '#8C8CD6' },
+  { value: 'reifen', label: 'Reifen', icon: Circle, color: '#E0A94E' },
+  { value: 'cockpit', label: 'Cockpit', icon: Move, color: '#5AD6B0' },
+  { value: 'sattel', label: 'Sattel', icon: Armchair, color: '#C58BD6' },
+  { value: 'sonstiges', label: 'Sonstiges', icon: Package, color: '#9A9489' },
 ]
 
 const BY_VALUE = new Map(CATEGORIES.map((c) => [c.value, c]))
@@ -39,6 +42,10 @@ export function categoryMeta(value: PartCategory): CategoryMeta {
 
 export function categoryLabel(value: PartCategory): string {
   return categoryMeta(value).label
+}
+
+export function categoryColor(value: PartCategory): string {
+  return categoryMeta(value).color
 }
 
 /** Häufige Einstell-Vorschläge je Kategorie (nur UI-Hilfe, frei überschreibbar). */

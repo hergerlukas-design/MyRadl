@@ -1,16 +1,20 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { Plus, Pencil, Trash2, ChevronRight } from 'lucide-react'
 import Layout from '@/components/Layout'
+import Watermark from '@/components/Watermark'
+import PageHeader, { squareBtn } from '@/components/PageHeader'
 import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
 import ImageUpload from '@/components/ImageUpload'
-import { CATEGORIES } from '@/lib/categories'
-import { uploadBikePhoto, deletePhoto, photoUrl } from '@/lib/storage'
+import { CATEGORIES, categoryColor, categoryLabel } from '@/lib/categories'
+import { uploadBikePhoto, deletePhoto } from '@/lib/storage'
 import { useAuth } from '@/hooks/useAuth'
 import { useBike, useUpdateBike, useDeleteBike } from '@/hooks/useBikes'
 import { useParts } from '@/hooks/useParts'
 import type { Bike, Part } from '@/types'
+
+const CAT_ORDER = new Map(CATEGORIES.map((c, i) => [c.value, i]))
 
 export default function BikeDetail() {
   const { bikeId = '' } = useParams()
@@ -23,9 +27,19 @@ export default function BikeDetail() {
   const [editing, setEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
+  const sorted = useMemo(
+    () =>
+      [...(parts ?? [])].sort(
+        (a, b) => (CAT_ORDER.get(a.category) ?? 99) - (CAT_ORDER.get(b.category) ?? 99),
+      ),
+    [parts],
+  )
+  const active = sorted.filter((p) => p.status === 'aktiv').length
+  const replaced = sorted.length - active
+
   if (isLoading || !bike) {
     return (
-      <Layout title="Rad" back>
+      <Layout>
         <div className="flex justify-center py-20">
           <Spinner />
         </div>
@@ -50,19 +64,37 @@ export default function BikeDetail() {
     navigate('/bikes', { replace: true })
   }
 
-  const sub = [bike.brand, bike.model, bike.year].filter(Boolean).join(' · ')
+  const sub = [bike.brand, bike.year, bike.model].filter(Boolean).join(' · ')
+  const eyebrow = (bike.brand ?? 'Rad').toUpperCase()
 
   return (
-    <Layout
-      title={bike.name}
-      back
-      action={
-        <button onClick={() => setEditing(true)} className="p-1.5 text-gray-500 hover:text-gray-900" aria-label="Bearbeiten">
-          <Pencil size={18} />
-        </button>
-      }
-    >
-      <div className="p-4 space-y-5">
+    <Layout>
+      <header className="relative overflow-hidden border-b border-white/[0.07] flex-none">
+        <Watermark variant="bottom" />
+        <div className="relative px-5 pt-4 pb-5">
+          <PageHeader
+            eyebrow={eyebrow}
+            onBack={() => navigate('/bikes')}
+            action={
+              <button onClick={() => setEditing(true)} className={squareBtn} aria-label="Bearbeiten">
+                <Pencil size={15} className="text-accent" />
+              </button>
+            }
+          />
+          <h1 className="mt-3.5 font-display font-black text-[42px] leading-[0.95] tracking-[-0.03em] text-cream">
+            {bike.name}
+          </h1>
+          {sub && <p className="mt-0.5 font-mono text-[13px] text-muted">{sub}</p>}
+          <div className="mt-4 grid grid-cols-4 gap-2.5">
+            <Tile label="TEILE" value={String(sorted.length)} />
+            <Tile label="AKTIV" value={String(active)} />
+            <Tile label="ERSETZT" value={String(replaced)} />
+            <Tile label="JAHR" value={bike.year ? String(bike.year) : '—'} />
+          </div>
+        </div>
+      </header>
+
+      <div className="flex-1 px-5 py-5 flex flex-col gap-5">
         <ImageUpload
           value={bike.image_url}
           onUpload={handlePhoto}
@@ -71,48 +103,31 @@ export default function BikeDetail() {
           label="Radfoto"
         />
 
-        {sub && <p className="text-gray-500 -mt-1">{sub}</p>}
-
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-gray-900">Bauteile</h2>
+          <h2 className="text-[15px] font-extrabold tracking-[0.02em] text-cream">Verbaute Teile</h2>
           <button
             onClick={() => navigate(`/bikes/${bike.id}/parts/new`)}
-            className="flex items-center gap-1 bg-primary text-white text-sm font-semibold pl-2.5 pr-3 py-1.5 rounded-full active:scale-95 transition-transform"
+            className="flex items-center gap-1.5 bg-accent text-accent-ink text-[13px] font-semibold pl-3 pr-3.5 py-2 rounded-full active:scale-95 transition-transform"
           >
-            <Plus size={17} /> Teil
+            <Plus size={16} /> Teil
           </button>
         </div>
 
-        {!parts || parts.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-8">
+        {sorted.length === 0 ? (
+          <p className="font-mono text-xs text-muted text-center py-8">
             Noch keine Bauteile. Füge das erste Teil hinzu.
           </p>
         ) : (
-          <div className="space-y-5">
-            {CATEGORIES.map((cat) => {
-              const group = parts.filter((p) => p.category === cat.value)
-              if (group.length === 0) return null
-              const Icon = cat.icon
-              return (
-                <section key={cat.value}>
-                  <div className="flex items-center gap-2 mb-2 text-gray-500">
-                    <Icon size={16} />
-                    <h3 className="text-xs font-semibold uppercase tracking-wide">{cat.label}</h3>
-                  </div>
-                  <ul className="space-y-2">
-                    {group.map((part) => (
-                      <PartRow key={part.id} part={part} />
-                    ))}
-                  </ul>
-                </section>
-              )
-            })}
+          <div className="flex flex-col gap-2.5">
+            {sorted.map((part) => (
+              <PartRow key={part.id} part={part} />
+            ))}
           </div>
         )}
 
         <button
           onClick={() => setConfirmDelete(true)}
-          className="mt-4 w-full flex items-center justify-center gap-2 text-red-600 text-sm font-medium py-2"
+          className="mt-2 w-full flex items-center justify-center gap-2 text-danger text-sm font-medium py-2"
         >
           <Trash2 size={16} /> Rad löschen
         </button>
@@ -125,16 +140,16 @@ export default function BikeDetail() {
           onClose={() => setConfirmDelete(false)}
           footer={
             <div className="flex gap-3">
-              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-3 rounded-xl bg-gray-100 font-semibold">
+              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-3.5 rounded-xl bg-surface-2 text-cream font-semibold">
                 Abbrechen
               </button>
-              <button onClick={handleDelete} className="flex-1 py-3 rounded-xl bg-red-600 text-white font-semibold">
+              <button onClick={handleDelete} className="flex-1 py-3.5 rounded-xl bg-danger text-ink font-semibold">
                 Löschen
               </button>
             </div>
           }
         >
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-cream-dim">
             „{bike.name}" und alle zugehörigen Bauteile, Einstellungen und Verläufe werden dauerhaft gelöscht.
           </p>
         </Modal>
@@ -143,35 +158,45 @@ export default function BikeDetail() {
   )
 }
 
+function Tile({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="bg-surface border border-white/[0.07] rounded-[14px] px-3 py-2.5 flex flex-col gap-1">
+      <span className="eyebrow">{label}</span>
+      <span className="font-display font-semibold text-[17px] text-cream leading-none">{value}</span>
+    </div>
+  )
+}
+
 function PartRow({ part }: { part: Part }) {
   const navigate = useNavigate()
-  const url = photoUrl(part.image_url)
-  const replaced = part.status === 'ersetzt'
+  const color = categoryColor(part.category)
+  const isReplaced = part.status === 'ersetzt'
   return (
-    <li>
-      <button
-        onClick={() => navigate(`/parts/${part.id}`)}
-        className={`w-full flex items-center gap-3 bg-white rounded-xl border border-gray-100 p-2.5 text-left active:scale-[0.99] transition-transform ${
-          replaced ? 'opacity-60' : ''
-        }`}
-      >
-        {url && (
-          <img src={url} alt="" className="w-11 h-11 rounded-lg object-cover flex-shrink-0" />
-        )}
-        <div className="flex-1 min-w-0">
-          <p className="font-medium text-gray-900 truncate">
-            {part.brand} {part.model}
-          </p>
-          <p className="text-sm text-gray-500 truncate">
-            {part.variant || '—'}
-          </p>
-        </div>
-        {replaced && (
-          <span className="text-[11px] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">ersetzt</span>
-        )}
-        <ChevronRight className="text-gray-300 flex-shrink-0" size={18} />
-      </button>
-    </li>
+    <button
+      onClick={() => navigate(`/parts/${part.id}`)}
+      className={`text-left flex items-stretch gap-3.5 bg-surface border border-white/[0.07] rounded-[18px] px-4 py-3.5 active:scale-[0.99] transition-transform ${
+        isReplaced ? 'opacity-55' : ''
+      }`}
+    >
+      <span className="w-[3px] rounded-full flex-none" style={{ background: color }} />
+      <div className="flex-1 min-w-0 flex flex-col gap-1">
+        <span
+          className="font-mono text-[9px] font-medium tracking-[0.16em]"
+          style={{ color }}
+        >
+          {categoryLabel(part.category).toUpperCase()}
+        </span>
+        <span className="text-base font-semibold leading-tight text-cream truncate">
+          {part.brand} {part.model}
+        </span>
+        <span className="font-mono text-xs text-muted truncate">{part.variant || '—'}</span>
+      </div>
+      {isReplaced ? (
+        <span className="self-center font-mono text-[9px] font-medium tracking-[0.12em] text-muted">ERSETZT</span>
+      ) : (
+        <ChevronRight className="self-center text-dim flex-none" size={18} />
+      )}
+    </button>
   )
 }
 
@@ -212,28 +237,28 @@ function EditBikeModal({ bike, onClose }: { bike: Bike; onClose: () => void }) {
         <button
           onClick={handleSave}
           disabled={updateBike.isPending}
-          className="w-full py-3 rounded-xl bg-primary text-white font-semibold disabled:opacity-60"
+          className="w-full py-3.5 rounded-xl bg-accent text-accent-ink font-semibold disabled:opacity-60"
         >
           Speichern
         </button>
       }
     >
       <label className="block">
-        <span className="block text-sm font-medium text-gray-700 mb-1">Name *</span>
+        <span className="block text-sm font-medium text-cream-dim mb-1.5">Name *</span>
         <input value={name} onChange={(e) => setName(e.target.value)} className="input" />
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Marke</span>
+          <span className="block text-sm font-medium text-cream-dim mb-1.5">Marke</span>
           <input value={brand} onChange={(e) => setBrand(e.target.value)} className="input" />
         </label>
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Modell</span>
+          <span className="block text-sm font-medium text-cream-dim mb-1.5">Modell</span>
           <input value={model} onChange={(e) => setModel(e.target.value)} className="input" />
         </label>
       </div>
       <label className="block">
-        <span className="block text-sm font-medium text-gray-700 mb-1">Baujahr</span>
+        <span className="block text-sm font-medium text-cream-dim mb-1.5">Baujahr</span>
         <input
           value={year}
           onChange={(e) => setYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
@@ -241,7 +266,7 @@ function EditBikeModal({ bike, onClose }: { bike: Bike; onClose: () => void }) {
           className="input"
         />
       </label>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
     </Modal>
   )
 }

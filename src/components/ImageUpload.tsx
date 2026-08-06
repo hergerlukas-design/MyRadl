@@ -63,7 +63,7 @@ export default function ImageUpload({
         onChange={handleFile}
       />
       <div
-        className={`relative ${ratio} w-full rounded-2xl overflow-hidden border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center`}
+        className={`relative ${ratio} w-full rounded-2xl overflow-hidden border border-white/[0.07] photo-ph flex items-center justify-center`}
       >
         {url ? (
           <img src={url} alt={label} className="w-full h-full object-cover" />
@@ -71,16 +71,16 @@ export default function ImageUpload({
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="flex flex-col items-center gap-1 text-gray-400"
+            className="flex flex-col items-center gap-1.5 text-muted"
           >
-            <Camera size={28} />
-            <span className="text-xs font-medium">{label} hinzufügen</span>
+            <Camera size={26} />
+            <span className="font-mono text-[10px] tracking-[0.14em]">{label.toUpperCase()}</span>
           </button>
         )}
 
         {busy && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <Loader2 className="animate-spin text-white" size={28} />
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+            <Loader2 className="animate-spin text-accent" size={28} />
           </div>
         )}
 
@@ -89,7 +89,7 @@ export default function ImageUpload({
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className="bg-white/90 rounded-full p-2 shadow"
+              className="bg-ink/80 text-cream rounded-full p-2 border border-white/10"
               aria-label="Foto ändern"
             >
               <Camera size={16} />
@@ -98,7 +98,7 @@ export default function ImageUpload({
               <button
                 type="button"
                 onClick={handleRemove}
-                className="bg-white/90 rounded-full p-2 shadow text-red-600"
+                className="bg-ink/80 rounded-full p-2 border border-white/10 text-danger"
                 aria-label="Foto entfernen"
               >
                 <X size={16} />
@@ -107,7 +107,7 @@ export default function ImageUpload({
           </div>
         )}
       </div>
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+      {error && <p className="mt-1 text-xs text-danger">{error}</p>}
     </div>
   )
 }

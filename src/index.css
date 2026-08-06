@@ -1,10 +1,26 @@
 @import "tailwindcss";
 
+/*
+ * MyRadl — dark "outdoor" design system.
+ * Warm near-black base, lime accent, Chivo signage / IBM Plex Sans UI /
+ * IBM Plex Mono for values & labels.
+ */
 @theme {
-  --color-primary: #15803d;   /* green-700 */
-  --color-primary-dark: #14532d;
-  --color-accent: #ea580c;    /* orange-600 */
-  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #12100e;        /* app background */
+  --color-surface: #1b1815;    /* cards */
+  --color-surface-2: #221f1a;  /* card hover / raised */
+  --color-nav: #17140f;        /* bottom nav */
+  --color-accent: #a6d65a;     /* lime accent */
+  --color-accent-ink: #12100e; /* text on accent */
+  --color-cream: #f2efe9;      /* primary text */
+  --color-cream-dim: #d8d3c9;  /* secondary text */
+  --color-muted: #8e877b;      /* tertiary text */
+  --color-dim: #6f6a60;        /* faint labels */
+  --color-danger: #d66a6a;
+
+  --font-display: "Chivo", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
 
 * {
@@ -13,12 +29,14 @@
 
 html {
   scroll-behavior: smooth;
+  background-color: var(--color-ink);
+  color-scheme: dark;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: var(--color-ink);
+  color: var(--color-cream);
 }
 
 /* Prevent iOS from zooming when focusing inputs (font-size >= 16px). */
@@ -28,27 +46,55 @@ textarea {
   font-size: 16px;
 }
 
-/* Shared form control styling. */
+/* Hidden scrollbars for the vertically-scrolling screen bodies. */
+.scr::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.scr {
+  scrollbar-width: none;
+}
+
+/* Diagonal hatched placeholder used where a real photo is missing. */
+.photo-ph {
+  background-image: repeating-linear-gradient(115deg, #211e19 0 10px, #1b1815 10px 20px);
+}
+
+/* Shared dark form control. */
 .input {
   width: 100%;
-  border-radius: 0.75rem;
-  border: 1px solid #d1d5db;
-  background-color: #fff;
-  padding: 0.625rem 0.875rem;
-  color: #0f172a;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--color-surface);
+  padding: 0.8125rem 0.9375rem;
+  color: var(--color-cream);
   outline: none;
 }
 .input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.15);
+  border-color: rgba(166, 214, 90, 0.6);
+  box-shadow: 0 0 0 3px rgba(166, 214, 90, 0.15);
 }
 .input::placeholder {
-  color: #9ca3af;
+  color: var(--color-dim);
 }
 select.input {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%238e877b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.625rem center;
-  padding-right: 2.25rem;
+  background-position: right 0.75rem center;
+  padding-right: 2.5rem;
+}
+select.input option {
+  background-color: var(--color-surface);
+  color: var(--color-cream);
+}
+
+/* Mono eyebrow label — the recurring small tracked caps in the design. */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-dim);
 }
