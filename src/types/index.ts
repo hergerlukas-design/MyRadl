@@ -46,6 +46,29 @@ export interface Part {
   created_at: string
 }
 
+export interface BikeGeometry {
+  bike_id: string
+  frame_size: string | null
+  seat_tube_length: number | null
+  top_tube_length: number | null
+  head_angle: number | null
+  seat_angle: number | null
+  head_tube_length: number | null
+  chainstay_length: number | null
+  wheelbase: number | null
+  bb_drop: number | null
+  standover_height: number | null
+  reach: number | null
+  stack: number | null
+  updated_at: string
+}
+
+/** Die numerischen Messwert-Felder der Geometrie (ohne Metaspalten & Rahmengröße). */
+export type GeometryField = Exclude<
+  keyof BikeGeometry,
+  'bike_id' | 'updated_at' | 'frame_size'
+>
+
 export interface PartLink {
   id: string
   part_id: string
