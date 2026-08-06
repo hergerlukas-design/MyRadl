@@ -2,12 +2,14 @@ import { StrictMode, useState, useCallback, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { registerSW } from 'virtual:pwa-register'
 import { AuthProvider } from '@/hooks/useAuth'
 import { ThemeProvider } from '@/hooks/useTheme'
+import { initPWA, subscribeNeedRefresh, applyUpdate } from '@/lib/pwa'
 import App from './App'
 import UpdateBanner from './components/UpdateBanner'
 import './index.css'
+
+initPWA()
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,29 +22,12 @@ const queryClient = new QueryClient({
 
 function Root() {
   const [needRefresh, setNeedRefresh] = useState(false)
-  const [updateSW, setUpdateSW] = useState<((reloadPage?: boolean) => Promise<void>) | null>(null)
 
-  useEffect(() => {
-    const update = registerSW({
-      onNeedRefresh() {
-        setNeedRefresh(true)
-      },
-      onOfflineReady() {},
-    })
-    setUpdateSW(() => update)
-
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        update(true)
-      }
-    }
-    document.addEventListener('visibilitychange', onVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
-  }, [])
+  useEffect(() => subscribeNeedRefresh(setNeedRefresh), [])
 
   const handleUpdate = useCallback(() => {
-    updateSW?.(true).then(() => window.location.reload())
-  }, [updateSW])
+    applyUpdate()
+  }, [])
 
   return (
     <StrictMode>

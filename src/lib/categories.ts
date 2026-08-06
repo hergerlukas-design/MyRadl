@@ -6,23 +6,27 @@ import {
   CircleDot,
   Circle,
   Move,
+  MoveHorizontal,
+  Grip,
   Armchair,
   Package,
   type LucideIcon,
 } from 'lucide-react'
-import type { PartCategory } from '@/types'
+import type { Part, PartCategory } from '@/types'
 
 export interface CategoryMeta {
   value: PartCategory
   label: string
   icon: LucideIcon
-  /** Fixed color code — stays identical across list, detail and search. */
+  /**
+   * Fester Farbcode der Kategorie als CSS-Variable — wechselt zwischen Dark-
+   * und Light-Theme automatisch (siehe index.css) und bleibt in Liste, Detail
+   * und Suche identisch.
+   */
   color: string
 }
 
 // Reihenfolge = Anzeigereihenfolge in der Bauteilliste.
-// Farbcodes aus dem Design-System (Kategorie-Codes) — als CSS-Variablen, damit
-// sie zwischen Dark- und Light-Theme automatisch wechseln (siehe index.css).
 export const CATEGORIES: CategoryMeta[] = [
   { value: 'federgabel', label: 'Federgabel', icon: MoveVertical, color: 'var(--cat-federgabel)' },
   { value: 'daempfer', label: 'Dämpfer', icon: Wind, color: 'var(--cat-daempfer)' },
@@ -30,7 +34,9 @@ export const CATEGORIES: CategoryMeta[] = [
   { value: 'bremsen', label: 'Bremsen', icon: Disc3, color: 'var(--cat-bremsen)' },
   { value: 'laufraeder', label: 'Laufräder', icon: CircleDot, color: 'var(--cat-laufraeder)' },
   { value: 'reifen', label: 'Reifen', icon: Circle, color: 'var(--cat-reifen)' },
-  { value: 'cockpit', label: 'Cockpit', icon: Move, color: 'var(--cat-cockpit)' },
+  { value: 'vorbau', label: 'Vorbau', icon: Move, color: 'var(--cat-vorbau)' },
+  { value: 'lenker', label: 'Lenker', icon: MoveHorizontal, color: 'var(--cat-lenker)' },
+  { value: 'griffe', label: 'Griffe', icon: Grip, color: 'var(--cat-griffe)' },
   { value: 'sattel', label: 'Sattel', icon: Armchair, color: 'var(--cat-sattel)' },
   { value: 'sonstiges', label: 'Sonstiges', icon: Package, color: 'var(--cat-sonstiges)' },
 ]
@@ -45,8 +51,59 @@ export function categoryLabel(value: PartCategory): string {
   return categoryMeta(value).label
 }
 
+/** Fester Farbcode (CSS-Variable, themebar). Legacy „Cockpit" → neutrale Farbe. */
 export function categoryColor(value: PartCategory): string {
+  if (value === 'cockpit') return 'var(--cat-sonstiges)'
   return categoryMeta(value).color
+}
+
+/** Kategorien, bei denen eine Einbauposition (vorne/hinten) sinnvoll ist. */
+export function categoryHasPosition(value: PartCategory): boolean {
+  return value === 'reifen' || value === 'laufraeder'
+}
+
+export interface PositionOption {
+  value: string
+  label: string
+}
+
+export const POSITION_OPTIONS: PositionOption[] = [
+  { value: 'vorne', label: 'Vorne' },
+  { value: 'hinten', label: 'Hinten' },
+]
+
+/** Anzeige-Label für eine gespeicherte Position, sonst null. */
+export function positionLabel(position: string | null | undefined): string | null {
+  return POSITION_OPTIONS.find((p) => p.value === position)?.label ?? null
+}
+
+/**
+ * Sprechender Titel eines Teils. Bei „Sonstiges" ist die freie Bezeichnung der
+ * primäre Titel; sonst Hersteller + Modell, zuletzt der Kategoriename.
+ */
+export function partTitle(
+  part: Pick<Part, 'brand' | 'model' | 'custom_type' | 'category'>,
+): string {
+  if (part.category === 'sonstiges' && part.custom_type?.trim()) {
+    return part.custom_type.trim()
+  }
+  const name = `${part.brand ?? ''} ${part.model ?? ''}`.trim()
+  if (name) return name
+  if (part.custom_type?.trim()) return part.custom_type.trim()
+  return categoryLabel(part.category)
+}
+
+/**
+ * Zweitzeile für Listen/Übersicht. Bei „Sonstiges" Hersteller + Modell (die
+ * Bezeichnung steht bereits im Titel), sonst Position und Variante/Größe.
+ */
+export function partSubtitle(
+  part: Pick<Part, 'brand' | 'model' | 'custom_type' | 'category' | 'position' | 'variant'>,
+): string {
+  if (part.category === 'sonstiges') {
+    return `${part.brand ?? ''} ${part.model ?? ''}`.trim()
+  }
+  return [positionLabel(part.position), part.variant].filter(Boolean).join(' · ')
 }
 
 /** Häufige Einstell-Vorschläge je Kategorie (nur UI-Hilfe, frei überschreibbar). */

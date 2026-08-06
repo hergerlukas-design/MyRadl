@@ -16,11 +16,11 @@ import PageHeader, { squareBtn } from '@/components/PageHeader'
 import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
 import ImageUpload from '@/components/ImageUpload'
-import { categoryColor, categoryLabel, SETTING_SUGGESTIONS } from '@/lib/categories'
+import { categoryColor, categoryLabel, partTitle, positionLabel, SETTING_SUGGESTIONS } from '@/lib/categories'
 import { uploadPartPhoto, deletePhoto } from '@/lib/storage'
 import { useAuth } from '@/hooks/useAuth'
 import { useBike } from '@/hooks/useBikes'
-import { usePart, useUpdatePart } from '@/hooks/useParts'
+import { usePart, useUpdatePart, useDeletePart } from '@/hooks/useParts'
 import {
   usePartSettings,
   useUpsertSetting,
@@ -49,6 +49,8 @@ export default function PartDetail() {
   const { data: part, isLoading } = usePart(partId)
   const { data: bike } = useBike(part?.bike_id ?? '')
   const updatePart = useUpdatePart()
+  const deletePart = useDeletePart()
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   if (isLoading || !part) {
     return (
@@ -70,6 +72,12 @@ export default function PartDetail() {
   async function handlePhotoRemove() {
     if (part!.image_url) deletePhoto(part!.image_url)
     await updatePart.mutateAsync({ id: part!.id, patch: { image_url: null } })
+  }
+
+  async function handleDelete() {
+    if (part!.image_url) deletePhoto(part!.image_url)
+    await deletePart.mutateAsync(part!.id)
+    navigate(`/bikes/${part!.bike_id}`, { replace: true })
   }
 
   const color = categoryColor(part.category)
@@ -95,7 +103,7 @@ export default function PartDetail() {
             {categoryLabel(part.category).toUpperCase()}
           </span>
           <h1 className="font-display font-extrabold text-[30px] leading-[1.05] tracking-[-0.02em] text-cream">
-            {part.brand} {part.model}
+            {partTitle(part)}
           </h1>
           <span className="font-mono text-[13px] text-muted">{part.variant || categoryLabel(part.category)}</span>
         </div>
@@ -129,7 +137,39 @@ export default function PartDetail() {
             <Repeat size={18} /> Teil ersetzen
           </button>
         )}
+
+        <button
+          onClick={() => setConfirmDelete(true)}
+          className="w-full flex items-center justify-center gap-2 text-danger text-sm font-medium py-2"
+        >
+          <Trash2 size={16} /> Teil löschen
+        </button>
       </div>
+
+      {confirmDelete && (
+        <Modal
+          title="Teil löschen?"
+          onClose={() => setConfirmDelete(false)}
+          footer={
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-3.5 rounded-xl bg-surface-2 text-cream font-semibold">
+                Abbrechen
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deletePart.isPending}
+                className="flex-1 py-3.5 rounded-xl bg-danger text-ink font-semibold disabled:opacity-60"
+              >
+                Löschen
+              </button>
+            </div>
+          }
+        >
+          <p className="text-sm text-cream-dim">
+            „{partTitle(part)}" und alle zugehörigen Einstellungen, Links und Verläufe werden dauerhaft gelöscht.
+          </p>
+        </Modal>
+      )}
     </Layout>
   )
 }
@@ -138,8 +178,10 @@ export default function PartDetail() {
 function Stammdaten({ part }: { part: Part }) {
   const rows: [string, string][] = [
     ['KATEGORIE', categoryLabel(part.category)],
+    ...(part.custom_type ? [['BEZEICHNUNG', part.custom_type] as [string, string]] : []),
     ['HERSTELLER', part.brand],
-    ['MODELL', part.model],
+    ...(part.model ? [['MODELL', part.model] as [string, string]] : []),
+    ...(positionLabel(part.position) ? [['POSITION', positionLabel(part.position)!] as [string, string]] : []),
     ...(part.variant ? [['VARIANTE', part.variant] as [string, string]] : []),
     ['STATUS', part.status],
     ...(part.install_date ? [['EINBAU', fmtDate(part.install_date)] as [string, string]] : []),

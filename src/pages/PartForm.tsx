@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import PageHeader from '@/components/PageHeader'
 import Spinner from '@/components/ui/Spinner'
-import { CATEGORIES } from '@/lib/categories'
+import { CATEGORIES, categoryHasPosition, POSITION_OPTIONS } from '@/lib/categories'
 import { usePart, useCreatePart, useUpdatePart } from '@/hooks/useParts'
 import { useAddHistory } from '@/hooks/usePartMeta'
 import type { PartCategory, PartStatus } from '@/types'
@@ -13,6 +13,8 @@ interface FormState {
   brand: string
   model: string
   variant: string
+  position: string
+  custom_type: string
   status: PartStatus
   install_date: string
   notes: string
@@ -23,6 +25,8 @@ const EMPTY: FormState = {
   brand: '',
   model: '',
   variant: '',
+  position: '',
+  custom_type: '',
   status: 'aktiv',
   install_date: '',
   notes: '',
@@ -46,8 +50,10 @@ export default function PartForm() {
       setForm({
         category: existing.category,
         brand: existing.brand,
-        model: existing.model,
+        model: existing.model ?? '',
         variant: existing.variant ?? '',
+        position: existing.position ?? '',
+        custom_type: existing.custom_type ?? '',
         status: existing.status,
         install_date: existing.install_date ?? '',
         notes: existing.notes ?? '',
@@ -61,15 +67,17 @@ export default function PartForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
-    if (!form.brand.trim() || !form.model.trim()) {
-      setError('Hersteller und Modell sind Pflichtfelder.')
+    if (!form.brand.trim()) {
+      setError('Hersteller ist ein Pflichtfeld.')
       return
     }
     const patch = {
       category: form.category,
       brand: form.brand.trim(),
-      model: form.model.trim(),
+      model: form.model.trim() || null,
       variant: form.variant.trim() || null,
+      position: categoryHasPosition(form.category) ? form.position || null : null,
+      custom_type: form.category === 'sonstiges' ? form.custom_type.trim() || null : null,
       status: form.status,
       install_date: form.install_date || null,
       notes: form.notes.trim() || null,
@@ -142,10 +150,36 @@ export default function PartForm() {
             <input value={form.brand} onChange={(e) => set('brand', e.target.value)} placeholder="z.B. Fox" className="input" />
           </label>
           <label className="block">
-            <span className="block text-sm font-medium text-cream-dim mb-1.5">Modell *</span>
+            <span className="block text-sm font-medium text-cream-dim mb-1.5">Modell</span>
             <input value={form.model} onChange={(e) => set('model', e.target.value)} placeholder="z.B. 36 Factory" className="input" />
           </label>
         </div>
+
+        {form.category === 'sonstiges' && (
+          <label className="block">
+            <span className="block text-sm font-medium text-cream-dim mb-1.5">Bezeichnung</span>
+            <input
+              value={form.custom_type}
+              onChange={(e) => set('custom_type', e.target.value)}
+              placeholder="z.B. Kettenführung, Schutzblech…"
+              className="input"
+            />
+          </label>
+        )}
+
+        {categoryHasPosition(form.category) && (
+          <label className="block">
+            <span className="block text-sm font-medium text-cream-dim mb-1.5">Position</span>
+            <select value={form.position} onChange={(e) => set('position', e.target.value)} className="input">
+              <option value="">– keine Angabe –</option>
+              {POSITION_OPTIONS.map((p) => (
+                <option key={p.value} value={p.value}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
 
         <label className="block">
           <span className="block text-sm font-medium text-cream-dim mb-1.5">Variante / Größe</span>

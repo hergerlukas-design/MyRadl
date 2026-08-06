@@ -54,14 +54,8 @@ export default function ImageUpload({
 
   return (
     <div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleFile}
-      />
+      {/* Ohne `capture` bietet der native Dialog Kamera UND Fotogalerie zur Auswahl. */}
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
       <div
         className={`relative ${ratio} w-full rounded-2xl overflow-hidden border border-hair photo-ph flex items-center justify-center`}
       >

@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { Check, Moon, Sun } from 'lucide-react'
+import { Check, Moon, Sun, RefreshCw } from 'lucide-react'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/hooks/useAuth'
 import { useTheme, type Theme } from '@/hooks/useTheme'
+import { applyUpdate, checkForUpdate } from '@/lib/pwa'
 
 export default function Settings() {
   const { user, signOut, updatePassword } = useAuth()
@@ -12,6 +13,25 @@ export default function Settings() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
+
+  const [checking, setChecking] = useState(false)
+  const [updateStatus, setUpdateStatus] = useState<'idle' | 'current' | 'available'>('idle')
+
+  async function handleCheckUpdate() {
+    setChecking(true)
+    setUpdateStatus('idle')
+    try {
+      const found = await checkForUpdate()
+      if (found) {
+        setUpdateStatus('available')
+        await applyUpdate()
+      } else {
+        setUpdateStatus('current')
+      }
+    } finally {
+      setChecking(false)
+    }
+  }
 
   async function handleSetPassword(e: React.FormEvent) {
     e.preventDefault()
@@ -111,11 +131,21 @@ export default function Settings() {
             Prüfe, ob eine neuere Version verfügbar ist, und aktualisiere sofort.
           </span>
           <button
-            onClick={() => window.location.reload()}
-            className="w-full py-3 rounded-xl border border-accent/40 text-accent font-semibold active:scale-[0.98] transition-transform"
+            onClick={handleCheckUpdate}
+            disabled={checking}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-accent/40 text-accent font-semibold active:scale-[0.98] transition-transform disabled:opacity-60"
           >
-            Auf Updates prüfen
+            <RefreshCw size={16} className={checking ? 'animate-spin' : ''} />
+            {checking ? 'Suche…' : 'Auf Updates prüfen'}
           </button>
+          {updateStatus === 'current' && (
+            <p className="text-sm text-accent flex items-center gap-1.5">
+              <Check size={16} /> Du hast die neueste Version.
+            </p>
+          )}
+          {updateStatus === 'available' && (
+            <p className="text-sm text-muted">Update gefunden – App wird neu geladen…</p>
+          )}
         </div>
 
         <button

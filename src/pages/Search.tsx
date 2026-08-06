@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import Spinner from '@/components/ui/Spinner'
-import { CATEGORIES, categoryColor, categoryLabel } from '@/lib/categories'
+import { CATEGORIES, categoryColor, categoryLabel, partTitle, partSubtitle } from '@/lib/categories'
 import { photoUrl } from '@/lib/storage'
 import { useBikes } from '@/hooks/useBikes'
 import { useAllParts } from '@/hooks/useParts'
@@ -26,7 +26,7 @@ export default function Search() {
       if (bikeId && p.bike_id !== bikeId) return false
       if (onlyActive && p.status !== 'aktiv') return false
       if (needle) {
-        const hay = `${p.brand} ${p.model} ${p.variant ?? ''}`.toLowerCase()
+        const hay = `${p.brand} ${p.model ?? ''} ${p.variant ?? ''} ${p.custom_type ?? ''}`.toLowerCase()
         if (!hay.includes(needle)) return false
       }
       return true
@@ -98,12 +98,12 @@ export default function Search() {
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col gap-1">
                     <span className="text-[15px] font-semibold text-cream truncate">
-                      {p.brand} {p.model}
+                      {partTitle(p)}
                     </span>
                     <span className="font-mono text-[11.5px] text-muted truncate">
                       {categoryLabel(p.category)}
                       {p.bike ? ` · ${p.bike.name}` : ''}
-                      {p.variant ? ` · ${p.variant}` : ''}
+                      {partSubtitle(p) ? ` · ${partSubtitle(p)}` : ''}
                     </span>
                   </div>
                   <span className="w-2 h-2 rounded-full flex-none" style={{ background: color }} />
