@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { LogOut, Bike as BikeIcon, KeyRound, Check } from 'lucide-react'
+import { LogOut, Bike as BikeIcon, KeyRound, Check, RefreshCw } from 'lucide-react'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/hooks/useAuth'
+import { applyUpdate, checkForUpdate } from '@/lib/pwa'
 
 export default function Settings() {
   const { user, signOut, updatePassword } = useAuth()
@@ -11,6 +12,26 @@ export default function Settings() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
+
+  const [checking, setChecking] = useState(false)
+  const [updateStatus, setUpdateStatus] = useState<'idle' | 'current' | 'available'>('idle')
+
+  async function handleCheckUpdate() {
+    setChecking(true)
+    setUpdateStatus('idle')
+    try {
+      const found = await checkForUpdate()
+      if (found) {
+        setUpdateStatus('available')
+        // Direkt anwenden und neu laden.
+        await applyUpdate()
+      } else {
+        setUpdateStatus('current')
+      }
+    } finally {
+      setChecking(false)
+    }
+  }
 
   async function handleSetPassword(e: React.FormEvent) {
     e.preventDefault()
@@ -91,6 +112,32 @@ export default function Settings() {
               {busy ? 'Speichern…' : 'Passwort speichern'}
             </button>
           </form>
+        </section>
+
+        <section className="bg-white rounded-2xl border border-gray-100 p-4">
+          <div className="flex items-center gap-2 mb-1">
+            <RefreshCw size={18} className="text-primary" />
+            <h2 className="font-semibold text-gray-900">App-Version</h2>
+          </div>
+          <p className="text-sm text-gray-500 mb-3">
+            Prüfe, ob eine neuere Version der App verfügbar ist, und aktualisiere sofort.
+          </p>
+          <button
+            onClick={handleCheckUpdate}
+            disabled={checking}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary text-white font-semibold active:scale-[0.98] transition-transform disabled:opacity-60"
+          >
+            <RefreshCw size={16} className={checking ? 'animate-spin' : ''} />
+            {checking ? 'Suche…' : 'Auf Updates prüfen'}
+          </button>
+          {updateStatus === 'current' && (
+            <p className="mt-2 text-sm text-primary flex items-center gap-1.5">
+              <Check size={16} /> Du hast die neueste Version.
+            </p>
+          )}
+          {updateStatus === 'available' && (
+            <p className="mt-2 text-sm text-gray-500">Update gefunden – App wird neu geladen…</p>
+          )}
         </section>
 
         <button

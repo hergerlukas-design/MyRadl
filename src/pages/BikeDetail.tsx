@@ -220,10 +220,10 @@ function GeometrySection({ bikeId }: { bikeId: string }) {
         </button>
         <button
           onClick={() => setEditing(true)}
-          className="flex items-center gap-1 text-primary text-sm font-semibold pl-2 pr-4 py-3 flex-shrink-0"
-          aria-label="Geometrie bearbeiten"
+          className="text-primary pl-2 pr-4 py-3 flex-shrink-0"
+          aria-label={hasAny ? 'Geometrie bearbeiten' : 'Geometrie erfassen'}
         >
-          <Pencil size={15} /> {hasAny ? 'Bearbeiten' : 'Erfassen'}
+          <Pencil size={18} />
         </button>
       </div>
 
