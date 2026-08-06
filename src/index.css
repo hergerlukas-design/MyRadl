@@ -1,9 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #15803d;   /* green-700 */
-  --color-primary-dark: #14532d;
-  --color-accent: #ea580c;    /* orange-600 */
+  --color-primary: #499167;      /* green */
+  --color-primary-dark: #493b2a; /* dark brown */
+  --color-accent: #e6af2e;       /* golden yellow */
+  --color-muted: #9f838c;        /* mauve */
   --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
@@ -17,7 +18,7 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background-color: #f8fafc;
+  background-color: #fbfffe;
   color: #0f172a;
 }
 
@@ -40,7 +41,7 @@ textarea {
 }
 .input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.15);
+  box-shadow: 0 0 0 3px rgba(73, 145, 103, 0.2);
 }
 .input::placeholder {
   color: #9ca3af;
