@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { LogOut, Bike as BikeIcon, KeyRound, Check } from 'lucide-react'
+import { Check, Moon, Sun, RefreshCw } from 'lucide-react'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/hooks/useAuth'
+import { useTheme, type Theme } from '@/hooks/useTheme'
+import { applyUpdate, checkForUpdate } from '@/lib/pwa'
 
 export default function Settings() {
   const { user, signOut, updatePassword } = useAuth()
@@ -11,6 +13,25 @@ export default function Settings() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [done, setDone] = useState(false)
+
+  const [checking, setChecking] = useState(false)
+  const [updateStatus, setUpdateStatus] = useState<'idle' | 'current' | 'available'>('idle')
+
+  async function handleCheckUpdate() {
+    setChecking(true)
+    setUpdateStatus('idle')
+    try {
+      const found = await checkForUpdate()
+      if (found) {
+        setUpdateStatus('available')
+        await applyUpdate()
+      } else {
+        setUpdateStatus('current')
+      }
+    } finally {
+      setChecking(false)
+    }
+  }
 
   async function handleSetPassword(e: React.FormEvent) {
     e.preventDefault()
@@ -37,28 +58,35 @@ export default function Settings() {
     }
   }
 
+  const initials = (user?.email ?? '?').slice(0, 2).toUpperCase()
+
   return (
-    <Layout title="Mehr">
-      <div className="p-4 space-y-5">
-        <div className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 p-4">
-          <div className="w-11 h-11 rounded-full bg-green-100 flex items-center justify-center">
-            <BikeIcon className="text-primary" size={22} />
+    <Layout>
+      <div className="px-5 pt-4 pb-4 flex-none">
+        <h1 className="font-display font-black text-[32px] leading-none tracking-[-0.02em] text-cream">Mehr</h1>
+      </div>
+
+      <div className="flex-1 px-5 pb-6 flex flex-col gap-3.5">
+        {/* Account */}
+        <div className="flex items-center gap-3.5 bg-surface border border-hair rounded-[20px] p-4">
+          <div className="w-[46px] h-[46px] rounded-full bg-accent/15 border border-accent/35 flex items-center justify-center font-display font-semibold text-[15px] text-accent">
+            {initials}
           </div>
-          <div className="min-w-0">
-            <p className="text-sm text-gray-500">Angemeldet als</p>
-            <p className="font-medium text-gray-900 truncate">{user?.email ?? '—'}</p>
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <span className="eyebrow">ANGEMELDET ALS</span>
+            <span className="text-sm font-medium text-cream-dim truncate">{user?.email ?? '—'}</span>
           </div>
         </div>
 
-        <section className="bg-white rounded-2xl border border-gray-100 p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <KeyRound size={18} className="text-primary" />
-            <h2 className="font-semibold text-gray-900">Passwort festlegen</h2>
-          </div>
-          <p className="text-sm text-gray-500 mb-3">
+        <ThemeCard />
+
+        {/* Passwort */}
+        <div className="bg-surface border border-hair rounded-[20px] p-[18px] flex flex-col gap-3">
+          <span className="text-[15px] font-extrabold text-cream">Passwort festlegen</span>
+          <span className="text-[13px] leading-relaxed text-muted">
             Lege ein Passwort fest oder ändere es, um dich künftig mit Email &amp; Passwort anzumelden.
-          </p>
-          <form onSubmit={handleSetPassword} className="space-y-3">
+          </span>
+          <form onSubmit={handleSetPassword} className="flex flex-col gap-3">
             <input
               type="password"
               value={password}
@@ -77,31 +105,88 @@ export default function Settings() {
               minLength={6}
               className="input"
             />
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-danger">{error}</p>}
             {done && (
-              <p className="text-sm text-primary flex items-center gap-1.5">
+              <p className="text-sm text-accent flex items-center gap-1.5">
                 <Check size={16} /> Passwort gespeichert.
               </p>
             )}
             <button
               type="submit"
               disabled={busy}
-              className="w-full py-2.5 rounded-xl bg-primary text-white font-semibold active:scale-[0.98] transition-transform disabled:opacity-60"
+              className="w-full py-3.5 rounded-xl bg-accent text-accent-ink font-semibold active:scale-[0.98] transition-transform disabled:opacity-60"
             >
               {busy ? 'Speichern…' : 'Passwort speichern'}
             </button>
           </form>
-        </section>
+        </div>
+
+        {/* App-Version */}
+        <div className="bg-surface border border-hair rounded-[20px] p-[18px] flex flex-col gap-3">
+          <div className="flex items-baseline justify-between">
+            <span className="text-[15px] font-extrabold text-cream">App-Version</span>
+            <span className="font-mono text-xs text-muted">{__APP_VERSION__}</span>
+          </div>
+          <span className="text-[13px] leading-relaxed text-muted">
+            Prüfe, ob eine neuere Version verfügbar ist, und aktualisiere sofort.
+          </span>
+          <button
+            onClick={handleCheckUpdate}
+            disabled={checking}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-accent/40 text-accent font-semibold active:scale-[0.98] transition-transform disabled:opacity-60"
+          >
+            <RefreshCw size={16} className={checking ? 'animate-spin' : ''} />
+            {checking ? 'Suche…' : 'Auf Updates prüfen'}
+          </button>
+          {updateStatus === 'current' && (
+            <p className="text-sm text-accent flex items-center gap-1.5">
+              <Check size={16} /> Du hast die neueste Version.
+            </p>
+          )}
+          {updateStatus === 'available' && (
+            <p className="text-sm text-muted">Update gefunden – App wird neu geladen…</p>
+          )}
+        </div>
 
         <button
           onClick={() => signOut()}
-          className="w-full flex items-center justify-center gap-2 bg-white border border-gray-200 text-red-600 font-semibold py-3 rounded-xl active:scale-[0.98] transition-transform"
+          className="w-full py-3.5 rounded-[20px] border border-danger/30 text-danger font-semibold active:scale-[0.98] transition-transform"
         >
-          <LogOut size={18} /> Abmelden
+          Abmelden
         </button>
-
-        <p className="text-center text-xs text-gray-400">MyRadl v{__APP_VERSION__}</p>
       </div>
     </Layout>
+  )
+}
+
+function ThemeCard() {
+  const { theme, setTheme } = useTheme()
+  const options: { value: Theme; label: string; icon: typeof Sun }[] = [
+    { value: 'dark', label: 'Dunkel', icon: Moon },
+    { value: 'light', label: 'Hell', icon: Sun },
+  ]
+  return (
+    <div className="bg-surface border border-hair rounded-[20px] p-[18px] flex flex-col gap-3">
+      <span className="text-[15px] font-extrabold text-cream">Erscheinungsbild</span>
+      <div className="grid grid-cols-2 gap-2.5">
+        {options.map(({ value, label, icon: Icon }) => {
+          const active = theme === value
+          return (
+            <button
+              key={value}
+              onClick={() => setTheme(value)}
+              className="flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-colors border"
+              style={{
+                background: active ? 'var(--color-accent)' : 'transparent',
+                color: active ? 'var(--color-accent-ink)' : 'var(--color-cream-dim)',
+                borderColor: active ? 'var(--color-accent)' : 'var(--c-hair-strong)',
+              }}
+            >
+              <Icon size={16} /> {label}
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }

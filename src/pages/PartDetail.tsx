@@ -12,13 +12,15 @@ import {
   ArrowLeftRight,
 } from 'lucide-react'
 import Layout from '@/components/Layout'
+import PageHeader, { squareBtn } from '@/components/PageHeader'
 import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
 import ImageUpload from '@/components/ImageUpload'
-import { categoryLabel, SETTING_SUGGESTIONS } from '@/lib/categories'
+import { categoryColor, categoryLabel, partTitle, positionLabel, SETTING_SUGGESTIONS } from '@/lib/categories'
 import { uploadPartPhoto, deletePhoto } from '@/lib/storage'
 import { useAuth } from '@/hooks/useAuth'
-import { usePart, useUpdatePart } from '@/hooks/useParts'
+import { useBike } from '@/hooks/useBikes'
+import { usePart, useUpdatePart, useDeletePart } from '@/hooks/useParts'
 import {
   usePartSettings,
   useUpsertSetting,
@@ -45,11 +47,14 @@ export default function PartDetail() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { data: part, isLoading } = usePart(partId)
+  const { data: bike } = useBike(part?.bike_id ?? '')
   const updatePart = useUpdatePart()
+  const deletePart = useDeletePart()
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   if (isLoading || !part) {
     return (
-      <Layout title="Teil" back>
+      <Layout>
         <div className="flex justify-center py-20">
           <Spinner />
         </div>
@@ -69,43 +74,114 @@ export default function PartDetail() {
     await updatePart.mutateAsync({ id: part!.id, patch: { image_url: null } })
   }
 
+  async function handleDelete() {
+    if (part!.image_url) deletePhoto(part!.image_url)
+    await deletePart.mutateAsync(part!.id)
+    navigate(`/bikes/${part!.bike_id}`, { replace: true })
+  }
+
+  const color = categoryColor(part.category)
+
   return (
-    <Layout
-      title={`${part.brand} ${part.model}`}
-      back
-      action={
-        <button
-          onClick={() => navigate(`/parts/${part.id}/edit`)}
-          className="p-1.5 text-gray-500 hover:text-gray-900"
-          aria-label="Bearbeiten"
-        >
-          <Pencil size={18} />
-        </button>
-      }
-    >
-      <div className="p-4 space-y-5">
-        <ImageUpload
-          value={part.image_url}
-          onUpload={handlePhoto}
-          onRemove={handlePhotoRemove}
-          aspect="square"
-          label="Teilfoto"
+    <Layout>
+      <header className="border-b border-hair px-5 pt-4 pb-5 flex-none">
+        <PageHeader
+          eyebrow={(bike?.name ?? '').toUpperCase()}
+          onBack={() => navigate(`/bikes/${part.bike_id}`)}
+          action={
+            <button
+              onClick={() => navigate(`/parts/${part.id}/edit`)}
+              className={squareBtn}
+              aria-label="Bearbeiten"
+            >
+              <Pencil size={15} className="text-accent" />
+            </button>
+          }
         />
+        <div className="mt-3.5 flex flex-col gap-1.5">
+          <span className="font-mono text-[10px] font-medium tracking-[0.16em]" style={{ color }}>
+            {categoryLabel(part.category).toUpperCase()}
+          </span>
+          <h1 className="font-display font-extrabold text-[30px] leading-[1.05] tracking-[-0.02em] text-cream">
+            {partTitle(part)}
+          </h1>
+          <span className="font-mono text-[13px] text-muted">{part.variant || categoryLabel(part.category)}</span>
+        </div>
+      </header>
+
+      <div className="flex-1 px-5 py-5 flex flex-col gap-4">
+        {part.image_url && (
+          <ImageUpload
+            value={part.image_url}
+            onUpload={handlePhoto}
+            onRemove={handlePhotoRemove}
+            aspect="square"
+            label="Teilfoto"
+          />
+        )}
 
         <Stammdaten part={part} />
         <SettingsBlock partId={part.id} category={part.category} />
+        {part.notes && (
+          <div className="bg-surface border border-hair rounded-[20px] p-4 flex flex-col gap-2">
+            <span className="eyebrow">SETUP-NOTIZ</span>
+            <p className="text-sm leading-relaxed text-cream-dim whitespace-pre-wrap">{part.notes}</p>
+          </div>
+        )}
         <LinksBlock partId={part.id} />
         <HistoryBlock partId={part.id} />
 
         {part.status === 'aktiv' && (
           <button
             onClick={() => navigate(`/parts/${part.id}/replace`)}
-            className="w-full flex items-center justify-center gap-2 border border-primary text-primary font-semibold py-3 rounded-xl active:scale-[0.98] transition-transform"
+            className="w-full flex items-center justify-center gap-2 border border-accent/40 text-accent font-semibold py-3.5 rounded-xl active:scale-[0.98] transition-transform"
           >
             <Repeat size={18} /> Teil ersetzen
           </button>
         )}
+
+        {!part.image_url && (
+          <ImageUpload
+            value={part.image_url}
+            onUpload={handlePhoto}
+            onRemove={handlePhotoRemove}
+            aspect="square"
+            label="Teilfoto"
+          />
+        )}
+
+        <button
+          onClick={() => setConfirmDelete(true)}
+          className="w-full flex items-center justify-center gap-2 text-danger text-sm font-medium py-2"
+        >
+          <Trash2 size={16} /> Teil löschen
+        </button>
       </div>
+
+      {confirmDelete && (
+        <Modal
+          title="Teil löschen?"
+          onClose={() => setConfirmDelete(false)}
+          footer={
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDelete(false)} className="flex-1 py-3.5 rounded-xl bg-surface-2 text-cream font-semibold">
+                Abbrechen
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deletePart.isPending}
+                className="flex-1 py-3.5 rounded-xl bg-danger text-ink font-semibold disabled:opacity-60"
+              >
+                Löschen
+              </button>
+            </div>
+          }
+        >
+          <p className="text-sm text-cream-dim">
+            „{partTitle(part)}" und alle zugehörigen Einstellungen, Links und Verläufe werden dauerhaft gelöscht.
+          </p>
+        </Modal>
+      )}
     </Layout>
   )
 }
@@ -113,30 +189,35 @@ export default function PartDetail() {
 // ── Stammdaten ────────────────────────────────────────────────────────────────
 function Stammdaten({ part }: { part: Part }) {
   const rows: [string, string][] = [
-    ['Kategorie', categoryLabel(part.category)],
-    ['Hersteller', part.brand],
-    ['Modell', part.model],
-    ...(part.variant ? [['Variante', part.variant] as [string, string]] : []),
-    ['Status', part.status],
-    ...(part.install_date ? [['Einbaudatum', fmtDate(part.install_date)] as [string, string]] : []),
+    ['KATEGORIE', categoryLabel(part.category)],
+    ...(part.custom_type ? [['BEZEICHNUNG', part.custom_type] as [string, string]] : []),
+    ['HERSTELLER', part.brand],
+    ...(part.model ? [['MODELL', part.model] as [string, string]] : []),
+    ...(positionLabel(part.position) ? [['POSITION', positionLabel(part.position)!] as [string, string]] : []),
+    ...(part.variant ? [['VARIANTE', part.variant] as [string, string]] : []),
+    ['STATUS', part.status],
+    ...(part.install_date ? [['EINBAU', fmtDate(part.install_date)] as [string, string]] : []),
   ]
   return (
-    <section className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
-      {rows.map(([label, value]) => (
-        <div key={label} className="flex items-center justify-between px-4 py-2.5">
-          <span className="text-sm text-gray-500">{label}</span>
-          <span className={`text-sm font-medium ${label === 'Status' && value === 'ersetzt' ? 'text-gray-400' : 'text-gray-900'}`}>
+    <div className="bg-surface border border-hair rounded-[20px] px-4">
+      {rows.map(([label, value], i) => (
+        <div
+          key={label}
+          className={`flex items-center justify-between py-3.5 ${
+            i < rows.length - 1 ? 'border-b border-hair-soft' : ''
+          }`}
+        >
+          <span className="eyebrow">{label}</span>
+          <span
+            className={`text-sm font-medium ${
+              label === 'STATUS' && value === 'ersetzt' ? 'text-muted' : 'text-cream-dim'
+            }`}
+          >
             {value}
           </span>
         </div>
       ))}
-      {part.notes && (
-        <div className="px-4 py-3">
-          <p className="text-sm text-gray-500 mb-0.5">Notizen</p>
-          <p className="text-sm text-gray-800 whitespace-pre-wrap">{part.notes}</p>
-        </div>
-      )}
-    </section>
+    </div>
   )
 }
 
@@ -151,10 +232,14 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <section>
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-base font-semibold text-gray-900">{title}</h2>
-        <button onClick={onAdd} className="flex items-center gap-1 text-primary text-sm font-semibold" aria-label={`${title} hinzufügen`}>
+    <section className="flex flex-col gap-2.5">
+      <div className="flex items-center justify-between">
+        <h2 className="text-[15px] font-extrabold tracking-[0.02em] text-cream">{title}</h2>
+        <button
+          onClick={onAdd}
+          className="flex items-center gap-1 text-accent text-[13px] font-semibold"
+          aria-label={`${title} hinzufügen`}
+        >
           <Plus size={16} /> Hinzufügen
         </button>
       </div>
@@ -172,26 +257,31 @@ function SettingsBlock({ partId, category }: { partId: string; category: Part['c
   return (
     <Section title="Einstellungen" onAdd={() => setEditing('new')}>
       {!settings || settings.length === 0 ? (
-        <p className="text-sm text-gray-400 py-2">Noch keine Einstellungen erfasst.</p>
+        <p className="font-mono text-xs text-muted py-1">Noch keine Einstellungen erfasst.</p>
       ) : (
-        <ul className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
-          {settings.map((s) => (
-            <li key={s.id} className="flex items-center gap-3 px-4 py-2.5">
-              <span className="flex-1 text-sm text-gray-700">{s.key}</span>
-              <button onClick={() => setEditing(s)} className="text-sm font-semibold text-gray-900">
+        <div className="bg-surface border border-hair rounded-[20px] px-4">
+          {settings.map((s, i) => (
+            <div
+              key={s.id}
+              className={`flex items-center gap-3 py-3.5 ${
+                i < settings.length - 1 ? 'border-b border-hair-soft' : ''
+              }`}
+            >
+              <span className="flex-1 eyebrow">{s.key}</span>
+              <button onClick={() => setEditing(s)} className="text-sm font-medium text-cream-dim">
                 {s.value}
                 {s.unit ? ` ${s.unit}` : ''}
               </button>
               <button
                 onClick={() => del.mutate({ id: s.id, partId })}
-                className="text-gray-300 hover:text-red-500"
+                className="text-dim hover:text-danger"
                 aria-label="Löschen"
               >
                 <Trash2 size={15} />
               </button>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
       {editing && (
         <SettingModal
@@ -239,13 +329,13 @@ function SettingModal({
       title={setting ? 'Einstellung bearbeiten' : 'Neue Einstellung'}
       onClose={onClose}
       footer={
-        <button onClick={save} disabled={upsert.isPending} className="w-full py-3 rounded-xl bg-primary text-white font-semibold disabled:opacity-60">
+        <button onClick={save} disabled={upsert.isPending} className="w-full py-3.5 rounded-xl bg-accent text-accent-ink font-semibold disabled:opacity-60">
           Speichern
         </button>
       }
     >
       <label className="block">
-        <span className="block text-sm font-medium text-gray-700 mb-1">Bezeichnung</span>
+        <span className="block text-sm font-medium text-cream-dim mb-1.5">Bezeichnung</span>
         <input value={key} onChange={(e) => setKey(e.target.value)} list="setting-suggestions" placeholder="z.B. Luftdruck" className="input" autoFocus />
         <datalist id="setting-suggestions">
           {suggestions.map((s) => (
@@ -255,11 +345,11 @@ function SettingModal({
       </label>
       <div className="grid grid-cols-2 gap-3">
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Wert</span>
+          <span className="block text-sm font-medium text-cream-dim mb-1.5">Wert</span>
           <input value={value} onChange={(e) => setValue(e.target.value)} placeholder="z.B. 75" className="input" />
         </label>
         <label className="block">
-          <span className="block text-sm font-medium text-gray-700 mb-1">Einheit</span>
+          <span className="block text-sm font-medium text-cream-dim mb-1.5">Einheit</span>
           <input value={unit} onChange={(e) => setUnit(e.target.value)} placeholder="z.B. psi" className="input" />
         </label>
       </div>
@@ -286,45 +376,50 @@ function LinksBlock({ partId }: { partId: string }) {
   }
 
   return (
-    <Section title="Shop &amp; Preisvergleich" onAdd={() => setAdding(true)}>
+    <Section title="Shop & Preisvergleich" onAdd={() => setAdding(true)}>
       {!links || links.length === 0 ? (
-        <p className="text-sm text-gray-400 py-2">Noch keine Links. Füge Shop- oder Vergleichslinks hinzu.</p>
+        <p className="font-mono text-xs text-muted py-1">Noch keine Links. Füge Shop- oder Vergleichslinks hinzu.</p>
       ) : (
-        <ul className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
-          {links.map((l) => (
-            <li key={l.id} className="flex items-center gap-3 px-4 py-2.5">
+        <div className="bg-surface border border-hair rounded-[20px] px-4">
+          {links.map((l, i) => (
+            <div
+              key={l.id}
+              className={`flex items-center gap-3 py-3.5 ${
+                i < links.length - 1 ? 'border-b border-hair-soft' : ''
+              }`}
+            >
               <a
                 href={l.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 flex items-center gap-2 text-sm font-medium text-primary min-w-0"
+                className="flex-1 flex items-center gap-2 text-sm font-medium text-accent min-w-0"
               >
                 <ExternalLink size={15} className="flex-shrink-0" />
                 <span className="truncate">{l.label}</span>
               </a>
-              <button onClick={() => del.mutate({ id: l.id, partId })} className="text-gray-300 hover:text-red-500" aria-label="Löschen">
+              <button onClick={() => del.mutate({ id: l.id, partId })} className="text-dim hover:text-danger" aria-label="Löschen">
                 <Trash2 size={15} />
               </button>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
       {adding && (
         <Modal
           title="Link hinzufügen"
           onClose={() => setAdding(false)}
           footer={
-            <button onClick={save} disabled={add.isPending} className="w-full py-3 rounded-xl bg-primary text-white font-semibold disabled:opacity-60">
+            <button onClick={save} disabled={add.isPending} className="w-full py-3.5 rounded-xl bg-accent text-accent-ink font-semibold disabled:opacity-60">
               Speichern
             </button>
           }
         >
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Bezeichnung</span>
+            <span className="block text-sm font-medium text-cream-dim mb-1.5">Bezeichnung</span>
             <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="z.B. Bike-Components" className="input" autoFocus />
           </label>
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">URL</span>
+            <span className="block text-sm font-medium text-cream-dim mb-1.5">URL</span>
             <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" inputMode="url" className="input" />
           </label>
         </Modal>
@@ -335,9 +430,9 @@ function LinksBlock({ partId }: { partId: string }) {
 
 // ── Verlaufshistorie ──────────────────────────────────────────────────────────
 const EVENT_META: Record<HistoryEventType, { label: string; icon: typeof Wrench; color: string }> = {
-  eingebaut: { label: 'Eingebaut', icon: PackagePlus, color: 'text-primary' },
-  gewartet: { label: 'Gewartet', icon: Wrench, color: 'text-blue-600' },
-  ersetzt: { label: 'Ersetzt', icon: ArrowLeftRight, color: 'text-orange-600' },
+  eingebaut: { label: 'Eingebaut', icon: PackagePlus, color: 'var(--cat-federgabel)' },
+  gewartet: { label: 'Gewartet', icon: Wrench, color: 'var(--cat-daempfer)' },
+  ersetzt: { label: 'Ersetzt', icon: ArrowLeftRight, color: 'var(--cat-reifen)' },
 }
 
 function HistoryBlock({ partId }: { partId: string }) {
@@ -359,42 +454,42 @@ function HistoryBlock({ partId }: { partId: string }) {
   return (
     <Section title="Verlauf" onAdd={() => setAdding(true)}>
       {!history || history.length === 0 ? (
-        <p className="text-sm text-gray-400 py-2">Noch keine Einträge.</p>
+        <p className="font-mono text-xs text-muted py-1">Noch keine Einträge.</p>
       ) : (
-        <ul className="space-y-2">
+        <div className="flex flex-col gap-2.5">
           {history.map((h) => {
             const meta = EVENT_META[h.event_type] ?? EVENT_META.gewartet
             const Icon = meta.icon
             return (
-              <li key={h.id} className="flex items-start gap-3 bg-white rounded-xl border border-gray-100 px-4 py-3">
-                <Icon size={18} className={`mt-0.5 flex-shrink-0 ${meta.color}`} />
+              <div key={h.id} className="flex items-start gap-3 bg-surface border border-hair rounded-[18px] px-4 py-3.5">
+                <Icon size={18} className="mt-0.5 flex-shrink-0" style={{ color: meta.color }} />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-semibold text-gray-900">{meta.label}</span>
-                    <span className="text-xs text-gray-400">{fmtDate(h.event_date)}</span>
+                    <span className="text-sm font-semibold text-cream">{meta.label}</span>
+                    <span className="font-mono text-xs text-muted">{fmtDate(h.event_date)}</span>
                   </div>
-                  {h.note && <p className="text-sm text-gray-600 mt-0.5 whitespace-pre-wrap">{h.note}</p>}
+                  {h.note && <p className="text-sm text-cream-dim mt-0.5 whitespace-pre-wrap">{h.note}</p>}
                 </div>
-                <button onClick={() => del.mutate({ id: h.id, partId })} className="text-gray-300 hover:text-red-500 mt-0.5" aria-label="Löschen">
+                <button onClick={() => del.mutate({ id: h.id, partId })} className="text-dim hover:text-danger mt-0.5" aria-label="Löschen">
                   <Trash2 size={15} />
                 </button>
-              </li>
+              </div>
             )
           })}
-        </ul>
+        </div>
       )}
       {adding && (
         <Modal
           title="Verlaufseintrag"
           onClose={() => setAdding(false)}
           footer={
-            <button onClick={save} disabled={add.isPending} className="w-full py-3 rounded-xl bg-primary text-white font-semibold disabled:opacity-60">
+            <button onClick={save} disabled={add.isPending} className="w-full py-3.5 rounded-xl bg-accent text-accent-ink font-semibold disabled:opacity-60">
               Speichern
             </button>
           }
         >
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Ereignis</span>
+            <span className="block text-sm font-medium text-cream-dim mb-1.5">Ereignis</span>
             <select value={type} onChange={(e) => setType(e.target.value as HistoryEventType)} className="input">
               <option value="eingebaut">Eingebaut</option>
               <option value="gewartet">Gewartet</option>
@@ -402,11 +497,11 @@ function HistoryBlock({ partId }: { partId: string }) {
             </select>
           </label>
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Datum</span>
+            <span className="block text-sm font-medium text-cream-dim mb-1.5">Datum</span>
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input" />
           </label>
           <label className="block">
-            <span className="block text-sm font-medium text-gray-700 mb-1">Notiz</span>
+            <span className="block text-sm font-medium text-cream-dim mb-1.5">Notiz</span>
             <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} placeholder="optional" className="input resize-none" />
           </label>
         </Modal>

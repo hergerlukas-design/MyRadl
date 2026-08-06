@@ -54,60 +54,57 @@ export default function ImageUpload({
 
   return (
     <div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={handleFile}
-      />
-      <div
-        className={`relative ${ratio} w-full rounded-2xl overflow-hidden border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center`}
-      >
-        {url ? (
+      {/* Ohne `capture` bietet der native Dialog Kamera UND Fotogalerie zur Auswahl. */}
+      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+
+      {url ? (
+        // Mit Foto: volles Seitenverhältnis anzeigen.
+        <div className={`relative ${ratio} w-full rounded-2xl overflow-hidden border border-hair`}>
           <img src={url} alt={label} className="w-full h-full object-cover" />
-        ) : (
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            className="flex flex-col items-center gap-1 text-gray-400"
-          >
-            <Camera size={28} />
-            <span className="text-xs font-medium">{label} hinzufügen</span>
-          </button>
-        )}
-
-        {busy && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <Loader2 className="animate-spin text-white" size={28} />
-          </div>
-        )}
-
-        {url && !busy && (
-          <div className="absolute bottom-2 right-2 flex gap-2">
-            <button
-              type="button"
-              onClick={() => inputRef.current?.click()}
-              className="bg-white/90 rounded-full p-2 shadow"
-              aria-label="Foto ändern"
-            >
-              <Camera size={16} />
-            </button>
-            {onRemove && (
+          {busy && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <Loader2 className="animate-spin text-accent" size={28} />
+            </div>
+          )}
+          {!busy && (
+            <div className="absolute bottom-2 right-2 flex gap-2">
               <button
                 type="button"
-                onClick={handleRemove}
-                className="bg-white/90 rounded-full p-2 shadow text-red-600"
-                aria-label="Foto entfernen"
+                onClick={() => inputRef.current?.click()}
+                className="bg-ink/80 text-cream rounded-full p-2 border border-hair-strong"
+                aria-label="Foto ändern"
               >
-                <X size={16} />
+                <Camera size={16} />
               </button>
-            )}
-          </div>
-        )}
-      </div>
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
+              {onRemove && (
+                <button
+                  type="button"
+                  onClick={handleRemove}
+                  className="bg-ink/80 rounded-full p-2 border border-hair-strong text-danger"
+                  aria-label="Foto entfernen"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        // Ohne Foto: schlanke Schaltfläche statt großer leerer Fläche.
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={busy}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-dashed border-hair-dashed text-muted active:scale-[0.99] transition-transform disabled:opacity-60"
+        >
+          {busy ? <Loader2 className="animate-spin text-accent" size={16} /> : <Camera size={16} />}
+          <span className="font-mono text-[11px] tracking-[0.14em]">
+            {busy ? 'LÄDT…' : `+ ${label.toUpperCase()}`}
+          </span>
+        </button>
+      )}
+
+      {error && <p className="mt-1 text-xs text-danger">{error}</p>}
     </div>
   )
 }
