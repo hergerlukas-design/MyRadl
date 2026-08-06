@@ -54,11 +54,11 @@ export default function ImageUpload({
 
   return (
     <div>
+      {/* Ohne `capture` bietet der native Dialog Kamera UND Fotogalerie zur Auswahl. */}
       <input
         ref={inputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={handleFile}
       />

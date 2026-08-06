@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Plus, Pencil, Trash2, ChevronRight, Ruler } from 'lucide-react'
+import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Ruler } from 'lucide-react'
 import Layout from '@/components/Layout'
 import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
@@ -183,53 +183,80 @@ function PartRow({ part }: { part: Part }) {
 function GeometrySection({ bikeId }: { bikeId: string }) {
   const { data: geo, isLoading } = useBikeGeometry(bikeId)
   const [editing, setEditing] = useState(false)
+  const [open, setOpen] = useState(false)
 
   const hasAny =
     geo != null &&
     (!!geo.frame_size || GEOMETRY_FIELDS.some((f) => geo[f.key] != null))
 
+  // Kompakte Zusammenfassung für den eingeklappten Zustand.
+  const summary = geo
+    ? [
+        geo.frame_size ? `Gr. ${geo.frame_size}` : null,
+        geo.reach != null ? `Reach ${geo.reach}` : null,
+        geo.stack != null ? `Stack ${geo.stack}` : null,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : ''
+
   return (
-    <section>
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
-          <Ruler size={16} className="text-gray-500" />
-          <h2 className="text-base font-semibold text-gray-900">Geometrie</h2>
-        </div>
+    <section className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+      <div className="flex items-center">
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="flex-1 flex items-center gap-2 px-4 py-3 min-w-0 text-left"
+          aria-expanded={open}
+        >
+          <Ruler size={16} className="text-gray-500 flex-shrink-0" />
+          <span className="text-base font-semibold text-gray-900 flex-shrink-0">Geometrie</span>
+          {!open && summary && (
+            <span className="text-sm text-gray-400 truncate">{summary}</span>
+          )}
+          <ChevronDown
+            size={18}
+            className={`ml-auto flex-shrink-0 text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          />
+        </button>
         <button
           onClick={() => setEditing(true)}
-          className="flex items-center gap-1 text-primary text-sm font-semibold"
+          className="flex items-center gap-1 text-primary text-sm font-semibold pl-2 pr-4 py-3 flex-shrink-0"
           aria-label="Geometrie bearbeiten"
         >
           <Pencil size={15} /> {hasAny ? 'Bearbeiten' : 'Erfassen'}
         </button>
       </div>
 
-      {isLoading ? (
-        <div className="py-4 flex justify-center">
-          <Spinner />
-        </div>
-      ) : !hasAny ? (
-        <p className="text-sm text-gray-400 py-2">
-          Noch keine Geometrie erfasst. Reach &amp; Stack sind die wichtigsten Werte für die Rahmengröße.
-        </p>
-      ) : (
-        <div className="bg-white rounded-2xl border border-gray-100 divide-y divide-gray-100">
-          {geo!.frame_size && (
-            <div className="flex items-center justify-between px-4 py-2.5">
-              <span className="text-sm font-semibold text-gray-900">Rahmengröße</span>
-              <span className="text-sm font-bold text-primary">{geo!.frame_size}</span>
+      {open && (
+        <div className="border-t border-gray-100">
+          {isLoading ? (
+            <div className="py-4 flex justify-center">
+              <Spinner />
+            </div>
+          ) : !hasAny ? (
+            <p className="text-sm text-gray-400 px-4 py-3">
+              Noch keine Geometrie erfasst. Reach &amp; Stack sind die wichtigsten Werte für die Rahmengröße.
+            </p>
+          ) : (
+            <div className="divide-y divide-gray-100">
+              {geo!.frame_size && (
+                <div className="flex items-center justify-between px-4 py-2.5">
+                  <span className="text-sm font-semibold text-gray-900">Rahmengröße</span>
+                  <span className="text-sm font-bold text-primary">{geo!.frame_size}</span>
+                </div>
+              )}
+              {GEOMETRY_FIELDS.filter((f) => geo![f.key] != null).map((f) => (
+                <div key={f.key} className="flex items-center justify-between px-4 py-2.5">
+                  <span className={`text-sm ${f.primary ? 'font-semibold text-gray-900' : 'text-gray-500'}`}>
+                    {f.label}
+                  </span>
+                  <span className={`text-sm ${f.primary ? 'font-bold text-primary' : 'font-medium text-gray-900'}`}>
+                    {formatGeometryValue(geo![f.key], f.unit)}
+                  </span>
+                </div>
+              ))}
             </div>
           )}
-          {GEOMETRY_FIELDS.filter((f) => geo![f.key] != null).map((f) => (
-            <div key={f.key} className="flex items-center justify-between px-4 py-2.5">
-              <span className={`text-sm ${f.primary ? 'font-semibold text-gray-900' : 'text-gray-500'}`}>
-                {f.label}
-              </span>
-              <span className={`text-sm ${f.primary ? 'font-bold text-primary' : 'font-medium text-gray-900'}`}>
-                {formatGeometryValue(geo![f.key], f.unit)}
-              </span>
-            </div>
-          ))}
         </div>
       )}
 
