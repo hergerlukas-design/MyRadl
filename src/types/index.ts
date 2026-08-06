@@ -43,6 +43,8 @@ export interface Part {
   install_date: string | null
   image_url: string | null
   notes: string | null
+  /** User-defined display order within the bike (drag-to-reorder). */
+  sort_order: number | null
   created_at: string
 }
 
