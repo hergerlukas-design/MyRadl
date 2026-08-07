@@ -17,6 +17,7 @@ import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
 import ImageUpload from '@/components/ImageUpload'
 import { categoryColor, categoryLabel, partTitle, positionLabel, SETTING_SUGGESTIONS } from '@/lib/categories'
+import { categoryImage } from '@/lib/categoryImages'
 import { uploadPartPhoto, deletePhoto } from '@/lib/storage'
 import { useAuth } from '@/hooks/useAuth'
 import { useBike } from '@/hooks/useBikes'
@@ -110,9 +111,10 @@ export default function PartDetail() {
       </header>
 
       <div className="flex-1 px-5 py-5 flex flex-col gap-4">
-        {part.image_url && (
+        {(part.image_url || categoryImage(part.category)) && (
           <ImageUpload
             value={part.image_url}
+            fallbackUrl={categoryImage(part.category)}
             onUpload={handlePhoto}
             onRemove={handlePhotoRemove}
             aspect="square"
@@ -140,7 +142,7 @@ export default function PartDetail() {
           </button>
         )}
 
-        {!part.image_url && (
+        {!part.image_url && !categoryImage(part.category) && (
           <ImageUpload
             value={part.image_url}
             onUpload={handlePhoto}
