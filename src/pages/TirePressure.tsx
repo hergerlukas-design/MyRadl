@@ -2,19 +2,18 @@ import { useMemo, useState } from 'react'
 import Layout from '@/components/Layout'
 import PageHeader from '@/components/PageHeader'
 
-type Wheel = '29' | '27.5' | '26' | 'mullet'
+type WheelSize = '29' | '27.5' | '26'
 type Mount = 'tubeless' | 'tube'
 type Discipline = 'xc' | 'trail' | 'enduro' | 'dh'
 
 /**
- * Volumen-Zuschlag kleinerer Laufräder (Referenz 29″), getrennt pro Rad –
- * Mullet fährt 29″ vorne / 27,5″ hinten.
+ * Volumen-Zuschlag kleinerer Laufräder (Referenz 29″). Vorne und hinten
+ * getrennt wählbar – unterschiedliche Größen ergeben ein Mullet/MX-Setup.
  */
-const WHEELS: { value: Wheel; label: string; front: number; rear: number }[] = [
-  { value: '29', label: '29″', front: 1.0, rear: 1.0 },
-  { value: '27.5', label: '27,5″', front: 1.05, rear: 1.05 },
-  { value: '26', label: '26″', front: 1.08, rear: 1.08 },
-  { value: 'mullet', label: 'Mullet', front: 1.0, rear: 1.05 },
+const WHEEL_SIZES: { value: WheelSize; label: string; factor: number }[] = [
+  { value: '29', label: '29″', factor: 1.0 },
+  { value: '27.5', label: '27,5″', factor: 1.05 },
+  { value: '26', label: '26″', factor: 1.08 },
 ]
 
 /** Schlauch braucht mehr Druck (Durchschlagschutz). */
@@ -36,7 +35,8 @@ const REF_WIDTH = 2.4 // Zoll, Referenz-Reifenbreite
 export default function TirePressure() {
   const [weight, setWeight] = useState('')
   const [width, setWidth] = useState('')
-  const [wheel, setWheel] = useState<Wheel>('29')
+  const [wheelFront, setWheelFront] = useState<WheelSize>('29')
+  const [wheelRear, setWheelRear] = useState<WheelSize>('29')
   const [mount, setMount] = useState<Mount>('tubeless')
   const [discipline, setDiscipline] = useState<Discipline>('trail')
 
@@ -48,16 +48,17 @@ export default function TirePressure() {
       return width.trim() ? { error: 'Reifenbreite in Zoll angeben (z. B. 2,4).' as const } : null
     }
 
-    const wheelCfg = WHEELS.find((x) => x.value === wheel)!
+    const frontF = WHEEL_SIZES.find((x) => x.value === wheelFront)!.factor
+    const rearF = WHEEL_SIZES.find((x) => x.value === wheelRear)!.factor
     const mountF = MOUNTS.find((x) => x.value === mount)!.factor
     const discF = DISCIPLINES.find((x) => x.value === discipline)!.factor
     const widthF = 1 + (REF_WIDTH - w) * 0.4
 
     // Basisdruck (bar), grob an realen Tubeless-Trail-Werten kalibriert.
-    // Laufrad-Faktor wirkt pro Rad (Mullet: 29″ vorne / 27,5″ hinten).
+    // Laufrad-Faktor wirkt pro Rad, damit Mullet-Setups korrekt herauskommen.
     const base = (0.016 * s + 0.12) * widthF * mountF * discF
-    return { front: base * wheelCfg.front * 0.94, rear: base * wheelCfg.rear * 1.06 }
-  }, [weight, width, wheel, mount, discipline])
+    return { front: base * frontF * 0.94, rear: base * rearF * 1.06 }
+  }, [weight, width, wheelFront, wheelRear, mount, discipline])
 
   return (
     <Layout hideNav>
@@ -104,9 +105,19 @@ export default function TirePressure() {
           </label>
 
           <div className="flex flex-col gap-1.5">
-            <span className="eyebrow">LAUFRADGRÖSSE</span>
-            <Segmented options={WHEELS} value={wheel} onChange={setWheel} cols={4} />
+            <span className="eyebrow">LAUFRAD VORNE</span>
+            <Segmented options={WHEEL_SIZES} value={wheelFront} onChange={setWheelFront} cols={3} />
           </div>
+          <div className="flex flex-col gap-1.5">
+            <span className="eyebrow">LAUFRAD HINTEN</span>
+            <Segmented options={WHEEL_SIZES} value={wheelRear} onChange={setWheelRear} cols={3} />
+          </div>
+          {wheelFront !== wheelRear && (
+            <p className="-mt-1.5 text-[12px] text-muted">
+              Mullet/MX-Setup ({WHEEL_SIZES.find((x) => x.value === wheelFront)!.label} vorne /{' '}
+              {WHEEL_SIZES.find((x) => x.value === wheelRear)!.label} hinten).
+            </p>
+          )}
 
           <div className="flex flex-col gap-1.5">
             <span className="eyebrow">MONTAGE</span>
