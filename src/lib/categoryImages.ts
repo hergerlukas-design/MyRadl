@@ -2,7 +2,7 @@ import type { PartCategory } from '@/types'
 
 // Standard-Blueprintbilder je Kategorie. Sie dienen als Fallback, solange ein
 // Teil kein eigenes Foto hat – so ist jedes Bauteil sofort visuell erkennbar.
-// Griffe und der Legacy-Wert „Cockpit" haben bewusst kein Standardbild.
+// Griffe, Sonstiges und der Legacy-Wert „Cockpit" haben bewusst kein Standardbild.
 import federgabel from '@/assets/categories/federgabel.webp'
 import daempfer from '@/assets/categories/daempfer.webp'
 import antrieb from '@/assets/categories/antrieb.webp'
@@ -12,7 +12,7 @@ import reifen from '@/assets/categories/reifen.webp'
 import vorbau from '@/assets/categories/vorbau.webp'
 import lenker from '@/assets/categories/lenker.webp'
 import sattel from '@/assets/categories/sattel.webp'
-import sonstiges from '@/assets/categories/sonstiges.webp'
+import sattelstuetze from '@/assets/categories/sattelstuetze.webp'
 
 const CATEGORY_IMAGES: Partial<Record<PartCategory, string>> = {
   federgabel,
@@ -24,7 +24,7 @@ const CATEGORY_IMAGES: Partial<Record<PartCategory, string>> = {
   vorbau,
   lenker,
   sattel,
-  sonstiges,
+  sattelstuetze,
 }
 
 /**

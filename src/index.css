@@ -64,6 +64,7 @@
   --cat-lenker: #4fbfd6;
   --cat-griffe: #6fd6a8;
   --cat-sattel: #c58bd6;
+  --cat-sattelstuetze: #d68bb0;
   --cat-sonstiges: #9a9489;
 
   color-scheme: dark;
@@ -106,6 +107,7 @@
     --cat-lenker: #1f6e7a;
     --cat-griffe: #2f7a54;
     --cat-sattel: #7a4fa8;
+    --cat-sattelstuetze: #a8407a;
     --cat-sonstiges: #6e685e;
 
     color-scheme: light;
@@ -144,7 +146,11 @@
   --cat-laufraeder: #5757a8;
   --cat-reifen: #8a6420;
   --cat-cockpit: #1f7a66;
+  --cat-vorbau: #1f7a66;
+  --cat-lenker: #1f6e7a;
+  --cat-griffe: #2f7a54;
   --cat-sattel: #7a4fa8;
+  --cat-sattelstuetze: #a8407a;
   --cat-sonstiges: #6e685e;
 
   color-scheme: light;

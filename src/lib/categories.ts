@@ -9,6 +9,7 @@ import {
   MoveHorizontal,
   Grip,
   Armchair,
+  ArrowUpDown,
   Package,
   type LucideIcon,
 } from 'lucide-react'
@@ -38,6 +39,7 @@ export const CATEGORIES: CategoryMeta[] = [
   { value: 'lenker', label: 'Lenker', icon: MoveHorizontal, color: 'var(--cat-lenker)' },
   { value: 'griffe', label: 'Griffe', icon: Grip, color: 'var(--cat-griffe)' },
   { value: 'sattel', label: 'Sattel', icon: Armchair, color: 'var(--cat-sattel)' },
+  { value: 'sattelstuetze', label: 'Sattelstütze', icon: ArrowUpDown, color: 'var(--cat-sattelstuetze)' },
   { value: 'sonstiges', label: 'Sonstiges', icon: Package, color: 'var(--cat-sonstiges)' },
 ]
 
