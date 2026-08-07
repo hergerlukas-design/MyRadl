@@ -9,6 +9,7 @@ import PartDetail from '@/pages/PartDetail'
 import ReplacePart from '@/pages/ReplacePart'
 import Search from '@/pages/Search'
 import Settings from '@/pages/Settings'
+import SagCalculator from '@/pages/SagCalculator'
 
 function Protected({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth()
@@ -36,6 +37,7 @@ export default function App() {
       <Route path="/parts/:partId/replace" element={<Protected><ReplacePart /></Protected>} />
       <Route path="/search" element={<Protected><Search /></Protected>} />
       <Route path="/settings" element={<Protected><Settings /></Protected>} />
+      <Route path="/sag" element={<Protected><SagCalculator /></Protected>} />
       <Route path="*" element={<Navigate to="/bikes" replace />} />
     </Routes>
   )

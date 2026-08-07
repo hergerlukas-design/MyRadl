@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Check, Moon, Sun, RefreshCw } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Check, Moon, Sun, RefreshCw, Calculator, ChevronRight } from 'lucide-react'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/hooks/useAuth'
 import { useTheme, type Theme } from '@/hooks/useTheme'
@@ -7,6 +8,7 @@ import { applyUpdate, checkForUpdate } from '@/lib/pwa'
 
 export default function Settings() {
   const { user, signOut, updatePassword } = useAuth()
+  const navigate = useNavigate()
 
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -77,6 +79,21 @@ export default function Settings() {
             <span className="text-sm font-medium text-cream-dim truncate">{user?.email ?? '—'}</span>
           </div>
         </div>
+
+        {/* Werkzeuge */}
+        <button
+          onClick={() => navigate('/sag')}
+          className="flex items-center gap-3.5 bg-surface border border-hair rounded-[20px] p-4 text-left active:scale-[0.99] transition-transform"
+        >
+          <div className="w-[46px] h-[46px] rounded-full bg-accent/15 border border-accent/35 flex items-center justify-center text-accent">
+            <Calculator size={20} />
+          </div>
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+            <span className="text-[15px] font-extrabold text-cream">Sag-Rechner</span>
+            <span className="text-[13px] text-muted truncate">Sag in % aus Federweg &amp; Messung</span>
+          </div>
+          <ChevronRight size={20} className="text-dim flex-none" />
+        </button>
 
         <ThemeCard />
 
