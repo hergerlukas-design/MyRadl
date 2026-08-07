@@ -2,15 +2,19 @@ import { useMemo, useState } from 'react'
 import Layout from '@/components/Layout'
 import PageHeader from '@/components/PageHeader'
 
-type Wheel = '29' | '27.5' | '26'
+type Wheel = '29' | '27.5' | '26' | 'mullet'
 type Mount = 'tubeless' | 'tube'
 type Discipline = 'xc' | 'trail' | 'enduro' | 'dh'
 
-/** Volumen-Zuschlag kleinerer Laufräder (Referenz 29″). */
-const WHEELS: { value: Wheel; label: string; factor: number }[] = [
-  { value: '29', label: '29″', factor: 1.0 },
-  { value: '27.5', label: '27,5″', factor: 1.05 },
-  { value: '26', label: '26″', factor: 1.08 },
+/**
+ * Volumen-Zuschlag kleinerer Laufräder (Referenz 29″), getrennt pro Rad –
+ * Mullet fährt 29″ vorne / 27,5″ hinten.
+ */
+const WHEELS: { value: Wheel; label: string; front: number; rear: number }[] = [
+  { value: '29', label: '29″', front: 1.0, rear: 1.0 },
+  { value: '27.5', label: '27,5″', front: 1.05, rear: 1.05 },
+  { value: '26', label: '26″', front: 1.08, rear: 1.08 },
+  { value: 'mullet', label: 'Mullet', front: 1.0, rear: 1.05 },
 ]
 
 /** Schlauch braucht mehr Druck (Durchschlagschutz). */
@@ -44,14 +48,15 @@ export default function TirePressure() {
       return width.trim() ? { error: 'Reifenbreite in Zoll angeben (z. B. 2,4).' as const } : null
     }
 
-    const wheelF = WHEELS.find((x) => x.value === wheel)!.factor
+    const wheelCfg = WHEELS.find((x) => x.value === wheel)!
     const mountF = MOUNTS.find((x) => x.value === mount)!.factor
     const discF = DISCIPLINES.find((x) => x.value === discipline)!.factor
     const widthF = 1 + (REF_WIDTH - w) * 0.4
 
     // Basisdruck (bar), grob an realen Tubeless-Trail-Werten kalibriert.
-    const base = (0.016 * s + 0.12) * widthF * wheelF * mountF * discF
-    return { front: base * 0.94, rear: base * 1.06 }
+    // Laufrad-Faktor wirkt pro Rad (Mullet: 29″ vorne / 27,5″ hinten).
+    const base = (0.016 * s + 0.12) * widthF * mountF * discF
+    return { front: base * wheelCfg.front * 0.94, rear: base * wheelCfg.rear * 1.06 }
   }, [weight, width, wheel, mount, discipline])
 
   return (
@@ -100,7 +105,7 @@ export default function TirePressure() {
 
           <div className="flex flex-col gap-1.5">
             <span className="eyebrow">LAUFRADGRÖSSE</span>
-            <Segmented options={WHEELS} value={wheel} onChange={setWheel} cols={3} />
+            <Segmented options={WHEELS} value={wheel} onChange={setWheel} cols={4} />
           </div>
 
           <div className="flex flex-col gap-1.5">
