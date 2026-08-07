@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Calculator, ChevronRight, type LucideIcon } from 'lucide-react'
+import { Calculator, Gauge, ChevronRight, type LucideIcon } from 'lucide-react'
 import Layout from '@/components/Layout'
 import Watermark from '@/components/Watermark'
 import Modal from '@/components/ui/Modal'
@@ -73,6 +73,7 @@ interface Tool {
 /** Tools/Rechner – wächst mit weiteren Tools. */
 const TOOLS: Tool[] = [
   { to: '/sag', label: 'Sag-Rechner', desc: 'Sag in % aus Federweg & Messung', icon: Calculator },
+  { to: '/reifendruck', label: 'Reifendruck-Rechner', desc: 'Druck vorne & hinten aus Gewicht & Reifen', icon: Gauge },
 ]
 
 function ToolsSection() {
