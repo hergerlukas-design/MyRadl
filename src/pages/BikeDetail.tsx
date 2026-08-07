@@ -23,8 +23,9 @@ import {
   QUICK_SETTING_CATEGORIES,
   type ShockType,
 } from '@/lib/categories'
+import { categoryImage } from '@/lib/categoryImages'
 import { GEOMETRY_FIELDS, formatGeometryValue } from '@/lib/geometry'
-import { uploadBikePhoto, deletePhoto } from '@/lib/storage'
+import { uploadBikePhoto, deletePhoto, photoUrl } from '@/lib/storage'
 import { useAuth } from '@/hooks/useAuth'
 import { useBike, useUpdateBike, useDeleteBike } from '@/hooks/useBikes'
 import { useBikeGeometry, useUpsertBikeGeometry } from '@/hooks/useBikeGeometry'
@@ -312,6 +313,8 @@ function PartRow({
   const color = categoryColor(part.category)
   const isReplaced = part.status === 'ersetzt'
   const sub = partSubtitle(part)
+  // Eigenes Foto, sonst das Standardbild der Kategorie (Blueprint), sonst leer.
+  const thumb = photoUrl(part.image_url) ?? categoryImage(part.category)
   return (
     <div
       ref={setRef}
@@ -335,6 +338,11 @@ function PartRow({
         onClick={() => navigate(`/parts/${part.id}`)}
         className="flex-1 min-w-0 flex items-center gap-3 text-left active:scale-[0.99] transition-transform"
       >
+        {thumb && (
+          <span className="w-[42px] h-[42px] flex-none rounded-[12px] overflow-hidden photo-ph border border-hair-soft">
+            <img src={thumb} alt="" className="w-full h-full object-cover" />
+          </span>
+        )}
         <span className="flex-1 min-w-0 flex flex-col gap-1">
           <span className="font-mono text-[9px] font-medium tracking-[0.16em]" style={{ color }}>
             {categoryLabel(part.category).toUpperCase()}

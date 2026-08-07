@@ -4,6 +4,7 @@ import Layout from '@/components/Layout'
 import Spinner from '@/components/ui/Spinner'
 import { CATEGORIES, categoryColor, categoryLabel, partTitle, partSubtitle } from '@/lib/categories'
 import { photoUrl } from '@/lib/storage'
+import { categoryImage } from '@/lib/categoryImages'
 import { useBikes } from '@/hooks/useBikes'
 import { useAllParts } from '@/hooks/useParts'
 import type { PartCategory } from '@/types'
@@ -83,7 +84,7 @@ export default function Search() {
             <p className="font-mono text-xs text-muted text-center py-8">Keine Teile gefunden.</p>
           ) : (
             results.map((p) => {
-              const url = photoUrl(p.image_url)
+              const url = photoUrl(p.image_url) ?? categoryImage(p.category)
               const color = categoryColor(p.category)
               return (
                 <button

@@ -11,6 +11,12 @@ interface ImageUploadProps {
   /** Aspect: 'video' (16/9, bikes) or 'square' (parts). */
   aspect?: 'video' | 'square'
   label?: string
+  /**
+   * Standardbild, das angezeigt wird, solange `value` leer ist (z. B. das
+   * Blueprint-Bild der Kategorie). Der Nutzer kann trotzdem ein eigenes Foto
+   * hinzufügen; entfernt werden kann nur ein echtes, hochgeladenes Foto.
+   */
+  fallbackUrl?: string | null
 }
 
 export default function ImageUpload({
@@ -19,11 +25,14 @@ export default function ImageUpload({
   onRemove,
   aspect = 'video',
   label = 'Foto',
+  fallbackUrl = null,
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const url = photoUrl(value)
+  // Eigenes Foto hat Vorrang; sonst das Standardbild der Kategorie.
+  const isFallback = !value && !!fallbackUrl
+  const url = photoUrl(value) ?? fallbackUrl
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -76,7 +85,7 @@ export default function ImageUpload({
               >
                 <Camera size={16} />
               </button>
-              {onRemove && (
+              {onRemove && !isFallback && (
                 <button
                   type="button"
                   onClick={handleRemove}
