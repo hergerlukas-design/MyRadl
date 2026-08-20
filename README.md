@@ -22,6 +22,9 @@ verbaut ist, und direkt zu Shop-/Preisvergleichsseiten springen.
 4. **Teil ersetzen** – altes Teil auf „ersetzt", History-Eintrag, Nachfolger
    vorausgefüllt anlegen (Kategorie übernommen).
 5. **Suche/Filter** – nach Freitext, Kategorie und Rad.
+6. **Öffentlicher Share-Link** – ein Rad lässt sich über `/share/<share_token>`
+   schreibgeschützt und ohne Login teilen (Toggle im Rad-Detail, Link neu
+   generierbar).
 
 Bildupload für Räder und Teile über Supabase Storage (Bucket `photos`).
 
@@ -52,16 +55,20 @@ Die Migrationen wurden bereits auf dieses Projekt angewendet (Tabellen, Enum,
 RLS-Policies, Storage-Bucket `photos`). Für einen frischen Aufbau:
 
 1. Projekt in Region `eu-central-1` anlegen.
-2. Migrationen der Reihe nach ausführen (SQL-Editor oder `supabase db push`):
-   - `supabase/migrations/001_initial_schema.sql`
-   - `supabase/migrations/002_inline_rls_drop_security_definer.sql`
+2. Alle Migrationen in `supabase/migrations/` der Reihe nach ausführen
+   (SQL-Editor oder `supabase db push`), beginnend mit
+   `001_initial_schema.sql`.
 3. Auth → Email-Provider aktivieren (Passwort und/oder Magic-Link). Standardmäßig
    ist Email-Bestätigung aktiv; zum schnellen Testen ggf. unter
    **Authentication → Sign In / Providers → Email** deaktivieren.
 
 Alle Tabellen sind per RLS auf den eingeloggten User beschränkt: `bikes.user_id`
 ist die Wurzel, die übrigen Tabellen leiten den Zugriff über `bike_id`/`part_id`
-ab.
+ab. Einzige Ausnahme sind die `*_public_read`-Policies aus
+`008_bike_share_link.sql`: Sie geben ausschließlich Räder mit
+`visibility = 'public'` (und deren Teile, Einstellungen, Links, Verlauf und
+Geometrie) lesend frei – für die Share-Ansicht. Geschrieben werden darf
+weiterhin nur vom Besitzer.
 
 ## Deployment (Fly.io)
 
