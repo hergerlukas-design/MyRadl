@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Check, Moon, Sun, RefreshCw } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Check, Moon, Sun, RefreshCw, ChevronRight, Scale } from 'lucide-react'
 import Layout from '@/components/Layout'
 import { useAuth } from '@/hooks/useAuth'
 import { useTheme, type Theme } from '@/hooks/useTheme'
@@ -147,6 +148,23 @@ export default function Settings() {
             <p className="text-sm text-muted">Update gefunden – App wird neu geladen…</p>
           )}
         </div>
+
+        {/* Rechtliches */}
+        <Link
+          to="/legal"
+          className="flex items-center gap-3.5 bg-surface border border-hair rounded-[20px] p-[18px] active:scale-[0.99] transition-transform"
+        >
+          <div className="w-9 h-9 rounded-xl bg-surface-2 border border-hair-strong flex items-center justify-center text-cream-dim flex-none">
+            <Scale size={17} />
+          </div>
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+            <span className="text-[15px] font-extrabold text-cream">Rechtliches</span>
+            <span className="text-[13px] text-muted truncate">
+              Impressum, Datenschutz &amp; Nutzungsbedingungen
+            </span>
+          </div>
+          <ChevronRight size={18} className="text-muted flex-none" />
+        </Link>
 
         <button
           onClick={() => signOut()}

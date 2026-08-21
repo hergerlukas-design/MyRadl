@@ -9,6 +9,7 @@ import PartDetail from '@/pages/PartDetail'
 import ReplacePart from '@/pages/ReplacePart'
 import Search from '@/pages/Search'
 import Settings from '@/pages/Settings'
+import Legal from '@/pages/Legal'
 
 function Protected({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth()
@@ -27,6 +28,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      {/* Impressum & Datenschutz müssen auch ohne Anmeldung erreichbar sein. */}
+      <Route path="/legal" element={<Legal />} />
       <Route path="/" element={<Protected><Navigate to="/bikes" replace /></Protected>} />
       <Route path="/bikes" element={<Protected><Bikes /></Protected>} />
       <Route path="/bikes/:bikeId" element={<Protected><BikeDetail /></Protected>} />

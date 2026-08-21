@@ -22,8 +22,34 @@ verbaut ist, und direkt zu Shop-/Preisvergleichsseiten springen.
 4. **Teil ersetzen** – altes Teil auf „ersetzt", History-Eintrag, Nachfolger
    vorausgefüllt anlegen (Kategorie übernommen).
 5. **Suche/Filter** – nach Freitext, Kategorie und Rad.
+6. **Rechtliches** – Impressum, Datenschutzerklärung, Nutzungsbedingungen
+   und Haftungshinweise unter `/legal` (auch ohne Anmeldung erreichbar).
 
 Bildupload für Räder und Teile über Supabase Storage (Bucket `photos`).
+
+## Rechtstexte
+
+Impressum und Datenschutzerklärung liegen unter der öffentlichen Route
+`/legal` (verlinkt aus „Mehr" und vom Login-Screen). Alle Betreiberdaten sind
+in `src/lib/legal.ts` zentralisiert.
+
+**Vor einem öffentlichen Launch anzupassen:**
+
+- `LEGAL.street` / `LEGAL.city` – die Platzhalter-Anschrift durch die echte
+  ersetzen. Ein unvollständiges Impressum ist nach § 5 ECG (AT) bzw. § 5 DDG
+  (DE) abmahnfähig.
+- `SUPERVISORY_AUTHORITY` – auf die Aufsichtsbehörde am Betreibersitz
+  anpassen, falls dieser nicht in Österreich liegt.
+- `LEGAL.site` – auf die tatsächliche Produktions-Domain setzen.
+- `LEGAL.updated` – bei inhaltlichen Änderungen der Texte hochziehen.
+
+Zwei Punkte sind in der Erklärung bewusst offengelegt, weil sie so
+implementiert sind: der Storage-Bucket `photos` ist öffentlich lesbar (Bilder
+sind über ihre zufällige URL abrufbar), und Google Fonts werden zur Laufzeit
+von Google-Servern geladen (IP-Übermittlung). Wer beides vermeiden will,
+stellt den Bucket auf privat um (mit signierten URLs) bzw. hostet die
+Schriften selbst – dann sind die Abschnitte 6 und 7 der Datenschutzerklärung
+entsprechend zu kürzen.
 
 ## Lokale Entwicklung
 

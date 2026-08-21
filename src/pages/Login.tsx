@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate } from 'react-router-dom'
 import { Mail, Loader2 } from 'lucide-react'
 import Watermark from '@/components/Watermark'
 import { useAuth } from '@/hooks/useAuth'
@@ -166,6 +166,16 @@ export default function Login() {
               Mit Passwort anmelden
             </button>
           )}
+        </div>
+
+        <div className="mt-8 flex items-center justify-center gap-4 text-[11px] text-dim">
+          <Link to="/legal#impressum" className="underline underline-offset-2">
+            Impressum
+          </Link>
+          <span aria-hidden>·</span>
+          <Link to="/legal#datenschutz" className="underline underline-offset-2">
+            Datenschutz
+          </Link>
         </div>
       </div>
     </div>
