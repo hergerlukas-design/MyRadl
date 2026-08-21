@@ -44,13 +44,27 @@ Aufsichtsbehörde ist das BayLDA in Ansbach.
 - `SUPERVISORY_AUTHORITY` – nur nötig, wenn der Betreibersitz Bayern verlässt;
   die Zuständigkeit richtet sich nach dem Bundesland.
 
-Zwei Punkte sind in der Erklärung bewusst offengelegt, weil sie so
-implementiert sind: der Storage-Bucket `photos` ist öffentlich lesbar (Bilder
-sind über ihre zufällige URL abrufbar), und Google Fonts werden zur Laufzeit
-von Google-Servern geladen (IP-Übermittlung). Wer beides vermeiden will,
-stellt den Bucket auf privat um (mit signierten URLs) bzw. hostet die
-Schriften selbst – dann sind die Abschnitte 6 und 7 der Datenschutzerklärung
-entsprechend zu kürzen.
+Ein Punkt ist in der Erklärung bewusst offengelegt, weil er so implementiert
+ist: der Storage-Bucket `photos` ist öffentlich lesbar, Bilder sind also über
+ihre (zufällig erzeugte, nicht erratbare) URL ohne Login abrufbar. Wer das
+vermeiden will, stellt den Bucket auf privat um und ersetzt `getPublicUrl`
+durch `createSignedUrl` – das macht `photoUrl()` asynchron und betrifft die
+drei Aufrufstellen in `ImageUpload`, `Bikes` und `Search`; ablaufende Tokens
+vertragen sich zudem schlecht mit dem Offline-Cache der PWA.
+
+## Schriftarten
+
+Chivo und IBM Plex werden über `@fontsource` selbst ausgeliefert (siehe
+`src/fonts.css`), nicht über Google Fonts. Das vermeidet die IP-Übermittlung
+an Google und sorgt dafür, dass die installierte PWA auch offline in der
+richtigen Schrift rendert – die woff2-Dateien sind über `globPatterns` im
+Precache des Service Workers enthalten.
+
+Importiert werden nur der `latin`-Subset und die neun Schnitte, die
+`index.css` referenziert (~168 KB). Wird ein neuer Schnitt im Design
+verwendet, muss er in `src/fonts.css` ergänzt werden, sonst rendert der
+Browser ihn synthetisch. Die von `@fontsource` mitgelieferten `.woff`-Dateien
+landen zwar im Build, werden aber von keinem aktuellen Browser angefragt.
 
 ## Lokale Entwicklung
 

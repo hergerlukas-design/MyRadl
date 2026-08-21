@@ -39,7 +39,12 @@ export const SUPERVISORY_AUTHORITY = {
   url: 'https://www.lda.bayern.de',
 } as const
 
-/** Eingesetzte Dienstleister (Auftragsverarbeiter bzw. Drittempfänger). */
+/**
+ * Eingesetzte Dienstleister (Auftragsverarbeiter bzw. Drittempfänger).
+ *
+ * Bewusst kurz: Schriftarten werden seit v0.6.0 selbst ausgeliefert
+ * (src/fonts.css), es gibt daher keinen Google-Fonts-Empfänger mehr.
+ */
 export const PROCESSORS = [
   {
     name: 'Supabase Inc.',
@@ -52,11 +57,5 @@ export const PROCESSORS = [
     purpose: 'Hosting und Auslieferung der Web-App',
     location: 'Serverstandort Frankfurt am Main (fra), Unternehmenssitz USA',
     privacy: 'https://fly.io/legal/privacy-policy/',
-  },
-  {
-    name: 'Google Ireland Ltd.',
-    purpose: 'Auslieferung der Schriftarten (Google Fonts)',
-    location: 'Irland, Übermittlung in die USA möglich',
-    privacy: 'https://policies.google.com/privacy',
   },
 ] as const

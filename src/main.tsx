@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/hooks/useTheme'
 import { initPWA, subscribeNeedRefresh, applyUpdate } from '@/lib/pwa'
 import App from './App'
 import UpdateBanner from './components/UpdateBanner'
+import './fonts.css'
 import './index.css'
 
 initPWA()

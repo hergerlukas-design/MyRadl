@@ -365,20 +365,14 @@ export default function Legal() {
           </div>
           <P>
             Die Datenbank, die Nutzerkonten und alle Fotos liegen auf Servern
-            innerhalb der EU (Frankfurt am Main).
+            innerhalb der EU (Frankfurt am Main). Darüber hinaus werden beim
+            Aufruf der App keine weiteren Server Dritter kontaktiert:
+            Schriftarten, Symbole und alle übrigen Bestandteile der Oberfläche
+            werden direkt von MyRadl ausgeliefert und nicht von externen
+            Anbietern wie Google Fonts nachgeladen.
           </P>
 
-          <H>6. Schriftarten von Google</H>
-          <P>
-            Die Oberfläche verwendet die Schriftarten Chivo und IBM Plex, die
-            beim Aufruf von den Servern von Google (fonts.googleapis.com und
-            fonts.gstatic.com) geladen werden. Dabei wird deine IP-Adresse an
-            Google übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO
-            (berechtigtes Interesse an einer einheitlichen Darstellung). Nach
-            dem ersten Laden liegen die Schriften im Browser-Cache.
-          </P>
-
-          <H>7. Sichtbarkeit hochgeladener Fotos</H>
+          <H>6. Sichtbarkeit hochgeladener Fotos</H>
           <P>
             Wichtiger Hinweis: Fotos zu Rädern und Teilen werden in einem
             Speicher abgelegt, der über eine lange, zufällig erzeugte Adresse
@@ -390,7 +384,7 @@ export default function Legal() {
             damit nicht einverstanden sind).
           </P>
 
-          <H>8. Datensicherheit</H>
+          <H>7. Datensicherheit</H>
           <UL
             items={[
               'Die gesamte Übertragung erfolgt ausschließlich verschlüsselt über HTTPS/TLS.',
@@ -399,7 +393,7 @@ export default function Legal() {
             ]}
           />
 
-          <H>9. Speicherdauer</H>
+          <H>8. Speicherdauer</H>
           <UL
             items={[
               'Konto- und Inhaltsdaten werden gespeichert, solange dein Konto besteht, und nach einer Löschung des Kontos entfernt.',
@@ -408,7 +402,7 @@ export default function Legal() {
             ]}
           />
 
-          <H>10. Änderungen dieser Erklärung</H>
+          <H>9. Änderungen dieser Erklärung</H>
           <P>
             Wird die App um neue Funktionen erweitert, kann eine Anpassung
             dieser Erklärung notwendig werden. Es gilt jeweils die hier

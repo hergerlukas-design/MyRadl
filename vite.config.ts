@@ -34,7 +34,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}'],
+        // woff2 gehört mit in den Precache: die Schriften werden selbst
+        // gehostet (src/fonts.css), damit die PWA offline korrekt rendert.
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff2}'],
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,

@@ -1,0 +1,28 @@
+/*
+ * Selbst gehostete Schriften (@fontsource) statt Google Fonts.
+ *
+ * Vorteile gegenüber dem früheren <link> auf fonts.googleapis.com:
+ *  – keine IP-Übermittlung an Google, dadurch datenschutzrechtlich unkritisch
+ *  – die Dateien werden vom Service Worker precacht, die PWA rendert also
+ *    auch offline in der richtigen Schrift statt in der Systemschrift
+ *  – kein DNS-Lookup/Verbindungsaufbau zu fremden Hosts beim ersten Start
+ *
+ * Importiert wird bewusst nur der `latin`-Subset und nur die Schnitte, die
+ * das Design in `index.css` tatsächlich referenziert. Deutsche Umlaute und
+ * ß liegen im latin-Subset; latin-ext wird nicht benötigt.
+ */
+
+/* --font-display: Chivo — Headlines (400/600) und die fetten Titel (800/900) */
+@import '@fontsource/chivo/latin-400.css';
+@import '@fontsource/chivo/latin-600.css';
+@import '@fontsource/chivo/latin-800.css';
+@import '@fontsource/chivo/latin-900.css';
+
+/* --font-sans: IBM Plex Sans — Fließtext, Labels, Buttons */
+@import '@fontsource/ibm-plex-sans/latin-400.css';
+@import '@fontsource/ibm-plex-sans/latin-500.css';
+@import '@fontsource/ibm-plex-sans/latin-600.css';
+
+/* --font-mono: IBM Plex Mono — Eyebrows, Navigation, Versionsnummer */
+@import '@fontsource/ibm-plex-mono/latin-400.css';
+@import '@fontsource/ibm-plex-mono/latin-500.css';
