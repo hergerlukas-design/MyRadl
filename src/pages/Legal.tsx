@@ -154,8 +154,7 @@ export default function Legal() {
           onToggle={() => setOpen(open === 'impressum' ? null : 'impressum')}
         >
           <P>
-            Informationspflicht laut § 5 E-Commerce-Gesetz (ECG), § 25
-            Mediengesetz und § 5 Digitale-Dienste-Gesetz (DDG).
+            Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG).
           </P>
 
           <H>Diensteanbieter</H>
@@ -187,24 +186,24 @@ export default function Legal() {
             MyRadl ist ein privates, nicht-kommerzielles Hobbyprojekt zur
             Verwaltung der eigenen Mountainbikes und der daran verbauten Teile.
             Es werden keine Waren oder Dienstleistungen verkauft, es besteht
-            keine Umsatzsteuer-Identifikationsnummer und keine
-            Gewerbeberechtigung.
+            keine Umsatzsteuer-Identifikationsnummer nach § 27a UStG und kein
+            angemeldetes Gewerbe.
           </P>
 
-          <H>Verantwortlich für den Inhalt</H>
+          <H>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</H>
           <P>
             {LEGAL.operator}, {address}
           </P>
 
-          <H>Online-Streitbeilegung</H>
+          <H>Verbraucherstreitbeilegung</H>
           <P>
-            Die Europäische Kommission stellt eine Plattform zur
-            Online-Streitbeilegung bereit:{' '}
-            <A href="https://ec.europa.eu/consumers/odr">ec.europa.eu/consumers/odr</A>. Da
-            über MyRadl keine Verträge mit Verbraucherinnen und Verbrauchern
-            geschlossen werden, besteht weder eine Verpflichtung noch die
-            Bereitschaft, an einem Streitbeilegungsverfahren vor einer
-            Verbraucherschlichtungsstelle teilzunehmen.
+            Über MyRadl werden keine Verträge mit Verbraucherinnen und
+            Verbrauchern geschlossen. Es besteht daher weder eine Verpflichtung
+            noch die Bereitschaft, an einem Streitbeilegungsverfahren vor einer
+            Verbraucherschlichtungsstelle im Sinne des
+            Verbraucherstreitbeilegungsgesetzes (VSBG) teilzunehmen. Die
+            Online-Streitbeilegungsplattform der Europäischen Kommission wurde
+            zum 20. Juli 2025 eingestellt und steht nicht mehr zur Verfügung.
           </P>
 
           <H>Urheberrecht</H>
@@ -238,21 +237,23 @@ export default function Legal() {
           <P>
             Der Schutz deiner Daten ist uns wichtig. Nachfolgend wird
             transparent dargestellt, welche personenbezogenen Daten bei der
-            Nutzung von MyRadl verarbeitet werden – gemäß Datenschutz-Grundverordnung
-            (DSGVO) und dem österreichischen Datenschutzgesetz (DSG).
+            Nutzung von MyRadl verarbeitet werden – gemäß
+            Datenschutz-Grundverordnung (DSGVO) und
+            Bundesdatenschutzgesetz (BDSG).
           </P>
 
           <H>1. Verantwortlicher</H>
           <P>
-            Verantwortlich im Sinne des Art. 4 Z 7 DSGVO ist:
+            Verantwortlich im Sinne des Art. 4 Nr. 7 DSGVO ist:
             <br />
             {LEGAL.operator}, {address}
             <br />
             E-Mail: <A href={mailto}>{LEGAL.email}</A>
           </P>
           <P>
-            Ein Datenschutzbeauftragter ist gesetzlich nicht erforderlich und
-            wurde nicht bestellt.
+            Die Voraussetzungen für die Pflicht zur Bestellung eines
+            Datenschutzbeauftragten nach § 38 BDSG liegen nicht vor; ein
+            solcher wurde daher nicht bestellt.
           </P>
 
           <H>2. Welche Daten verarbeitet werden</H>
@@ -336,8 +337,9 @@ export default function Legal() {
           <P>
             Diese Daten verlassen dein Gerät nicht und lassen sich jederzeit
             über die Browsereinstellungen („Websitedaten löschen") entfernen.
-            Rechtsgrundlage: § 165 Abs. 3 TKG bzw. § 25 Abs. 2 TTDSG
-            (unbedingt erforderliche Speicherung).
+            Rechtsgrundlage ist § 25 Abs. 2 Nr. 2 TDDDG (unbedingt
+            erforderliche Speicherung), da ohne sie der von dir gewünschte
+            Dienst nicht bereitgestellt werden kann.
           </P>
 
           <H>5. Empfänger und Auftragsverarbeiter</H>

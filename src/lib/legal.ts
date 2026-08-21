@@ -2,20 +2,21 @@
  * Zentrale Stammdaten für Impressum & Datenschutzerklärung.
  *
  * ▸ Diese Werte sind die einzige Stelle, an der Betreiberdaten gepflegt werden.
- *   Die Platzhalter unten MÜSSEN vor einem öffentlichen Launch durch die
- *   echten Angaben ersetzt werden – ein unvollständiges Impressum ist in
- *   Deutschland (§ 5 DDG) und Österreich (§ 5 ECG) abmahnfähig.
+ *   Sitz des Betreibers ist München – daraus folgen die deutschen
+ *   Rechtsgrundlagen (§ 5 DDG, BDSG, § 25 TDDDG) in den Texten sowie das
+ *   BayLDA als zuständige Aufsichtsbehörde. Bei einem Umzug in ein anderes
+ *   Bundesland ist `SUPERVISORY_AUTHORITY` anzupassen.
  */
 
 export const LEGAL = {
   /** Name der natürlichen/juristischen Person, die die App betreibt. */
   operator: 'Lukas Herger',
-  /** Straße + Hausnummer. TODO: echte Anschrift eintragen. */
-  street: 'Musterstraße 1',
-  /** PLZ + Ort. TODO: echte Anschrift eintragen. */
-  city: '0000 Musterstadt',
+  /** Straße + Hausnummer. */
+  street: 'Passauerstraße 26',
+  /** PLZ + Ort. */
+  city: '81369 München',
   /** Land des Betreibersitzes – bestimmt die zuständige Aufsichtsbehörde. */
-  country: 'Österreich',
+  country: 'Deutschland',
   /** Kontakt für Auskunfts-, Lösch- und Widerspruchsersuchen. */
   email: 'herger.lukas@gmail.com',
   /** Optionale Telefonnummer. Leer lassen, wenn nicht gewünscht. */
@@ -26,11 +27,16 @@ export const LEGAL = {
   updated: '21.08.2026',
 } as const
 
-/** Zuständige Datenschutz-Aufsichtsbehörde je nach Sitz des Betreibers. */
+/**
+ * Zuständige Datenschutz-Aufsichtsbehörde. Für nicht-öffentliche Stellen in
+ * Bayern (Sitz München) ist das BayLDA in Ansbach zuständig – nicht der
+ * Bayerische Landesbeauftragte für den Datenschutz, der nur öffentliche
+ * Stellen betreut.
+ */
 export const SUPERVISORY_AUTHORITY = {
-  name: 'Österreichische Datenschutzbehörde',
-  address: 'Barichgasse 40–42, 1030 Wien',
-  url: 'https://www.dsb.gv.at',
+  name: 'Bayerisches Landesamt für Datenschutzaufsicht (BayLDA)',
+  address: 'Promenade 27, 91522 Ansbach',
+  url: 'https://www.lda.bayern.de',
 } as const
 
 /** Eingesetzte Dienstleister (Auftragsverarbeiter bzw. Drittempfänger). */

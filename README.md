@@ -33,15 +33,16 @@ Impressum und Datenschutzerklärung liegen unter der öffentlichen Route
 `/legal` (verlinkt aus „Mehr" und vom Login-Screen). Alle Betreiberdaten sind
 in `src/lib/legal.ts` zentralisiert.
 
+Betreibersitz ist München; die Texte zitieren entsprechend deutsches Recht
+(§ 5 DDG, § 18 Abs. 2 MStV, BDSG, § 25 Abs. 2 Nr. 2 TDDDG). Zuständige
+Aufsichtsbehörde ist das BayLDA in Ansbach.
+
 **Vor einem öffentlichen Launch anzupassen:**
 
-- `LEGAL.street` / `LEGAL.city` – die Platzhalter-Anschrift durch die echte
-  ersetzen. Ein unvollständiges Impressum ist nach § 5 ECG (AT) bzw. § 5 DDG
-  (DE) abmahnfähig.
-- `SUPERVISORY_AUTHORITY` – auf die Aufsichtsbehörde am Betreibersitz
-  anpassen, falls dieser nicht in Österreich liegt.
 - `LEGAL.site` – auf die tatsächliche Produktions-Domain setzen.
 - `LEGAL.updated` – bei inhaltlichen Änderungen der Texte hochziehen.
+- `SUPERVISORY_AUTHORITY` – nur nötig, wenn der Betreibersitz Bayern verlässt;
+  die Zuständigkeit richtet sich nach dem Bundesland.
 
 Zwei Punkte sind in der Erklärung bewusst offengelegt, weil sie so
 implementiert sind: der Storage-Bucket `photos` ist öffentlich lesbar (Bilder
