@@ -128,6 +128,34 @@ export default function Login() {
             {busy && <Loader2 className="animate-spin" size={18} />}
             {mode === 'magic' ? 'Magic-Link senden' : isSignup ? 'Registrieren' : 'Anmelden'}
           </button>
+
+          {/*
+            Pflichthinweis unmittelbar an der Schaltfläche, mit der ein Konto
+            entstehen kann – erfüllt die Informationspflicht nach Art. 13 DSGVO
+            und bezieht die Nutzungsbedingungen nach § 305 Abs. 2 BGB ein.
+            Bewusst KEINE Checkbox: die Verarbeitung stützt sich auf
+            Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung), nicht auf eine
+            Einwilligung – eine erzwungene, jederzeit widerrufbare Einwilligung
+            wäre hier die schwächere Rechtsgrundlage.
+
+            Gilt auch für den Magic-Link: `signInWithOtp` legt ohne
+            `shouldCreateUser: false` bei unbekannter Adresse ein Konto an.
+          */}
+          {(isSignup || mode === 'magic') && (
+            <p className="text-[11px] leading-relaxed text-dim text-center px-1">
+              {mode === 'magic'
+                ? 'Ist die Adresse noch nicht registriert, wird dabei ein Konto angelegt. Damit stimmst du den '
+                : 'Mit dem Erstellen eines Kontos stimmst du den '}
+              <Link to="/legal#nutzung" className="underline underline-offset-2 text-muted">
+                Nutzungsbedingungen
+              </Link>{' '}
+              zu und bestätigst, die{' '}
+              <Link to="/legal#datenschutz" className="underline underline-offset-2 text-muted">
+                Datenschutzerklärung
+              </Link>{' '}
+              gelesen zu haben.
+            </p>
+          )}
         </form>
 
         <div className="mt-6 flex flex-col gap-3 text-center text-sm">
