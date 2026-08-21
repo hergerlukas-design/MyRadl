@@ -17,6 +17,9 @@ export type PartStatus = 'aktiv' | 'ersetzt'
 
 export type HistoryEventType = 'eingebaut' | 'gewartet' | 'ersetzt'
 
+/** Sichtbarkeit eines Rads: privat (Standard) oder über Share-Link lesbar. */
+export type BikeVisibility = 'private' | 'public'
+
 export interface Bike {
   id: string
   user_id: string
@@ -25,6 +28,10 @@ export interface Bike {
   model: string | null
   year: number | null
   image_url: string | null
+  /** 'public' = über /share/<share_token> ohne Login einsehbar. */
+  visibility: BikeVisibility
+  /** Token für den öffentlichen Link; neu setzbar, um alte Links zu entwerten. */
+  share_token: string
   created_at: string
 }
 

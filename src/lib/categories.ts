@@ -106,6 +106,30 @@ export function partSubtitle(
   return [positionLabel(part.position), part.variant].filter(Boolean).join(' · ')
 }
 
+// Anzeigereihenfolge der Kategorien als Lookup (Index in CATEGORIES).
+const CAT_ORDER = new Map(CATEGORIES.map((c, i) => [c.value, i]))
+
+/**
+ * Anzeigereihenfolge der Bauteile eines Rads: sobald ein Teil eine vom Nutzer
+ * gesetzte `sort_order` hat, gilt diese (Drag & Drop), sonst wird nach
+ * Kategorie gruppiert. Liefert eine neue Liste, die Eingabe bleibt unberührt.
+ */
+export function sortParts<T extends Pick<Part, 'category' | 'sort_order' | 'created_at'>>(
+  parts: readonly T[],
+): T[] {
+  const arr = [...parts]
+  if (arr.some((p) => p.sort_order != null)) {
+    arr.sort(
+      (a, b) =>
+        (a.sort_order ?? Number.MAX_SAFE_INTEGER) - (b.sort_order ?? Number.MAX_SAFE_INTEGER) ||
+        (a.created_at < b.created_at ? -1 : 1),
+    )
+  } else {
+    arr.sort((a, b) => (CAT_ORDER.get(a.category) ?? 99) - (CAT_ORDER.get(b.category) ?? 99))
+  }
+  return arr
+}
+
 /** Häufige Einstell-Vorschläge je Kategorie (nur UI-Hilfe, frei überschreibbar). */
 export const SETTING_SUGGESTIONS: Partial<Record<PartCategory, string[]>> = {
   federgabel: ['Luftdruck', 'Sag', 'Rebound', 'HSC', 'LSC', 'Tokens'],

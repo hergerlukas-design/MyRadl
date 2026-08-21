@@ -1,7 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { format } from 'date-fns'
-import { Plus, Pencil, Trash2, ChevronRight, ChevronDown, Ruler, SlidersHorizontal, GripVertical } from 'lucide-react'
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  ChevronRight,
+  ChevronDown,
+  Ruler,
+  SlidersHorizontal,
+  GripVertical,
+  Share2,
+  Copy,
+  Check,
+  RefreshCw,
+  ExternalLink,
+  AlertTriangle,
+} from 'lucide-react'
 import Layout from '@/components/Layout'
 import Watermark from '@/components/Watermark'
 import PageHeader, { squareBtn } from '@/components/PageHeader'
@@ -9,13 +24,13 @@ import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
 import ImageUpload from '@/components/ImageUpload'
 import {
-  CATEGORIES,
   categoryColor,
   categoryLabel,
   categoryMeta,
   partTitle,
   partSubtitle,
   positionLabel,
+  sortParts,
   importantSettingsForPart,
   shockTypeFromValue,
   shockTypeLabel,
@@ -31,8 +46,6 @@ import { useBikeGeometry, useUpsertBikeGeometry } from '@/hooks/useBikeGeometry'
 import { useParts, useReorderParts } from '@/hooks/useParts'
 import { useBikeSettings, useUpsertSetting, useAddHistory, type BikeSetting } from '@/hooks/usePartMeta'
 import type { Bike, BikeGeometry, GeometryField, Part } from '@/types'
-
-const CAT_ORDER = new Map(CATEGORIES.map((c, i) => [c.value, i]))
 
 /** Zahl fürs Header-Kachel-Format (deutsches Dezimalkomma, optionale Einheit). */
 function tileValue(value: number | null | undefined, unit = ''): string {
@@ -52,22 +65,7 @@ export default function BikeDetail() {
   const [editing, setEditing] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const sorted = useMemo(() => {
-    const arr = [...(parts ?? [])]
-    const anyCustom = arr.some((p) => p.sort_order != null)
-    if (anyCustom) {
-      // Vom Nutzer festgelegte Reihenfolge (Drag & Drop).
-      arr.sort(
-        (a, b) =>
-          (a.sort_order ?? Number.MAX_SAFE_INTEGER) - (b.sort_order ?? Number.MAX_SAFE_INTEGER) ||
-          (a.created_at < b.created_at ? -1 : 1),
-      )
-    } else {
-      // Standard: nach Kategorie gruppiert.
-      arr.sort((a, b) => (CAT_ORDER.get(a.category) ?? 99) - (CAT_ORDER.get(b.category) ?? 99))
-    }
-    return arr
-  }, [parts])
+  const sorted = useMemo(() => sortParts(parts ?? []), [parts])
   const active = sorted.filter((p) => p.status === 'aktiv').length
 
   if (isLoading || !bike) {
@@ -141,6 +139,8 @@ export default function BikeDetail() {
         <GeometrySection bikeId={bike.id} />
 
         <BikeSettingsSection bikeId={bike.id} parts={parts ?? []} />
+
+        <ShareSection bike={bike} />
 
         <div className="flex items-center justify-between">
           <h2 className="text-[15px] font-extrabold tracking-[0.02em] text-cream">
@@ -787,6 +787,196 @@ function QuickSettingModal({ target, onClose }: { target: QuickEditTarget; onClo
         Änderung im Verlauf des Teils festhalten
       </label>
     </Modal>
+  )
+}
+
+// ── Teilen (öffentlicher Share-Link) ─────────────────────────────────────────
+function ShareSection({ bike }: { bike: Bike }) {
+  const updateBike = useUpdateBike()
+  const [open, setOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [confirmRegen, setConfirmRegen] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => () => {
+    if (copyTimer.current) clearTimeout(copyTimer.current)
+  }, [])
+
+  const isPublic = bike.visibility === 'public'
+  const shareUrl = `${window.location.origin}/share/${bike.share_token}`
+
+  async function toggleVisibility() {
+    setError(null)
+    try {
+      await updateBike.mutateAsync({
+        id: bike.id,
+        patch: { visibility: isPublic ? 'private' : 'public' },
+      })
+      if (!isPublic) setOpen(true)
+    } catch (err) {
+      setError((err as Error)?.message ?? 'Konnte die Sichtbarkeit nicht ändern.')
+    }
+  }
+
+  async function copyLink() {
+    setError(null)
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      setCopied(true)
+      if (copyTimer.current) clearTimeout(copyTimer.current)
+      copyTimer.current = setTimeout(() => setCopied(false), 2000)
+    } catch {
+      setError('Kopieren nicht möglich – bitte den Link oben markieren und manuell kopieren.')
+    }
+  }
+
+  async function regenerate() {
+    setError(null)
+    try {
+      await updateBike.mutateAsync({ id: bike.id, patch: { share_token: crypto.randomUUID() } })
+      setConfirmRegen(false)
+      setCopied(false)
+    } catch (err) {
+      setError((err as Error)?.message ?? 'Konnte keinen neuen Link erzeugen.')
+    }
+  }
+
+  return (
+    <section className="bg-surface border border-hair rounded-[20px] overflow-hidden">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center gap-2 px-4 py-3.5 min-w-0 text-left"
+        aria-expanded={open}
+      >
+        <Share2 size={16} className="text-muted flex-shrink-0" />
+        <span className="text-[15px] font-extrabold text-cream flex-shrink-0">Teilen</span>
+        <span
+          className={`font-mono text-[9px] font-medium tracking-[0.16em] px-2 py-1 rounded-full flex-none ${
+            isPublic ? 'bg-accent/15 text-accent' : 'bg-surface-2 text-muted'
+          }`}
+        >
+          {isPublic ? 'ÖFFENTLICH' : 'PRIVAT'}
+        </span>
+        <ChevronDown
+          size={18}
+          className={`ml-auto flex-shrink-0 text-muted transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {open && (
+        <div className="border-t border-hair-soft px-4 py-4 flex flex-col gap-4">
+          <div className="flex items-start justify-between gap-4">
+            <span className="flex flex-col gap-1 min-w-0">
+              <span className="text-sm font-semibold text-cream">Rad öffentlich teilen</span>
+              <span className="text-xs text-muted leading-relaxed">
+                Erzeugt einen schreibgeschützten Link zu diesem Rad – ohne Login aufrufbar.
+              </span>
+            </span>
+            <button
+              role="switch"
+              aria-checked={isPublic}
+              aria-label="Rad öffentlich teilen"
+              disabled={updateBike.isPending}
+              onClick={toggleVisibility}
+              className={`relative flex-none w-[46px] h-[26px] rounded-full transition-colors disabled:opacity-60 ${
+                isPublic ? 'bg-accent' : 'bg-surface-2 border border-hair-strong'
+              }`}
+            >
+              <span
+                className={`absolute top-[3px] w-5 h-5 rounded-full transition-all ${
+                  isPublic ? 'left-[23px] bg-accent-ink' : 'left-[3px] bg-muted'
+                }`}
+              />
+            </button>
+          </div>
+
+          {isPublic && (
+            <>
+              <div className="flex items-start gap-2.5 rounded-[14px] border border-hair-strong bg-surface-2 px-3.5 py-3">
+                <AlertTriangle size={15} className="text-accent flex-none mt-0.5" />
+                <p className="text-xs text-cream-dim leading-relaxed">
+                  <span className="font-semibold text-cream">Jede Person mit diesem Link</span> kann das Rad
+                  samt Teilen, Einstellungen, Notizen und Verlauf ansehen – ohne Login und ohne dass du es
+                  mitbekommst. Gib ihn nur weiter, wenn das für dich in Ordnung ist.
+                </p>
+              </div>
+
+              <label className="block">
+                <span className="eyebrow">ÖFFENTLICHER LINK</span>
+                <input
+                  readOnly
+                  value={shareUrl}
+                  onFocus={(e) => e.currentTarget.select()}
+                  className="input mt-1.5 font-mono text-xs"
+                  aria-label="Öffentlicher Link"
+                />
+              </label>
+
+              <div className="flex gap-2.5">
+                <button
+                  onClick={copyLink}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-accent text-accent-ink text-sm font-semibold active:scale-[0.98] transition-transform"
+                >
+                  {copied ? <Check size={16} /> : <Copy size={16} />}
+                  {copied ? 'Kopiert' : 'Link kopieren'}
+                </button>
+                <a
+                  href={shareUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-none flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-hair-strong text-cream-dim text-sm font-semibold"
+                >
+                  <ExternalLink size={16} /> Ansehen
+                </a>
+              </div>
+
+              <button
+                onClick={() => setConfirmRegen(true)}
+                disabled={updateBike.isPending}
+                className="flex items-center justify-center gap-2 text-accent text-sm font-semibold py-1 disabled:opacity-60"
+              >
+                <RefreshCw size={15} /> Link neu generieren
+              </button>
+              <p className="-mt-2 text-xs text-muted leading-relaxed">
+                Erzeugt einen neuen Link und macht den bisherigen sofort ungültig. Das Rad bleibt geteilt.
+              </p>
+            </>
+          )}
+
+          {error && <p className="text-sm text-danger">{error}</p>}
+        </div>
+      )}
+
+      {confirmRegen && (
+        <Modal
+          title="Link neu generieren?"
+          onClose={() => setConfirmRegen(false)}
+          footer={
+            <div className="flex gap-3">
+              <button
+                onClick={() => setConfirmRegen(false)}
+                className="flex-1 py-3.5 rounded-xl bg-surface-2 text-cream font-semibold"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={regenerate}
+                disabled={updateBike.isPending}
+                className="flex-1 py-3.5 rounded-xl bg-accent text-accent-ink font-semibold disabled:opacity-60"
+              >
+                Neu generieren
+              </button>
+            </div>
+          }
+        >
+          <p className="text-sm text-cream-dim">
+            Der bisherige Link funktioniert danach nicht mehr – wer ihn hat, sieht das Rad nicht länger. Du
+            bekommst stattdessen einen neuen Link zum Weitergeben.
+          </p>
+        </Modal>
+      )}
+    </section>
   )
 }
 

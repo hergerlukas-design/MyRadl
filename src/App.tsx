@@ -10,6 +10,7 @@ import ReplacePart from '@/pages/ReplacePart'
 import Search from '@/pages/Search'
 import Settings from '@/pages/Settings'
 import SagCalculator from '@/pages/SagCalculator'
+import SharedBike from '@/pages/SharedBike'
 import TirePressure from '@/pages/TirePressure'
 
 function Protected({ children }: { children: React.ReactNode }) {
@@ -29,6 +30,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      {/* Öffentlich: schreibgeschützte Ansicht eines geteilten Rads (kein Auth-Guard). */}
+      <Route path="/share/:shareToken" element={<SharedBike />} />
       <Route path="/" element={<Protected><Navigate to="/bikes" replace /></Protected>} />
       <Route path="/bikes" element={<Protected><Bikes /></Protected>} />
       <Route path="/bikes/:bikeId" element={<Protected><BikeDetail /></Protected>} />
