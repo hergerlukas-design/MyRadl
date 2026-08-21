@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { Mail, Loader2 } from 'lucide-react'
 import Watermark from '@/components/Watermark'
 import { useAuth } from '@/hooks/useAuth'
+import { termsAcceptanceMeta } from '@/lib/legal'
 
 type Mode = 'password' | 'magic'
 
@@ -13,20 +14,29 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
 
   if (session) return <Navigate to="/bikes" replace />
 
+  // Beide Wege können ein Konto anlegen – der Magic-Link ebenso, weil
+  // signInWithOtp ohne `shouldCreateUser: false` aufgerufen wird.
+  const createsAccount = isSignup || mode === 'magic'
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
     setInfo(null)
+    if (createsAccount && !acceptedTerms) {
+      setError('Bitte stimme den Nutzungsbedingungen zu.')
+      return
+    }
     setBusy(true)
     try {
       if (mode === 'magic') {
-        await signInWithMagicLink(email.trim())
+        await signInWithMagicLink(email.trim(), termsAcceptanceMeta())
         setInfo('Magic-Link gesendet – prüfe dein Postfach.')
       } else if (isSignup) {
         if (password !== confirmPassword) {
@@ -34,7 +44,11 @@ export default function Login() {
           setBusy(false)
           return
         }
-        const { needsConfirmation } = await signUpWithPassword(email.trim(), password)
+        const { needsConfirmation } = await signUpWithPassword(
+          email.trim(),
+          password,
+          termsAcceptanceMeta(),
+        )
         if (needsConfirmation) {
           setInfo('Fast fertig! Bestätige deine Email über den zugesendeten Link.')
         }
@@ -141,20 +155,41 @@ export default function Login() {
             Gilt auch für den Magic-Link: `signInWithOtp` legt ohne
             `shouldCreateUser: false` bei unbekannter Adresse ein Konto an.
           */}
-          {(isSignup || mode === 'magic') && (
-            <p className="text-[11px] leading-relaxed text-dim text-center px-1">
-              {mode === 'magic'
-                ? 'Ist die Adresse noch nicht registriert, wird dabei ein Konto angelegt. Damit stimmst du den '
-                : 'Mit dem Erstellen eines Kontos stimmst du den '}
-              <Link to="/legal#nutzung" className="underline underline-offset-2 text-muted">
-                Nutzungsbedingungen
-              </Link>{' '}
-              zu und bestätigst, die{' '}
-              <Link to="/legal#datenschutz" className="underline underline-offset-2 text-muted">
-                Datenschutzerklärung
-              </Link>{' '}
-              gelesen zu haben.
-            </p>
+          {createsAccount && (
+            <div className="flex flex-col gap-2.5">
+              <label className="flex items-start gap-2.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="mt-px w-[18px] h-[18px] flex-none accent-accent cursor-pointer"
+                />
+                <span className="text-[12px] leading-snug text-cream-dim">
+                  Ich stimme den{' '}
+                  <Link
+                    to="/legal#nutzung"
+                    className="underline underline-offset-2"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Nutzungsbedingungen
+                  </Link>{' '}
+                  zu.
+                </span>
+              </label>
+              {/*
+                Bewusst nur ein Hinweis ohne Häkchen: die Verarbeitung stützt
+                sich auf Art. 6 Abs. 1 lit. b DSGVO, nicht auf Einwilligung.
+              */}
+              <p className="text-[11px] leading-relaxed text-dim">
+                {mode === 'magic' &&
+                  'Ist die Adresse noch nicht registriert, wird dabei ein Konto angelegt. '}
+                Wie MyRadl mit deinen Daten umgeht, steht in der{' '}
+                <Link to="/legal#datenschutz" className="underline underline-offset-2 text-muted">
+                  Datenschutzerklärung
+                </Link>
+                .
+              </p>
+            </div>
           )}
         </form>
 

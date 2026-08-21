@@ -52,6 +52,40 @@ durch `createSignedUrl` – das macht `photoUrl()` asynchron und betrifft die
 drei Aufrufstellen in `ImageUpload`, `Bikes` und `Search`; ablaufende Tokens
 vertragen sich zudem schlecht mit dem Offline-Cache der PWA.
 
+## Zustimmung zu den Nutzungsbedingungen
+
+Bei der Kontoerstellung ist ein Häkchen unter den Nutzungsbedingungen
+Pflicht (beide Wege – Registrierung und Magic-Link, denn `signInWithOtp`
+legt ohne `shouldCreateUser: false` ebenfalls Konten an). Zusammen mit dem
+Konto werden `terms_version` und `terms_accepted_at` in den User-Metadaten
+gespeichert, damit belegbar ist, wer wann welcher Fassung zugestimmt hat.
+
+Auslesen im SQL-Editor:
+
+```sql
+select email,
+       raw_user_meta_data ->> 'terms_version'     as fassung,
+       raw_user_meta_data ->> 'terms_accepted_at' as zugestimmt_am
+from auth.users
+order by created_at desc;
+```
+
+Für den Datenschutz gibt es bewusst **kein** Häkchen: die Verarbeitung
+stützt sich auf Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung). Eine
+Einwilligung wäre nach Art. 7 Abs. 3 DSGVO jederzeit widerrufbar und würde
+die Grundlage für Daten entziehen, die der Betrieb des Kontos weiter
+benötigt. Die Datenschutzerklärung ist daher nur verlinkt.
+
+Bei inhaltlichen Änderungen der Nutzungsbedingungen `TERMS_VERSION` in
+`src/lib/legal.ts` hochziehen. Bestandskonten behalten die alte Fassung –
+die obige Abfrage zeigt dann, wer die neue noch nicht bestätigt hat. Eine
+erneute Abfrage bei bestehenden Konten ist derzeit nicht implementiert.
+
+Einschränkung: User-Metadaten sind über `supabase.auth.updateUser` vom
+Konto selbst überschreibbar. Für ein Hobbyprojekt ist das vertretbar; wo es
+auf Manipulationssicherheit ankommt, gehört die Zustimmung in eine eigene
+Tabelle mit reiner Insert-Policy.
+
 ## Schriftarten
 
 Chivo und IBM Plex werden über `@fontsource` selbst ausgeliefert (siehe

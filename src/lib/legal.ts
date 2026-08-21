@@ -59,3 +59,22 @@ export const PROCESSORS = [
     privacy: 'https://fly.io/legal/privacy-policy/',
   },
 ] as const
+
+/**
+ * Fassung der Nutzungsbedingungen, der bei der Registrierung zugestimmt wird.
+ *
+ * Wird zusammen mit dem Zeitpunkt in den User-Metadaten abgelegt, damit
+ * später belegbar ist, WELCHER Fassung jemand zugestimmt hat. Bei jeder
+ * inhaltlichen Änderung der Nutzungsbedingungen hochziehen (gemeinsam mit
+ * `LEGAL.updated`) – bestehende Konten behalten dann die alte Fassung, was
+ * sichtbar macht, wer die neue noch nicht bestätigt hat.
+ */
+export const TERMS_VERSION = '2026-08-21'
+
+/** Metadaten, die beim Anlegen eines Kontos mitgeschrieben werden. */
+export function termsAcceptanceMeta() {
+  return {
+    terms_version: TERMS_VERSION,
+    terms_accepted_at: new Date().toISOString(),
+  }
+}

@@ -7,8 +7,13 @@ interface AuthContextValue {
   user: User | null
   loading: boolean
   signInWithPassword: (email: string, password: string) => Promise<void>
-  signUpWithPassword: (email: string, password: string) => Promise<{ needsConfirmation: boolean }>
-  signInWithMagicLink: (email: string) => Promise<void>
+  /** `meta` landet in den User-Metadaten – siehe termsAcceptanceMeta(). */
+  signUpWithPassword: (
+    email: string,
+    password: string,
+    meta?: Record<string, unknown>,
+  ) => Promise<{ needsConfirmation: boolean }>
+  signInWithMagicLink: (email: string, meta?: Record<string, unknown>) => Promise<void>
   updatePassword: (password: string) => Promise<void>
   signOut: () => Promise<void>
 }
@@ -36,18 +41,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error
   }
 
-  async function signUpWithPassword(email: string, password: string) {
-    const { data, error } = await supabase.auth.signUp({ email, password })
+  async function signUpWithPassword(
+    email: string,
+    password: string,
+    meta?: Record<string, unknown>,
+  ) {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: meta },
+    })
     if (error) throw error
     // When email confirmation is enabled, no session is returned until the user
     // confirms via the link in their inbox.
     return { needsConfirmation: !data.session }
   }
 
-  async function signInWithMagicLink(email: string) {
+  async function signInWithMagicLink(email: string, meta?: Record<string, unknown>) {
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin },
+      // `data` wird nur ausgewertet, wenn dabei ein neues Konto entsteht –
+      // bei bestehenden Konten lässt Supabase die Metadaten unangetastet.
+      options: { emailRedirectTo: window.location.origin, data: meta },
     })
     if (error) throw error
   }
