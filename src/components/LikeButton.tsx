@@ -56,7 +56,7 @@ export default function LikeButton({ bikeId, likes, size = 'sm', className = '' 
         aria-label={likedByMe ? 'Like entfernen' : 'Rad liken'}
         title={error ?? undefined}
         className={`flex-none inline-flex items-center gap-1.5 rounded-full border transition-colors active:scale-95 disabled:opacity-60 ${
-          big ? 'px-3.5 py-2' : 'px-2.5 py-1.5'
+          big ? 'px-3.5 py-1.5' : 'px-2.5 py-1'
         } ${className}`}
         style={{
           background: likedByMe ? 'color-mix(in srgb, var(--color-accent) 15%, transparent)' : 'transparent',
@@ -64,7 +64,7 @@ export default function LikeButton({ bikeId, likes, size = 'sm', className = '' 
           color: likedByMe ? 'var(--color-accent)' : 'var(--color-muted)',
         }}
       >
-        <BikeLikeIcon filled={likedByMe} size={big ? 20 : 17} />
+        <BikeLikeIcon filled={likedByMe} size={big ? 26 : 21} />
         <span className={`font-mono font-medium tabular-nums ${big ? 'text-[13px]' : 'text-[11.5px]'}`}>
           {count}
         </span>
