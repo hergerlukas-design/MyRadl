@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { format } from 'date-fns'
 import {
   Plus,
@@ -23,6 +23,8 @@ import PageHeader, { squareBtn } from '@/components/PageHeader'
 import Modal from '@/components/ui/Modal'
 import Spinner from '@/components/ui/Spinner'
 import ImageUpload from '@/components/ImageUpload'
+import LikeButton from '@/components/LikeButton'
+import UsernameModal from '@/components/UsernameModal'
 import {
   categoryColor,
   categoryLabel,
@@ -45,6 +47,8 @@ import { useBike, useUpdateBike, useDeleteBike } from '@/hooks/useBikes'
 import { useBikeGeometry, useUpsertBikeGeometry } from '@/hooks/useBikeGeometry'
 import { useParts, useReorderParts } from '@/hooks/useParts'
 import { useBikeSettings, useUpsertSetting, useAddHistory, type BikeSetting } from '@/hooks/usePartMeta'
+import { useMyProfile } from '@/hooks/useProfile'
+import { useBikeLike } from '@/hooks/useLikes'
 import type { Bike, BikeGeometry, GeometryField, Part } from '@/types'
 
 /** Zahl fürs Header-Kachel-Format (deutsches Dezimalkomma, optionale Einheit). */
@@ -116,6 +120,7 @@ export default function BikeDetail() {
             {bike.name}
           </h1>
           {sub && <p className="mt-0.5 font-mono text-[13px] text-muted">{sub}</p>}
+          {bike.visibility === 'public' && <BikeLikes bikeId={bike.id} />}
           <div className="mt-4 grid grid-cols-4 gap-2.5">
             <Tile label="REACH" value={tileValue(geo?.reach)} />
             <Tile label="STACK" value={tileValue(geo?.stack)} />
@@ -203,6 +208,19 @@ export default function BikeDetail() {
         </Modal>
       )}
     </Layout>
+  )
+}
+
+/**
+ * Like-Zahl des eigenen Rads. Nur eingeblendet, solange das Rad öffentlich ist –
+ * privat kann es niemand sehen und damit auch niemand liken.
+ */
+function BikeLikes({ bikeId }: { bikeId: string }) {
+  const { likes } = useBikeLike(bikeId)
+  return (
+    <div className="mt-3 flex">
+      <LikeButton bikeId={bikeId} likes={likes} />
+    </div>
   )
 }
 
@@ -793,9 +811,11 @@ function QuickSettingModal({ target, onClose }: { target: QuickEditTarget; onClo
 // ── Teilen (öffentlicher Share-Link) ─────────────────────────────────────────
 function ShareSection({ bike }: { bike: Bike }) {
   const updateBike = useUpdateBike()
+  const { data: profile, isLoading: profileLoading } = useMyProfile()
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [confirmRegen, setConfirmRegen] = useState(false)
+  const [askUsername, setAskUsername] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const copyTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -806,17 +826,33 @@ function ShareSection({ bike }: { bike: Bike }) {
   const isPublic = bike.visibility === 'public'
   const shareUrl = `${window.location.origin}/share/${bike.share_token}`
 
-  async function toggleVisibility() {
+  async function makePublic() {
     setError(null)
     try {
-      await updateBike.mutateAsync({
-        id: bike.id,
-        patch: { visibility: isPublic ? 'private' : 'public' },
-      })
-      if (!isPublic) setOpen(true)
+      await updateBike.mutateAsync({ id: bike.id, patch: { visibility: 'public' } })
+      setOpen(true)
     } catch (err) {
       setError((err as Error)?.message ?? 'Konnte die Sichtbarkeit nicht ändern.')
     }
+  }
+
+  async function toggleVisibility() {
+    setError(null)
+    if (isPublic) {
+      try {
+        await updateBike.mutateAsync({ id: bike.id, patch: { visibility: 'private' } })
+      } catch (err) {
+        setError((err as Error)?.message ?? 'Konnte die Sichtbarkeit nicht ändern.')
+      }
+      return
+    }
+    // Ein öffentliches Rad erscheint in der Community und auf dem eigenen
+    // Profil – dafür braucht es zuerst einen Username.
+    if (!profile) {
+      setAskUsername(true)
+      return
+    }
+    await makePublic()
   }
 
   async function copyLink() {
@@ -877,7 +913,7 @@ function ShareSection({ bike }: { bike: Bike }) {
               role="switch"
               aria-checked={isPublic}
               aria-label="Rad öffentlich teilen"
-              disabled={updateBike.isPending}
+              disabled={updateBike.isPending || profileLoading}
               onClick={toggleVisibility}
               className={`relative flex-none w-[46px] h-[26px] rounded-full transition-colors disabled:opacity-60 ${
                 isPublic ? 'bg-accent' : 'bg-surface-2 border border-hair-strong'
@@ -931,6 +967,23 @@ function ShareSection({ bike }: { bike: Bike }) {
                 </a>
               </div>
 
+              {profile && (
+                <div className="flex items-center justify-between gap-3 rounded-[14px] border border-hair-strong bg-surface-2 px-3.5 py-3">
+                  <span className="flex flex-col gap-0.5 min-w-0">
+                    <span className="eyebrow">IN DER COMMUNITY ALS</span>
+                    <span className="font-mono text-[13px] text-cream-dim truncate">
+                      @{profile.username}
+                    </span>
+                  </span>
+                  <Link
+                    to={`/u/${profile.username}`}
+                    className="flex-none text-sm font-semibold text-accent"
+                  >
+                    Profil ansehen
+                  </Link>
+                </div>
+              )}
+
               <button
                 onClick={() => setConfirmRegen(true)}
                 disabled={updateBike.isPending}
@@ -946,6 +999,14 @@ function ShareSection({ bike }: { bike: Bike }) {
 
           {error && <p className="text-sm text-danger">{error}</p>}
         </div>
+      )}
+
+      {askUsername && (
+        <UsernameModal
+          hint="Öffentlich geteilte Räder erscheinen mit deinem Username in der Community. Wähle einen – danach wird das Rad geteilt."
+          onClose={() => setAskUsername(false)}
+          onSaved={() => void makePublic()}
+        />
       )}
 
       {confirmRegen && (

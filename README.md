@@ -25,6 +25,10 @@ verbaut ist, und direkt zu Shop-/Preisvergleichsseiten springen.
 6. **Öffentlicher Share-Link** – ein Rad lässt sich über `/share/<share_token>`
    schreibgeschützt und ohne Login teilen (Toggle im Rad-Detail, Link neu
    generierbar).
+7. **Community** – Tab „Entdecken" mit allen öffentlich geteilten Rädern
+   (neueste zuerst, Suche nach Username/Marke/Modell), öffentliche Profile unter
+   `/u/<username>` und ein Like pro Rad und User. Beides ohne Login einsehbar;
+   Liken verlangt ein Konto.
 
 Bildupload für Räder und Teile über Supabase Storage (Bucket `photos`).
 
@@ -64,11 +68,22 @@ RLS-Policies, Storage-Bucket `photos`). Für einen frischen Aufbau:
 
 Alle Tabellen sind per RLS auf den eingeloggten User beschränkt: `bikes.user_id`
 ist die Wurzel, die übrigen Tabellen leiten den Zugriff über `bike_id`/`part_id`
-ab. Einzige Ausnahme sind die `*_public_read`-Policies aus
-`008_bike_share_link.sql`: Sie geben ausschließlich Räder mit
-`visibility = 'public'` (und deren Teile, Einstellungen, Links, Verlauf und
-Geometrie) lesend frei – für die Share-Ansicht. Geschrieben werden darf
-weiterhin nur vom Besitzer.
+ab. Ausnahmen sind bewusst gesetzt und ausschließlich lesend:
+
+- `*_public_read` aus `008_bike_share_link.sql` gibt Räder mit
+  `visibility = 'public'` (samt Teilen, Einstellungen, Links, Verlauf und
+  Geometrie) frei – Grundlage für Share-Ansicht und Community.
+- `profiles` und `bike_likes` aus `009_community_profiles_likes.sql` sind
+  komplett öffentlich lesbar: Profile sollen ohne Login auffindbar sein, die
+  Like-Zahl eines Rads sichtbar. Geschrieben wird in beiden Tabellen nur in
+  eigenem Namen (`id`/`user_id = auth.uid()`).
+
+Geschrieben werden darf ansonsten weiterhin nur vom Besitzer.
+
+Ein Username (`profiles`) ist Voraussetzung, bevor ein Rad öffentlich geteilt
+wird – die App fragt ihn beim ersten Teilen ab. Räder aus Phase 1, deren
+Besitzer noch kein Profil hat, bleiben über ihren Link erreichbar, erscheinen
+aber nicht im Community-Feed.
 
 ## Deployment (Fly.io)
 

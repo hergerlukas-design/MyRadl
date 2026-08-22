@@ -11,6 +11,8 @@ import Search from '@/pages/Search'
 import Settings from '@/pages/Settings'
 import SagCalculator from '@/pages/SagCalculator'
 import SharedBike from '@/pages/SharedBike'
+import Community from '@/pages/Community'
+import PublicProfile from '@/pages/PublicProfile'
 import TirePressure from '@/pages/TirePressure'
 
 function Protected({ children }: { children: React.ReactNode }) {
@@ -30,8 +32,11 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      {/* Öffentlich: schreibgeschützte Ansicht eines geteilten Rads (kein Auth-Guard). */}
+      {/* Öffentlich (kein Auth-Guard): geteiltes Rad, Community-Übersicht und
+          Profile sind bewusst auch ohne Login erreichbar. */}
       <Route path="/share/:shareToken" element={<SharedBike />} />
+      <Route path="/community" element={<Community />} />
+      <Route path="/u/:username" element={<PublicProfile />} />
       <Route path="/" element={<Protected><Navigate to="/bikes" replace /></Protected>} />
       <Route path="/bikes" element={<Protected><Bikes /></Protected>} />
       <Route path="/bikes/:bikeId" element={<Protected><BikeDetail /></Protected>} />

@@ -14,6 +14,7 @@ import {
 import Layout from '@/components/Layout'
 import Watermark from '@/components/Watermark'
 import Spinner from '@/components/ui/Spinner'
+import LikeButton from '@/components/LikeButton'
 import { photoUrl } from '@/lib/storage'
 import {
   categoryColor,
@@ -31,10 +32,12 @@ import {
 } from '@/lib/categories'
 import { GEOMETRY_FIELDS, formatGeometryValue } from '@/lib/geometry'
 import { useSharedBike } from '@/hooks/useSharedBike'
+import { useProfileByUserId } from '@/hooks/useProfile'
+import { useBikeLike } from '@/hooks/useLikes'
 import { useParts } from '@/hooks/useParts'
 import { useBikeGeometry } from '@/hooks/useBikeGeometry'
 import { useBikeSettings, useBikeLinks, useBikeHistory, type BikeSetting } from '@/hooks/usePartMeta'
-import type { BikeGeometry, HistoryEventType, Part, PartHistory, PartLink } from '@/types'
+import type { BikeGeometry, HistoryEventType, Part, PartHistory, PartLink, Profile } from '@/types'
 
 /** Zahl fürs Header-Kachel-Format (deutsches Dezimalkomma, optionale Einheit). */
 function tileValue(value: number | null | undefined, unit = ''): string {
@@ -64,6 +67,8 @@ export default function SharedBike() {
   const { data: settings } = useBikeSettings(bikeId)
   const { data: links } = useBikeLinks(bikeId)
   const { data: history } = useBikeHistory(bikeId)
+  const { data: owner } = useProfileByUserId(bike?.user_id)
+  const { likes } = useBikeLike(bikeId)
 
   const sorted = useMemo(() => sortParts(parts ?? []), [parts])
 
@@ -101,6 +106,17 @@ export default function SharedBike() {
             {bike.name}
           </h1>
           {sub && <p className="mt-0.5 font-mono text-[13px] text-muted">{sub}</p>}
+          <div className="mt-3.5 flex items-center gap-3">
+            {bikeId && <LikeButton bikeId={bikeId} likes={likes} />}
+            {owner && (
+              <Link to={`/u/${owner.username}`} className="min-w-0 flex flex-col gap-0.5">
+                <span className="font-mono text-[12.5px] text-accent truncate">@{owner.username}</span>
+                {owner.display_name && (
+                  <span className="text-[12px] text-muted truncate">{owner.display_name}</span>
+                )}
+              </Link>
+            )}
+          </div>
           <div className="mt-4 grid grid-cols-4 gap-2.5">
             <Tile label="REACH" value={tileValue(geo?.reach)} />
             <Tile label="STACK" value={tileValue(geo?.stack)} />
@@ -147,7 +163,7 @@ export default function SharedBike() {
           </div>
         )}
 
-        <ShareFooter />
+        <ShareFooter owner={owner ?? null} />
       </div>
     </Layout>
   )
@@ -185,14 +201,22 @@ function NotShared() {
   )
 }
 
-function ShareFooter() {
+function ShareFooter({ owner }: { owner: Profile | null }) {
   return (
     <div className="mt-2 flex flex-col items-center gap-2.5 border-t border-hair pt-5 text-center">
       <p className="text-xs text-muted leading-relaxed">
-        Schreibgeschützte Ansicht – geteilt mit MyRadl. Andere Räder dieses Nutzers sind hier nicht
-        einsehbar.
+        Schreibgeschützte Ansicht – geteilt mit MyRadl. Sichtbar sind nur Räder, die ausdrücklich
+        öffentlich geteilt wurden.
       </p>
-      <Link to="/" className="text-sm font-semibold text-accent">
+      {owner && (
+        <Link to={`/u/${owner.username}`} className="text-sm font-semibold text-accent">
+          Alle öffentlichen Räder von @{owner.username}
+        </Link>
+      )}
+      <Link to="/community" className="text-sm font-semibold text-accent">
+        Community entdecken
+      </Link>
+      <Link to="/" className="text-sm font-medium text-muted">
         Eigenes Setup verwalten
       </Link>
     </div>

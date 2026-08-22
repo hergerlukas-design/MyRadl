@@ -35,6 +35,36 @@ export interface Bike {
   created_at: string
 }
 
+/** Öffentliches Profil eines Users (Community). */
+export interface Profile {
+  id: string
+  /** Kleingeschrieben, 3–20 Zeichen aus a-z, 0-9 und _. Teil der URL /u/<username>. */
+  username: string
+  /** Optionaler Anzeigename; fällt in der App auf @username zurück. */
+  display_name: string | null
+  created_at: string
+}
+
+/** Ein Like eines Users auf ein Rad (max. einer pro Paar). */
+export interface BikeLike {
+  id: string
+  bike_id: string
+  user_id: string
+  created_at: string
+}
+
+/** Aggregierte Like-Info für ein Rad, wie sie der Like-Button braucht. */
+export interface LikeState {
+  count: number
+  /** Hat der eingeloggte User dieses Rad geliked? Ausgeloggt immer false. */
+  likedByMe: boolean
+}
+
+/** Öffentliches Rad samt Profil seines Besitzers (Community-Listen). */
+export interface PublicBike extends Bike {
+  profile: Profile | null
+}
+
 export interface Part {
   id: string
   bike_id: string
