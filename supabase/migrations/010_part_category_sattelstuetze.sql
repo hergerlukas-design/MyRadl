@@ -1,0 +1,12 @@
+-- MyRadl – Kategorie „Sattelstütze"
+--
+-- Nachtrag: Dieser Schritt war auf dem Live-Projekt bereits angewendet
+-- (Migration `add_sattelstuetze_category` vom 07.08.), fehlte hier im Ordner
+-- aber – ein frischer Aufbau nach README hätte die Kategorie deshalb nicht
+-- bekommen. Die Datei holt das nach und ist bewusst hinten einsortiert, damit
+-- die bestehende Nummerierung stabil bleibt; für die Reihenfolge spielt es
+-- keine Rolle, da nichts anderes auf dem Wert aufbaut.
+--
+-- Wie in 004: Enum-Werte lassen sich nur hinzufügen, nicht entfernen.
+-- `if not exists` macht die Migration auf dem Live-Projekt zum No-op.
+alter type part_category add value if not exists 'sattelstuetze';

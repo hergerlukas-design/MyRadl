@@ -8,6 +8,7 @@ import {
   Move,
   MoveHorizontal,
   Grip,
+  ChevronsUpDown,
   Armchair,
   Package,
   type LucideIcon,
@@ -37,6 +38,7 @@ export const CATEGORIES: CategoryMeta[] = [
   { value: 'vorbau', label: 'Vorbau', icon: Move, color: 'var(--cat-vorbau)' },
   { value: 'lenker', label: 'Lenker', icon: MoveHorizontal, color: 'var(--cat-lenker)' },
   { value: 'griffe', label: 'Griffe', icon: Grip, color: 'var(--cat-griffe)' },
+  { value: 'sattelstuetze', label: 'Sattelstütze', icon: ChevronsUpDown, color: 'var(--cat-sattelstuetze)' },
   { value: 'sattel', label: 'Sattel', icon: Armchair, color: 'var(--cat-sattel)' },
   { value: 'sonstiges', label: 'Sonstiges', icon: Package, color: 'var(--cat-sonstiges)' },
 ]
