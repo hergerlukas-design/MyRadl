@@ -8,10 +8,11 @@ interface BikeLikeIconProps {
 /**
  * Fahrrad-Glyphe für den Like-Button.
  *
- * Zeichnung aus `public/bike-like-outline.svg` bzw. `public/bike-like-filled.svg`.
+ * Zeichnung aus `design/icon/bike-like-outline.svg` bzw.
+ * `design/icon/bike-like-filled.svg` (Quelldateien, nicht ausgeliefert).
  * Die beiden Dateien teilen sich dieselben Pfade – sie unterscheiden sich nur
  * darin, dass die befüllte Variante eine Scheibe hinterlegt und das Rad darin
- * aussparrt. Deshalb liegen die Pfade hier genau einmal.
+ * ausspart. Deshalb liegen die Pfade hier genau einmal.
  *
  * Inline statt `<img src="…">`, weil die Zeichnung `currentColor` erbt: nur so
  * folgt das Icon der Textfarbe des Buttons (grau ⇢ Akzent) und dem Hell-/
