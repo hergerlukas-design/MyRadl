@@ -8,6 +8,7 @@ export type PartCategory =
   | 'vorbau'
   | 'lenker'
   | 'griffe'
+  | 'sattelstuetze'
   | 'sattel'
   | 'sonstiges'
   // Legacy-Wert (nicht mehr zur Auswahl): früher „Cockpit".
