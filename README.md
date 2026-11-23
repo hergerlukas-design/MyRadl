@@ -22,6 +22,13 @@ verbaut ist, und direkt zu Shop-/Preisvergleichsseiten springen.
 4. **Teil ersetzen** – altes Teil auf „ersetzt", History-Eintrag, Nachfolger
    vorausgefüllt anlegen (Kategorie übernommen).
 5. **Suche/Filter** – nach Freitext, Kategorie und Rad.
+6. **Öffentlicher Share-Link** – ein Rad lässt sich über `/share/<share_token>`
+   schreibgeschützt und ohne Login teilen (Toggle im Rad-Detail, Link neu
+   generierbar).
+7. **Community** – Tab „Entdecken" mit allen öffentlich geteilten Rädern
+   (neueste zuerst, Suche nach Username/Marke/Modell), öffentliche Profile unter
+   `/u/<username>` und ein Like pro Rad und User. Beides ohne Login einsehbar;
+   Liken verlangt ein Konto.
 
 Bildupload für Räder und Teile über Supabase Storage (Bucket `photos`).
 
@@ -52,16 +59,31 @@ Die Migrationen wurden bereits auf dieses Projekt angewendet (Tabellen, Enum,
 RLS-Policies, Storage-Bucket `photos`). Für einen frischen Aufbau:
 
 1. Projekt in Region `eu-central-1` anlegen.
-2. Migrationen der Reihe nach ausführen (SQL-Editor oder `supabase db push`):
-   - `supabase/migrations/001_initial_schema.sql`
-   - `supabase/migrations/002_inline_rls_drop_security_definer.sql`
+2. Alle Migrationen in `supabase/migrations/` der Reihe nach ausführen
+   (SQL-Editor oder `supabase db push`), beginnend mit
+   `001_initial_schema.sql`.
 3. Auth → Email-Provider aktivieren (Passwort und/oder Magic-Link). Standardmäßig
    ist Email-Bestätigung aktiv; zum schnellen Testen ggf. unter
    **Authentication → Sign In / Providers → Email** deaktivieren.
 
 Alle Tabellen sind per RLS auf den eingeloggten User beschränkt: `bikes.user_id`
 ist die Wurzel, die übrigen Tabellen leiten den Zugriff über `bike_id`/`part_id`
-ab.
+ab. Ausnahmen sind bewusst gesetzt und ausschließlich lesend:
+
+- `*_public_read` aus `008_bike_share_link.sql` gibt Räder mit
+  `visibility = 'public'` (samt Teilen, Einstellungen, Links, Verlauf und
+  Geometrie) frei – Grundlage für Share-Ansicht und Community.
+- `profiles` und `bike_likes` aus `009_community_profiles_likes.sql` sind
+  komplett öffentlich lesbar: Profile sollen ohne Login auffindbar sein, die
+  Like-Zahl eines Rads sichtbar. Geschrieben wird in beiden Tabellen nur in
+  eigenem Namen (`id`/`user_id = auth.uid()`).
+
+Geschrieben werden darf ansonsten weiterhin nur vom Besitzer.
+
+Ein Username (`profiles`) ist Voraussetzung, bevor ein Rad öffentlich geteilt
+wird – die App fragt ihn beim ersten Teilen ab. Räder aus Phase 1, deren
+Besitzer noch kein Profil hat, bleiben über ihren Link erreichbar, erscheinen
+aber nicht im Community-Feed.
 
 ## Deployment (Fly.io)
 

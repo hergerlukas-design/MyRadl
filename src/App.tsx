@@ -9,6 +9,11 @@ import PartDetail from '@/pages/PartDetail'
 import ReplacePart from '@/pages/ReplacePart'
 import Search from '@/pages/Search'
 import Settings from '@/pages/Settings'
+import SagCalculator from '@/pages/SagCalculator'
+import SharedBike from '@/pages/SharedBike'
+import Community from '@/pages/Community'
+import PublicProfile from '@/pages/PublicProfile'
+import TirePressure from '@/pages/TirePressure'
 
 function Protected({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth()
@@ -27,6 +32,11 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      {/* Öffentlich (kein Auth-Guard): geteiltes Rad, Community-Übersicht und
+          Profile sind bewusst auch ohne Login erreichbar. */}
+      <Route path="/share/:shareToken" element={<SharedBike />} />
+      <Route path="/community" element={<Community />} />
+      <Route path="/u/:username" element={<PublicProfile />} />
       <Route path="/" element={<Protected><Navigate to="/bikes" replace /></Protected>} />
       <Route path="/bikes" element={<Protected><Bikes /></Protected>} />
       <Route path="/bikes/:bikeId" element={<Protected><BikeDetail /></Protected>} />
@@ -36,6 +46,8 @@ export default function App() {
       <Route path="/parts/:partId/replace" element={<Protected><ReplacePart /></Protected>} />
       <Route path="/search" element={<Protected><Search /></Protected>} />
       <Route path="/settings" element={<Protected><Settings /></Protected>} />
+      <Route path="/sag" element={<Protected><SagCalculator /></Protected>} />
+      <Route path="/reifendruck" element={<Protected><TirePressure /></Protected>} />
       <Route path="*" element={<Navigate to="/bikes" replace />} />
     </Routes>
   )

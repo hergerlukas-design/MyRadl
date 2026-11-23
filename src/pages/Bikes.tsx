@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Calculator, Gauge, ChevronRight, type LucideIcon } from 'lucide-react'
 import Layout from '@/components/Layout'
 import Watermark from '@/components/Watermark'
 import Modal from '@/components/ui/Modal'
@@ -52,11 +53,51 @@ export default function Bikes() {
           >
             + Rad hinzufügen
           </button>
+
+          <ToolsSection />
         </div>
       )}
 
       {adding && <AddBikeModal onClose={() => setAdding(false)} />}
     </Layout>
+  )
+}
+
+interface Tool {
+  to: string
+  label: string
+  desc: string
+  icon: LucideIcon
+}
+
+/** Tools/Rechner – wächst mit weiteren Tools. */
+const TOOLS: Tool[] = [
+  { to: '/sag', label: 'Sag-Rechner', desc: 'Sag in % aus Federweg & Messung', icon: Calculator },
+  { to: '/reifendruck', label: 'Reifendruck-Rechner', desc: 'Druck vorne & hinten aus Gewicht & Reifen', icon: Gauge },
+]
+
+function ToolsSection() {
+  const navigate = useNavigate()
+  return (
+    <section className="pt-4 flex flex-col gap-3">
+      <span className="eyebrow">TOOLS</span>
+      {TOOLS.map((tool) => (
+        <button
+          key={tool.to}
+          onClick={() => navigate(tool.to)}
+          className="flex items-center gap-3.5 bg-surface border border-hair rounded-[22px] p-4 text-left active:scale-[0.99] transition-transform"
+        >
+          <div className="w-[46px] h-[46px] rounded-full bg-accent/15 border border-accent/35 flex items-center justify-center text-accent flex-none">
+            <tool.icon size={20} />
+          </div>
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+            <span className="text-[15px] font-extrabold text-cream">{tool.label}</span>
+            <span className="text-[13px] text-muted truncate">{tool.desc}</span>
+          </div>
+          <ChevronRight size={20} className="text-dim flex-none" />
+        </button>
+      ))}
+    </section>
   )
 }
 

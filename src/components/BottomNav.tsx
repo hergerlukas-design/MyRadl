@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 
 const items = [
   { to: '/bikes', label: 'RÄDER' },
+  { to: '/community', label: 'COMMUNITY' },
   { to: '/search', label: 'SUCHE' },
   { to: '/settings', label: 'MEHR' },
 ]
@@ -21,11 +22,11 @@ export default function BottomNav() {
           {({ isActive }) => (
             <>
               <span
-                className="h-1 w-[34px] rounded-full transition-colors"
+                className="h-1 w-[28px] rounded-full transition-colors"
                 style={{ background: isActive ? 'var(--color-accent)' : 'var(--c-navbar-off)' }}
               />
               <span
-                className="font-mono text-[11px] font-semibold tracking-[0.12em] transition-colors"
+                className="font-mono text-[10px] font-semibold tracking-[0.08em] transition-colors"
                 style={{ color: isActive ? 'var(--color-accent)' : 'var(--color-dim)' }}
               >
                 {label}

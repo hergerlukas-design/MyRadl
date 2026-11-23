@@ -1,7 +1,10 @@
 import { useState } from 'react'
-import { Check, Moon, Sun, RefreshCw } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Check, Moon, Sun, RefreshCw, Pencil } from 'lucide-react'
 import Layout from '@/components/Layout'
+import UsernameModal from '@/components/UsernameModal'
 import { useAuth } from '@/hooks/useAuth'
+import { useMyProfile } from '@/hooks/useProfile'
 import { useTheme, type Theme } from '@/hooks/useTheme'
 import { applyUpdate, checkForUpdate } from '@/lib/pwa'
 
@@ -77,6 +80,8 @@ export default function Settings() {
             <span className="text-sm font-medium text-cream-dim truncate">{user?.email ?? '—'}</span>
           </div>
         </div>
+
+        <ProfileCard />
 
         <ThemeCard />
 
@@ -156,6 +161,70 @@ export default function Settings() {
         </button>
       </div>
     </Layout>
+  )
+}
+
+/**
+ * Öffentliches Community-Profil: Username vergeben oder ändern. Der Username
+ * ist Pflicht, bevor ein Rad öffentlich geteilt werden kann – wer hier keinen
+ * setzt, wird spätestens beim Teilen-Schalter danach gefragt.
+ */
+function ProfileCard() {
+  const { data: profile, isLoading } = useMyProfile()
+  const [editing, setEditing] = useState(false)
+
+  return (
+    <div className="bg-surface border border-hair rounded-[20px] p-[18px] flex flex-col gap-3">
+      <div className="flex items-baseline justify-between gap-3">
+        <span className="text-[15px] font-extrabold text-cream">Öffentliches Profil</span>
+        {profile && (
+          <button
+            onClick={() => setEditing(true)}
+            className="flex items-center gap-1.5 text-accent text-[13px] font-semibold"
+          >
+            <Pencil size={14} /> Bearbeiten
+          </button>
+        )}
+      </div>
+
+      {isLoading ? (
+        <span className="text-[13px] text-muted">Wird geladen…</span>
+      ) : profile ? (
+        <>
+          <div className="flex flex-col gap-0.5">
+            <span className="eyebrow">USERNAME</span>
+            <span className="font-mono text-sm text-cream-dim">@{profile.username}</span>
+          </div>
+          {profile.display_name && (
+            <div className="flex flex-col gap-0.5">
+              <span className="eyebrow">ANZEIGENAME</span>
+              <span className="text-sm text-cream-dim">{profile.display_name}</span>
+            </div>
+          )}
+          <Link
+            to={`/u/${profile.username}`}
+            className="w-full text-center py-3 rounded-xl border border-accent/40 text-accent font-semibold active:scale-[0.98] transition-transform"
+          >
+            Profil ansehen
+          </Link>
+        </>
+      ) : (
+        <>
+          <span className="text-[13px] leading-relaxed text-muted">
+            Wähle einen Username, damit deine öffentlich geteilten Räder dir zugeordnet werden. Dein
+            Profil ist danach unter <span className="font-mono">/u/username</span> erreichbar.
+          </span>
+          <button
+            onClick={() => setEditing(true)}
+            className="w-full py-3.5 rounded-xl bg-accent text-accent-ink font-semibold active:scale-[0.98] transition-transform"
+          >
+            Username wählen
+          </button>
+        </>
+      )}
+
+      {editing && <UsernameModal profile={profile} onClose={() => setEditing(false)} />}
+    </div>
   )
 }
 

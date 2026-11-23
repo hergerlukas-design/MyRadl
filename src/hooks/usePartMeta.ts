@@ -87,6 +87,22 @@ export function usePartLinks(partId: string) {
   })
 }
 
+/** Alle Shop-Links eines Rads (über alle Teile) – für die geteilte Ansicht. */
+export function useBikeLinks(bikeId: string) {
+  return useQuery({
+    queryKey: ['bike_links', bikeId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('part_links')
+        .select('*, part:parts!inner(id, bike_id)')
+        .eq('part.bike_id', bikeId)
+      if (error) throw error
+      return data as PartLink[]
+    },
+    enabled: !!bikeId,
+  })
+}
+
 export function useAddLink() {
   const qc = useQueryClient()
   return useMutation({
@@ -124,6 +140,23 @@ export function usePartHistory(partId: string) {
       return data as PartHistory[]
     },
     enabled: !!partId,
+  })
+}
+
+/** Kompletter Verlauf eines Rads (über alle Teile) – für die geteilte Ansicht. */
+export function useBikeHistory(bikeId: string) {
+  return useQuery({
+    queryKey: ['bike_history', bikeId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('part_history')
+        .select('*, part:parts!inner(id, bike_id)')
+        .eq('part.bike_id', bikeId)
+        .order('event_date', { ascending: false })
+      if (error) throw error
+      return data as PartHistory[]
+    },
+    enabled: !!bikeId,
   })
 }
 
